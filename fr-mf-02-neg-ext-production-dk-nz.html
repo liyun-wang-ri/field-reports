@@ -376,6 +376,7 @@ function go(n){
 /* ---------- economic model (illustrative) ---------- */
 // MPB = MSB = a − bQ ; MPC = c + dQ ; MEC = kQ, so MSC = MPC + MEC fans out above MPC as in the notes' figures.
 const M=P.model;
+let ARW=0;
 const msb=q=>M.a-M.b*q, mpc=q=>M.c+M.d*q, msc=(q,k)=>mpc(q)+k*q;
 const QE=(M.a-M.c)/(M.b+M.d);
 const qsOf=k=>(M.a-M.c)/(M.b+M.d+k);
@@ -392,13 +393,18 @@ function diagram(o){
   const qs=(M.a-M.c-dc)/(M.b+M.d+k),qe=(M.a-M.c-dc)/(M.b+M.d);
   const qTop=Math.min(QMAX,(PMAX-M.c-dc)/(M.d+k));
   let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Externality diagram. Market quantity '+Math.round(q)+', socially optimal quantity '+Math.round(qs)+'.">';
+  // Arrows show how a curve shifts: the tax lifts MPC; cleaner production pulls MSC down towards MPC.
+  const aid="arw"+(++ARW);
+  s+='<defs>'+[["a","var(--accent)"],["m","var(--msc)"]].map(([k,c])=>'<marker id="'+aid+k+'" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="'+c+'"/></marker>').join("")+'</defs>';
+  const shift=(qx,p1,p2,k)=>Math.abs(Y(p2)-Y(p1))<14?'':'<line x1="'+X(qx)+'" y1="'+Y(p1)+'" x2="'+X(qx)+'" y2="'+(Y(p2)+(p2>p1?4:-4))+'" stroke="'+(k==="a"?"var(--accent)":"var(--msc)")+'" stroke-width="2" marker-end="url(#'+aid+k+')"/>';
   if(Math.abs(q-qs)>0.6)s+='<polygon points="'+X(qs)+','+Y(msb(qs))+' '+X(q)+','+Y(msb(q))+' '+X(q)+','+Y(mscD(q))+'" fill="var(--warn)" opacity=".3"/>';
   s+='<line x1="'+x0+'" y1="'+y0+'" x2="'+x1+'" y2="'+y0+'" stroke="var(--ink)"/><line x1="'+x0+'" y1="'+y0+'" x2="'+x0+'" y2="'+y1+'" stroke="var(--ink)"/>';
   s+='<text x="'+x1+'" y="'+(y0+30)+'" text-anchor="end">'+esc(o.axisQ||M.axisQ)+'</text><text x="'+(x0+6)+'" y="'+(y1+4)+'">'+esc(M.axisP)+'</text>';
   s+='<text x="'+(x0-8)+'" y="'+(y0+16)+'" text-anchor="end">0</text>';
   if(o.ghostK!=null){const gt=Math.min(QMAX,(PMAX-M.c)/(M.d+o.ghostK));
     s+='<line x1="'+X(0)+'" y1="'+Y(msc(0,o.ghostK))+'" x2="'+X(gt)+'" y2="'+Y(msc(gt,o.ghostK))+'" stroke="var(--msc)" stroke-width="1.5" stroke-dasharray="2 4" opacity=".7"/>'+
-       '<text x="'+(X(gt*0.55)-6)+'" y="'+(Y(msc(gt*0.55,o.ghostK))-8)+'" text-anchor="end" style="fill:var(--msc);opacity:.85">'+esc(o.ghostLabel||"earlier MSC")+'</text>'}
+       '<text x="'+(X(gt*0.55)-6)+'" y="'+(Y(msc(gt*0.55,o.ghostK))-8)+'" text-anchor="end" style="fill:var(--msc);opacity:.85">'+esc(o.ghostLabel||"earlier MSC")+'</text>'+
+       shift(Math.min(70,gt*0.8),msc(Math.min(70,gt*0.8),o.ghostK),mscD(Math.min(70,gt*0.8)),"m")}
   s+='<line x1="'+X(0)+'" y1="'+Y(M.a)+'" x2="'+X(QMAX)+'" y2="'+Y(msb(QMAX))+'" stroke="var(--ink)" stroke-width="2.5"/><text class="lbl" x="'+X(100)+'" y="'+(Y(msb(100))-12)+'" text-anchor="middle" style="fill:var(--ink)">'+esc(L.mpb)+'</text>';
   s+='<line x1="'+X(0)+'" y1="'+Y(mpcD(0))+'" x2="'+X(QMAX)+'" y2="'+Y(mpcD(QMAX))+'" stroke="var(--muted)" stroke-width="2.5"/><text class="lbl" x="'+X(QMAX)+'" y="'+(Y(mpcD(QMAX))+(o.t>0&&!o.ban?22:-8))+'" text-anchor="end">'+esc(o.mpcLabel||L.mpc)+'</text>';
   s+='<line x1="'+X(0)+'" y1="'+Y(mscD(0))+'" x2="'+X(qTop)+'" y2="'+Y(mscD(qTop))+'" stroke="var(--msc)" stroke-width="2.5"/>';
@@ -406,7 +412,7 @@ function diagram(o){
               :'<text class="lbl" x="'+X(QMAX)+'" y="'+(Y(mscD(QMAX))-8)+'" text-anchor="end" style="fill:var(--msc)">'+esc(L.msc)+'</text>';
   if(!o.ban&&o.t>0){
     s+='<line x1="'+X(0)+'" y1="'+Y(mpcD(0)+o.t)+'" x2="'+X(QMAX)+'" y2="'+Y(mpcD(QMAX)+o.t)+'" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="7 4"/>';
-    s+='<text class="lbl" x="'+X(QMAX)+'" y="'+(Y(mpcD(QMAX)+o.t)-8)+'" text-anchor="end" style="fill:var(--accent)">'+esc(o.taxLabel||P.policy.price.lineLabel)+'</text>';
+    s+='<text class="lbl" x="'+X(QMAX)+'" y="'+(Y(mpcD(QMAX)+o.t)-8)+'" text-anchor="end" style="fill:var(--accent)">'+esc(o.taxLabel||P.policy.price.lineLabel)+'</text>';    s+=shift(100,mpcD(100),mpcD(100)+o.t,"a");
   }
   if(o.ban){const bx=X(P.policy.quantity.q);s+='<line x1="'+bx+'" y1="'+y0+'" x2="'+bx+'" y2="'+y1+'" stroke="var(--accent)" stroke-width="5"/><text class="lbl" x="'+(bx+8)+'" y="'+(y1+34)+'" style="fill:var(--accent)">'+esc(P.policy.quantity.lineLabel)+'</text>'}
   s+='<line x1="'+X(qs)+'" y1="'+Y(msb(qs))+'" x2="'+X(qs)+'" y2="'+y0+'" stroke="var(--msc)" stroke-dasharray="3 3"/><text x="'+X(qs)+'" y="'+(y0+16)+'" text-anchor="middle" style="fill:var(--msc)">Qs</text>';
