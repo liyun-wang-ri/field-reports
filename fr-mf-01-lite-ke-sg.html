@@ -110,6 +110,22 @@ button{font:inherit;cursor:pointer}
 input[type=text],input[type=password],input[type=url],input[type=email],textarea{font:inherit;font-size:16px;width:100%;background:var(--paper);color:var(--ink);border:1px solid var(--rule);border-radius:6px;padding:10px 12px}
 textarea{min-height:110px;resize:vertical}
 input[type=range]{width:100%;accent-color:var(--accent)}
+/* sliders: a thick filled track and a big round handle, so they read as "drag me" on phones */
+input[type=range].slider{-webkit-appearance:none;appearance:none;height:36px;margin:0;background:transparent;cursor:grab;touch-action:pan-y}
+input[type=range].slider:active{cursor:grabbing}
+.slider::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:linear-gradient(to right,var(--accent) var(--fill,0%),var(--rule) var(--fill,0%))}
+.slider::-moz-range-track{height:10px;border-radius:5px;background:var(--rule)}
+.slider::-moz-range-progress{height:10px;border-radius:5px;background:var(--accent)}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-10px;border-radius:50%;background:var(--sheet);border:3px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--sheet);border:3px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.slider:disabled{opacity:.4;cursor:not-allowed}
+.slider:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+@media (prefers-reduced-motion:no-preference){
+  .slider.untouched::-webkit-slider-thumb{animation:nudge 1.8s ease-in-out infinite}
+  .slider.untouched::-moz-range-thumb{animation:nudge 1.8s ease-in-out infinite}
+  @keyframes nudge{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 45%,transparent)}50%{box-shadow:0 0 0 9px color-mix(in srgb,var(--accent) 0%,transparent)}}}
+.slends{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);font-family:var(--display);margin-top:-4px}
+.slends .drag{color:var(--accent);font-weight:600}
 .big{font-family:var(--display);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .hint{font-size:14.5px;color:var(--muted)}
@@ -375,6 +391,10 @@ function G(mood,html,tag,kind){
     (guess?'<span class="stamp">Griffles\'s guess</span>':'<small>Griffles'+(tag?" · "+tag:"")+'</small>')+rich(html)+'</div></div>';
 }
 
+/* ---------- sliders ---------- */
+function fillSlider(el){if(!el)return;const lo=+el.min||0,hi=+el.max||100;el.style.setProperty("--fill",(100*((+el.value)-lo)/((hi-lo)||1))+"%")}
+function slEnds(lo,hi,id){return '<div class="slends" aria-hidden="true"><span>'+esc(lo)+'</span><span class="drag" id="'+id+'">◀ drag ▶</span><span>'+esc(hi)+'</span></div>'}
+document.addEventListener("input",e=>{const t=e.target;if(t.classList&&t.classList.contains("slider")){fillSlider(t);if(t.classList.contains("untouched")){t.classList.remove("untouched");const d=document.getElementById(t.id+"Drag");if(d)d.style.visibility="hidden"}}});
 /* ---------- header, rail and navigation ---------- */
 function header(){
   const places=P.contexts.map(c=>c.city).join(" ↔ ");
@@ -509,12 +529,12 @@ function vCommit(){
   '<p class="hint aux">Nobody is marking this. A clear wrong guess teaches you more than a vague right one.</p>'+
   '<div class="q"><span class="qtext">'+rich(N.question)+'</span>'+
    '<div class="row"><span class="big" id="numVal">'+S.num+N.unit+'</span><span class="hint">'+esc(N.suffix)+'</span></div>'+
-   '<input type="range" id="num" min="'+N.min+'" max="'+N.max+'" step="'+N.step+'" value="'+S.num+'" aria-label="Your prediction"></div>'+
+   '<input type="range" class="slider'+(S.committed?'':' untouched')+'" id="num" min="'+N.min+'" max="'+N.max+'" step="'+N.step+'" value="'+S.num+'" aria-label="Your prediction">'+slEnds(N.min+(N.unit||""),N.max+(N.unit||""),"numDrag")+'</div>'+
   '<div class="q"><span class="qtext">'+rich(Ch.question)+'</span><div class="opts">'+
    Ch.options.map(o=>'<label class="opt"><input type="radio" name="choice" value="'+o.id+'"'+(S.choice===o.id?" checked":"")+'><span>'+esc(o.text)+'</span></label>').join("")+'</div></div>'+
   '<div class="q"><label class="qtext" for="why">Why? One line is enough. <span class="hint">(optional)</span></label><input type="text" id="why" maxlength="200" value="'+esc(S.why)+'"></div>'+
   '<p class="hint aux">Locking just keeps your predictions honest. They aren\'t marked, and being off is useful.</p><button class="btn" id="lock" type="button" disabled>Lock it in</button><div id="after"></div></section>';
-  const num=document.getElementById("num"),lock=document.getElementById("lock");
+  const num=document.getElementById("num"),lock=document.getElementById("lock");fillSlider(num);
   num.oninput=()=>{S.num=+num.value;document.getElementById("numVal").textContent=S.num+N.unit};
   stage.querySelectorAll('input[name=choice]').forEach(r=>r.onchange=()=>{S.choice=r.value;lock.disabled=false});
   if(S.choice)lock.disabled=false;
@@ -663,7 +683,7 @@ function vPolicy(){
   '<div class="row" role="group" aria-label="Context"><span class="label">'+esc(Po.ctxLabel||"MEC size")+'</span>'+P.contexts.map(c=>'<button class="chip" type="button" data-ctx="'+c.id+'">'+esc(c.name)+'</button>').join("")+'<span class="model-badge">Model numbers, not real data</span></div>'+
   '<div class="fig" id="pfig"></div>'+
   '<div class="row"><label for="ch" class="label">'+esc(Pr.label)+'</label><span class="mono" id="chV"></span><span class="status" id="st"></span></div>'+
-  '<input type="range" id="ch" min="0" max="'+Pr.max+'" step="1" value="'+S.charge+'">'+
+  '<input type="range" class="slider'+(S.charge?'':' untouched')+'" id="ch" min="0" max="'+Pr.max+'" step="1" value="'+S.charge+'">'+slEnds("0",Pr.max+" "+Pr.unitWord,"chDrag")+
   '<div class="row"><button class="btn ghost" id="ban" type="button"></button><span class="hint" id="banNote"></span></div>'+
   '<div class="readout" id="ro"></div><div id="gNote"></div>'+
   '<div id="why" hidden style="display:flex;flex-direction:column;gap:12px">'+
@@ -698,7 +718,7 @@ function vPolicy(){
     else{st.className="status over";st.textContent="Q < Qs · over-corrected"}
     if(ab&&!r.avail){banB.textContent=Qt.unavailableLabel||Qt.tryLabel;banB.disabled=true;banB.setAttribute("aria-pressed",false);document.getElementById("banNote").innerHTML=rich(r.opt.note||"")}
     else{banB.disabled=false;banB.textContent=S.ban?Qt.liftLabel:Qt.tryLabel;banB.setAttribute("aria-pressed",S.ban);document.getElementById("banNote").innerHTML=ab&&S.ban?rich(r.opt.note||""):""}
-    ch.disabled=!ab&&S.ban;
+    ch.disabled=!ab&&S.ban;fillSlider(ch);
     const base=dwl(QE,r.k0),now=near?0:r.loss,outPct=Math.round(100*(q-QE)/QE);
     document.getElementById("ro").innerHTML='<div><span class="label">Deadweight loss, no policy (model)</span><div class="big">'+Math.round(base)+'</div></div>'+
       '<div><span class="label">Deadweight loss, your policy (model)</span><div class="big" style="color:'+(now<base?"var(--good)":"var(--warn)")+'">'+Math.round(now)+'</div></div>'+
