@@ -262,7 +262,7 @@ window.addEventListener("resize",()=>{track.scrollLeft=S.i*track.clientWidth});
 
 /* caption, sources and the action bar follow the slide */
 const CAPS=[
-  ()=>({hand:true,text:F.message,src:[],extra:F.photo?'<br><a href="'+esc(F.photo.url)+'" target="_blank" rel="noopener">'+esc(F.photo.label)+'</a>':''}),
+  ()=>({hand:true,text:F.message,src:[]}),
   ()=>({text:esc(Z.heading)+'. Two places, one plastic bag, opposite rules.',src:Z.cards.flatMap(c=>c.sources||[])}),
   ()=>({text:S.guess?'You voted: '+esc((Z.options.find(o=>o.id===S.guess)||{}).text||'')+'. Your vote is locked in.':'Make your call before you see what happened.',src:[]}),
   ()=>({hand:true,text:T.griffles,src:T.sources||[]}),

@@ -123,6 +123,13 @@ details summary{cursor:pointer;font-family:var(--display);font-weight:600}
 /* optional place brief */
 .placebrief{border:1px solid var(--rule);border-radius:6px;background:var(--paper)}
 .lite .aux{display:none}
+/* Lite: no intro box, no step labels, one Back/Next bar (at the bottom), plain progress bar */
+.lite .stepnum,.lite nav.stepnav[data-top],.lite .meet img{display:none}
+.lite .meet{display:block;border:0;padding:0}
+.lite .meet p{font-size:13.5px;color:var(--muted);font-family:var(--display)}
+.lite .rail li{padding-top:0}
+.lite .rail li .n{display:none}
+.lite .rail li button{display:block;width:100%;height:16px;margin-top:-3px}
 details.more{border-top:1px dashed var(--rule);padding-top:6px}
 details.more > summary{cursor:pointer;color:var(--accent);font-size:14px}
 details.more > div{margin-top:8px;display:flex;flex-direction:column;gap:10px}
@@ -238,7 +245,7 @@ footer{display:flex;flex-direction:column;gap:10px}
     <ol class="rail" id="rail" aria-label="Progress"></ol>
     <div class="testerbar" id="testerBar" hidden><span><b>Tester mode</b> · every step is open. Your activity is logged as tester data.</span><span class="row"><button class="btn ghost sm" id="tFill" type="button">Fill sample answers</button><button class="btn ghost sm" id="tExit" type="button">Exit tester mode</button></span></div>
   </header>
-  <nav class="stepnav" data-nav aria-label="Step navigation"></nav>
+  <nav class="stepnav" data-nav data-top aria-label="Step navigation"></nav>
   <noscript><div class="note" style="border:1px solid var(--rule);padding:16px;border-radius:8px"><b>This page can't start here.</b> It needs JavaScript, and this viewer has switched it off (Canvas file previews do this). Open the Field Report from the link your teacher gave you instead, in a normal browser tab.</div></noscript>
   <main id="stage" aria-live="polite"></main>
   <nav class="stepnav" data-nav aria-label="Step navigation (bottom)"></nav>
@@ -353,10 +360,12 @@ function G(mood,html,tag,kind){
 function header(){
   const places=P.contexts.map(c=>c.city).join(" ↔ ");
   if(LITE)document.body.classList.add("lite");
-  document.getElementById("hDate").innerHTML='<b>Griffles Field Report · '+esc(SHORT)+(P.variant?' '+esc(P.variantLabel||P.variant):'')+'</b><span>'+esc(P.title)+'</span><span>'+esc(places)+'</span><span>~'+P.minutes+' min</span>';
+  if(LITE)document.getElementById("hDate").innerHTML='<b>Griffles Field Report · '+esc(SHORT)+' '+esc(P.variantLabel||"Lite")+'</b><span>~'+P.minutes+' min</span>';
+  else document.getElementById("hDate").innerHTML='<b>Griffles Field Report · '+esc(SHORT)+(P.variant?' '+esc(P.variantLabel||P.variant):'')+'</b><span>'+esc(P.title)+'</span><span>'+esc(places)+'</span><span>~'+P.minutes+' min</span>';
   document.getElementById("hHead").textContent=P.header.headline;
   document.getElementById("hLede").textContent=P.header.lede;
-  if(LITE)document.getElementById("hMeet").innerHTML='<b>How this works.</b> '+STEPS.length+' short steps with Griffles. Your predictions lock once you commit.'+(formTemplate()?' Answers are sent anonymously.':'')+(CFG.emailCopyUrl?' You can get the report by email; your address isn\'t recorded.':'');
+  if(LITE){document.getElementById("fNote").textContent="Your answers are anonymous: no names or accounts are recorded.";
+    document.getElementById("hMeet").textContent=(formTemplate()?"Answers are sent anonymously.":"")+(CFG.emailCopyUrl?" If you ask for the report by email, your address isn't recorded.":"");}
   else document.getElementById("hMeet").innerHTML='<b>How this works.</b> '+STEPS.length+' short steps with Griffles, who\'s learning alongside you. You can go back to earlier steps at any time, but your predictions lock once you commit.'+
     (formTemplate()?' Your answers are collected anonymously.':'')+
     (CFG.emailCopyUrl?' At the end, you can ask for a copy of the report using your school email; your address isn\'t recorded.':'');
@@ -442,7 +451,7 @@ function diagram(o){
 function vHook(){
   const H=P.hook,Pc=P.perception;
   stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(0)+'</span>'+
-  '<div class="q perc"><span class="label">Before we start · quick gut check</span><span class="qtext">'+esc(Pc.question)+'</span>'+scale7("perc0",Pc.low,Pc.high)+
+  '<div class="q perc"><span class="label aux">Before we start · quick gut check</span><span class="qtext">'+esc(Pc.question)+'</span>'+scale7("perc0",Pc.low,Pc.high)+
    '<span class="hint">'+(S.perc0?"Locked in. You'll see this question again at the end.":"No right answer. You'll see this question again at the end.")+'</span></div>'+
   '<h2>'+esc(H.heading)+'</h2>'+
   '<div class="pair">'+H.cards.map(c=>factCard(c,'<p>'+rich(c.body)+'</p>'+(c.note?'<p class="hint">'+rich(c.note)+'</p>':''))).join("")+'</div>'+
@@ -503,7 +512,7 @@ function vCommit(){
     log("commit",{num_guess:S.num,choice_guess:S.choice,why:S.why,num_near_griffles:Math.abs(S.num-N.griffles)<=10,choice_same_as_griffles:S.choice===Ch.griffles});
     showLocked();
   };
-  if(S.committed){showLocked();document.getElementById("after").insertAdjacentHTML("afterbegin",'<p class="filed">Locked when you committed. Predictions can\'t be changed after the reveal.</p>')}
+  if(S.committed){showLocked();if(!LITE)document.getElementById("after").insertAdjacentHTML("afterbegin",'<p class="filed">Locked when you committed. Predictions can\'t be changed after the reveal.</p>')}
 }
 
 /* ---------- 3 Reveal ---------- */
