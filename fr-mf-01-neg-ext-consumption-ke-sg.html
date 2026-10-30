@@ -118,6 +118,10 @@ details summary{cursor:pointer;font-family:var(--display);font-weight:600}
 
 /* optional place brief */
 .placebrief{border:1px solid var(--rule);border-radius:6px;background:var(--paper)}
+.lite .aux{display:none}
+details.more{border-top:1px dashed var(--rule);padding-top:6px}
+details.more > summary{cursor:pointer;color:var(--accent);font-size:14px}
+details.more > div{margin-top:8px;display:flex;flex-direction:column;gap:10px}
 .briefs{display:flex;flex-direction:column;gap:10px}
 .placebrief.ca{border-left:4px solid var(--ca)}.placebrief.cb{border-left:4px solid var(--cb)}
 .placebrief > summary{padding:12px 16px;list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
@@ -261,7 +265,9 @@ const CFG=JSON.parse(document.getElementById("cfg").textContent);
 const SHORT=P.id.replace(/^FR-/,"");
 const STEPS=["Hook","Commit","Reveal","Name","Compare","Policy","Transfer","Report","Check-in"];
 const sn=i=>"Step "+(i+1)+" of "+STEPS.length+" · "+STEPS[i];
-const KEY="griffles-"+P.id+"-log";
+const LITE=P.ui==="lite";
+const PID=P.id+(P.variant?"-"+String(P.variant).toUpperCase():"");
+const KEY="griffles-"+PID+"-log";
 const CTX={};P.contexts.forEach(c=>CTX[c.id]=c);
 const stage=document.getElementById("stage");
 
@@ -270,6 +276,7 @@ function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;","
 // With no notes link (e.g. a host where the PDF isn't uploaded yet), page references show as plain text.
 function nl(page,label){return P.notesPdf?'<a href="'+P.notesPdf+'#page='+page+'" target="_blank" rel="noopener">'+label+'</a>':label+(/\bpp?\./.test(label)?"":" (notes p. "+page+")")}
 function srcLink(id){const s=P.sources[id];return s?'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.label)+'</a>':""}
+function more(label,html){return html?(LITE?'<details class="more"><summary>'+esc(label)+'</summary><div>'+html+'</div></details>':html):''}
 function srcs(ids){return ids&&ids.length?'<p class="src">'+ids.map(srcLink).join(" · ")+'</p>':""}
 // Package text may contain light HTML and tokens: [[notes:35|p. 35]] links to the lecture notes; [[src:id]] links a source.
 function rich(t){return String(t||"").replace(/\[\[notes:(\d+)\|([^\]]+)\]\]/g,(m,p,l)=>nl(p,l)).replace(/\[\[src:([A-Za-z0-9_]+)\]\]/g,(m,id)=>srcLink(id))}
@@ -297,7 +304,7 @@ const S=fresh();
 let LOG=[];
 try{LOG=JSON.parse(localStorage.getItem(KEY)||"[]")||[]}catch(e){LOG=[]}
 function log(type,data){
-  const ev={pkg:P.id,session:S.session,t:new Date().toISOString(),secs:Math.round((Date.now()-S.start)/1000),step:STEPS[S.step],type,data:data||{}};
+  const ev={pkg:PID,session:S.session,t:new Date().toISOString(),secs:Math.round((Date.now()-S.start)/1000),step:STEPS[S.step],type,data:data||{}};
   if(S.tester)ev.tester=true;
   LOG.push(ev);
   try{localStorage.setItem(KEY,JSON.stringify(LOG.slice(-2000)))}catch(e){}
@@ -341,10 +348,12 @@ function G(mood,html,tag,kind){
 /* ---------- header, rail and navigation ---------- */
 function header(){
   const places=P.contexts.map(c=>c.city).join(" ↔ ");
-  document.getElementById("hDate").innerHTML='<b>Griffles Field Report · '+esc(SHORT)+'</b><span>'+esc(P.title)+'</span><span>'+esc(places)+'</span><span>~'+P.minutes+' min</span>';
+  if(LITE)document.body.classList.add("lite");
+  document.getElementById("hDate").innerHTML='<b>Griffles Field Report · '+esc(SHORT)+(P.variant?' '+esc(P.variant.charAt(0).toUpperCase()+P.variant.slice(1)):'')+'</b><span>'+esc(P.title)+'</span><span>'+esc(places)+'</span><span>~'+P.minutes+' min</span>';
   document.getElementById("hHead").textContent=P.header.headline;
   document.getElementById("hLede").textContent=P.header.lede;
-  document.getElementById("hMeet").innerHTML='<b>How this works.</b> '+STEPS.length+' short steps with Griffles, who\'s learning alongside you. You can go back to earlier steps at any time, but your predictions lock once you commit.'+
+  if(LITE)document.getElementById("hMeet").innerHTML='<b>How this works.</b> '+STEPS.length+' short steps with Griffles. Your predictions lock once you commit.'+(formTemplate()?' Answers are sent anonymously.':'')+(CFG.emailCopyUrl?' You can get the report by email; your address isn\'t recorded.':'');
+  else document.getElementById("hMeet").innerHTML='<b>How this works.</b> '+STEPS.length+' short steps with Griffles, who\'s learning alongside you. You can go back to earlier steps at any time, but your predictions lock once you commit.'+
     (formTemplate()?' Your answers are collected anonymously.':'')+
     (CFG.emailCopyUrl?' At the end, you can ask for a copy of the report using your school email; your address isn\'t recorded.':'');
   document.getElementById("rail").style.gridTemplateColumns="repeat("+STEPS.length+",1fr)";
@@ -360,7 +369,7 @@ function rail(){
   const canPrev=S.step>0,canNext=S.step<S.maxStep;
   document.querySelectorAll("[data-nav]").forEach(n=>{
     n.innerHTML='<button class="arrow" type="button" data-dir="-1"'+(canPrev?'':' disabled')+' aria-label="Previous step">‹ Back</button>'+
-      '<span class="where">Step '+(S.step+1)+' of '+STEPS.length+(canNext?' · you\'ve reached '+(S.maxStep+1):'')+'</span>'+
+      '<span class="where">'+(LITE?(S.step+1)+' / '+STEPS.length:'Step '+(S.step+1)+' of '+STEPS.length+(canNext?' · you\'ve reached '+(S.maxStep+1):''))+'</span>'+
       '<button class="arrow" type="button" data-dir="1"'+(canNext?'':' disabled')+' aria-label="Next step">Next ›</button>';
     n.querySelectorAll(".arrow").forEach(b=>b.onclick=()=>go(S.step+(+b.dataset.dir)));
   });
@@ -465,14 +474,14 @@ function vCommit(){
   const C=P.commit,N=C.numeric,Ch=C.choice;
   stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(1)+'</span>'+
   '<h2>'+esc(C.heading)+'</h2>'+
-  '<p class="hint">Nobody is marking this. A clear wrong guess teaches you more than a vague right one.</p>'+
+  '<p class="hint aux">Nobody is marking this. A clear wrong guess teaches you more than a vague right one.</p>'+
   '<div class="q"><span class="qtext">'+rich(N.question)+'</span>'+
    '<div class="row"><span class="big" id="numVal">'+S.num+N.unit+'</span><span class="hint">'+esc(N.suffix)+'</span></div>'+
    '<input type="range" id="num" min="'+N.min+'" max="'+N.max+'" step="'+N.step+'" value="'+S.num+'" aria-label="Your prediction"></div>'+
   '<div class="q"><span class="qtext">'+rich(Ch.question)+'</span><div class="opts">'+
    Ch.options.map(o=>'<label class="opt"><input type="radio" name="choice" value="'+o.id+'"'+(S.choice===o.id?" checked":"")+'><span>'+esc(o.text)+'</span></label>').join("")+'</div></div>'+
   '<div class="q"><label class="qtext" for="why">Why? One line is enough. <span class="hint">(optional)</span></label><input type="text" id="why" maxlength="200" value="'+esc(S.why)+'"></div>'+
-  '<p class="hint">Locking just keeps your predictions honest. They aren\'t marked, and being off is useful.</p><button class="btn" id="lock" type="button" disabled>Lock it in</button><div id="after"></div></section>';
+  '<p class="hint aux">Locking just keeps your predictions honest. They aren\'t marked, and being off is useful.</p><button class="btn" id="lock" type="button" disabled>Lock it in</button><div id="after"></div></section>';
   const num=document.getElementById("num"),lock=document.getElementById("lock");
   num.oninput=()=>{S.num=+num.value;document.getElementById("numVal").textContent=S.num+N.unit};
   stage.querySelectorAll('input[name=choice]').forEach(r=>r.onchange=()=>{S.choice=r.value;lock.disabled=false});
@@ -480,7 +489,7 @@ function vCommit(){
   function showLocked(){
     num.disabled=true;document.getElementById("why").disabled=true;stage.querySelectorAll('input[name=choice]').forEach(r=>r.disabled=true);lock.hidden=true;
     document.getElementById("after").innerHTML='<div style="display:flex;flex-direction:column;gap:14px">'+
-     '<p class="hint">Yours are locked. Here are Griffles\'s, made before he read anything:</p>'+
+     '<p class="hint aux">Yours are locked. Here are Griffles\'s, made before he read anything:</p>'+
      G("guessing",N.grifflesLine,"","guess")+G("guessing",Ch.grifflesLine,"","guess")+
      '<button class="btn" id="next" type="button">'+esc(C.button)+'</button></div>';
     document.getElementById("next").onclick=()=>go(2);
@@ -501,7 +510,7 @@ function vReveal(){
   stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(2)+'</span>'+
   '<h2>'+esc(R.numeric.heading)+'</h2>'+
   '<div class="bars">'+bar("you","You",pct(S.num),S.num+N.unit)+bar("gr","Griffles",pct(N.griffles),N.griffles+N.unit)+bar("real "+slot(N.ctx),"Reported",pct(N.actualHigh),esc(N.actualLabel))+'</div>'+
-  '<p class="hint">However far off you were, that gap is the point: it shows what surprised you.</p>'+
+  '<p class="hint aux">However far off you were, that gap is the point: it shows what surprised you.</p>'+
   '<p>'+rich(R.numeric.body)+'</p>'+srcs(R.numeric.sources)+
   G("surprised",R.numeric.griffles,"reacting")+
   '<div class="q"><span class="qtext">'+esc(R.doubtsQuestion)+'</span><div class="chips" id="doubts">'+
@@ -513,7 +522,7 @@ function vReveal(){
   '<p class="hint">Your pick: “'+esc(pick)+'”. Griffles picked “'+esc(R.choice.grifflesPicked)+'”</p>'+
   srcs(R.choice.sources)+
   G("skeptical",R.choice.griffles,"reacting")+
-  '<p class="hint">'+rich(R.choice.caution)+'</p>'+
+  more("Careful with the evidence",'<p class="hint">'+rich(R.choice.caution)+'</p>')+
   '<button class="btn" id="next" type="button">'+esc(R.button)+'</button></section>';
   // Only the most recently opened question's answer shows; S.doubts records every question opened.
   function refresh(){const d=R.doubts.find(x=>x.id===S.doubtShown);document.getElementById("doubtNote").innerHTML=d?rich(d.a)+" "+(d.sources?srcs(d.sources):""):""}
@@ -547,7 +556,7 @@ function vName(){
   '<div class="q"><label class="qtext" for="nm">'+esc(Nm.label)+'</label><input type="text" id="nm" maxlength="200" value="'+esc(S.name)+'" placeholder="'+esc(Nm.placeholder)+'"></div>'+
   '<button class="btn" id="nmGo" type="button">'+esc(Nm.button)+'</button>'+
   '<div id="concept" hidden style="display:flex;flex-direction:column;gap:16px">'+
-   '<p class="hint">You wrote: “<span id="echo"></span>”</p><div id="recog"></div>'+
+   '<p class="hint aux">You wrote: “<span id="echo"></span>”</p><div id="recog"></div>'+
    '<h2>'+esc(Nm.concept)+'</h2><p>'+rich(Nm.intro)+'</p>'+
    '<ol class="steps7">'+Nm.steps.map(t=>'<li>'+rich(t)+'</li>').join("")+'</ol>'+
    '<div class="fig">'+diagram({k:M.k.general,q:QE,letters:true})+'</div>'+
@@ -580,7 +589,7 @@ function vCompare(){
     '<div class="row" role="group" aria-label="Show context">'+P.contexts.map(c=>'<button class="chip" type="button" data-ctx="'+c.id+'">'+esc(c.name+C.toggleSuffix)+'</button>').join("")+'<span class="model-badge">Model numbers, not real data</span></div>'+
     '<div class="fig" id="extFig"></div><p class="hint" id="extCap"></p>'+
     G("skeptical",C.grifflesAfter,"asking")+
-    '<p class="hint">'+rich(C.caution)+'</p>'+
+    more("Careful with the evidence",'<p class="hint">'+rich(C.caution)+'</p>')+
     '<button class="btn" id="next" type="button">'+esc(C.button)+'</button>'+
    '</div></section>';
   const extGo=document.getElementById("extGo");
@@ -641,7 +650,7 @@ function vPolicy(){
    '<button class="btn" id="whyGo" type="button">Check against the notes</button></div>'+
    '<div id="terms" hidden style="display:flex;flex-direction:column;gap:12px">'+
     '<p>'+rich(Po.notesPoint)+'</p>'+
-    '<ul class="terms">'+Po.terms.map(t=>'<li><b>'+esc(t.t)+'</b>'+rich(t.d)+'</li>').join("")+'</ul>'+
+    more("Key points from your notes",'<ul class="terms">'+Po.terms.map(t=>'<li><b>'+esc(t.t)+'</b>'+rich(t.d)+'</li>').join("")+'</ul>')+
     '<button class="btn" id="next" type="button">'+esc(Po.button)+'</button></div>'+
   '</div></section>';
   const ch=document.getElementById("ch"),banB=document.getElementById("ban");
@@ -880,7 +889,7 @@ function formValues(){
   const clip=(v,n)=>{v=String(v==null?"":v);return v.length>n?v.slice(0,n)+"…":v};
   const choice=(P.commit.choice.options.find(o=>o.id===S.choice)||{text:""}).text;
   const rs=S.repSummary||{};
-  return {PKG:P.id,SES:S.session,DONE:new Date(S.endAt||Date.now()).toISOString(),MIN:Math.max(1,Math.round(((S.endAt||Date.now())-S.start)/60000)),
+  return {PKG:PID,SES:S.session,DONE:new Date(S.endAt||Date.now()).toISOString(),MIN:Math.max(1,Math.round(((S.endAt||Date.now())-S.start)/60000)),
     TEST:S.tester?"yes":"no",P0:S.perc0||"",P1:S.ci.percAfter||"",PNUM:S.committed?S.num:"",PCHO:choice,PWHY:clip(S.why,300),
     DOUB:S.doubts.join(", "),NAME:clip(S.name,300),NREC:S.recog,CMP:S.ext||"",POL:clip(S.policyWhy,500),ADV:clip(S.advice,600),
     TICK:S.ticks.join(", "),HL:clip(rs.headline||"",200),HLX:S.reportFiled?(rs.overstated?"yes":"no"):"",
@@ -991,12 +1000,12 @@ function vCheckin(){
       let okSend=false;
       try{
         const r=await fetch(CFG.emailCopyUrl,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-          body:JSON.stringify({to,pkg:P.id,title:"Griffles Field Report · "+SHORT+" · "+P.title+" · "+P.places,brief:briefPlain()})});
+          body:JSON.stringify({to,pkg:PID,title:"Griffles Field Report · "+SHORT+" · "+P.title+" · "+P.places,brief:briefPlain()})});
         const txt=await r.text().catch(()=>"");okSend=r.ok&&/sent/.test(txt);
       }catch(err){
         // Apps Script may not allow the reply to be read; the email can still have gone. Retry without reading the reply.
         try{await fetch(CFG.emailCopyUrl,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
-          body:JSON.stringify({to,pkg:P.id,title:"Griffles Field Report · "+SHORT+" · "+P.title+" · "+P.places,brief:briefPlain()})});okSend=true}catch(e2){okSend=false}
+          body:JSON.stringify({to,pkg:PID,title:"Griffles Field Report · "+SHORT+" · "+P.title+" · "+P.places,brief:briefPlain()})});okSend=true}catch(e2){okSend=false}
       }
       S.emailState=okSend?"sent":"failed";
       log("email_copy",{result:S.emailState}); // never logs the address
@@ -1018,7 +1027,7 @@ function vCheckin(){
   if(S.filed)showEnd();
 }
 
-stage.addEventListener("toggle",e=>{if(e.target.tagName!=="DETAILS")return;if(e.target.classList.contains("placebrief")){const c=e.target.dataset.brief;S.briefsOpen=S.briefsOpen||{};S.briefsOpen[c]=e.target.open;if(e.target.open)log("brief_opened",{ctx:c})}else if(e.target.open)log("model_answer_opened")},true);
+stage.addEventListener("toggle",e=>{if(e.target.tagName!=="DETAILS")return;if(e.target.classList.contains("placebrief")){const c=e.target.dataset.brief;S.briefsOpen=S.briefsOpen||{};S.briefsOpen[c]=e.target.open;if(e.target.open)log("brief_opened",{ctx:c})}else if(e.target.classList.contains("more")){if(e.target.open)log("more_opened",{what:e.target.querySelector("summary").textContent})}else if(e.target.open)log("model_answer_opened")},true);
 const VIEWS=[vHook,vCommit,vReveal,vName,vCompare,vPolicy,vTransfer,vReport,vCheckin];
 
 /* ---------- teacher view and tester mode ---------- */
