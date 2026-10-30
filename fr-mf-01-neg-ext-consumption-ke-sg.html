@@ -620,7 +620,7 @@ function vPolicy(){
   '<div class="row"><button class="btn ghost" id="ban" type="button"></button><span class="hint" id="banNote"></span></div>'+
   '<div class="readout" id="ro"></div><div id="gNote"></div>'+
   '<div id="why" hidden style="display:flex;flex-direction:column;gap:12px">'+
-   (Po.overTime?'<h3>'+esc(Po.overTime.heading)+'</h3>'+(Po.overTime.intro?'<p>'+rich(Po.overTime.intro)+'</p>':'')+runChips("data-prun",Po.overTime)+
+   (Po.overTime?'<h3>'+esc(Po.overTime.heading)+'</h3>'+(Po.overTime.intro?'<p>'+rich(Po.overTime.intro)+'</p>':'')+runChips("data-prun",Po.overTime,true)+
      '<div class="fig" id="prunFig"></div><div class="readout" id="prunRo"></div><p id="prunCap"></p>'+(Po.overTime.note?'<p class="hint">'+rich(Po.overTime.note)+'</p>':''):'')+
    '<h3>'+esc(Po.tableHeading)+'</h3><p class="hint">'+rich(Po.tableNote)+'</p>'+
    '<div class="tablewrap"><table class="cmp"><thead><tr><th></th>'+Po.tableCols.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr></thead><tbody>'+
@@ -706,7 +706,7 @@ function drawRun(id,H,run,par,caption){
     '<div><span class="label">Emissions vs no tax (model)</span><div class="big" style="color:var(--good)">'+pct(100*(r.em-QE)/QE)+'</div></div>';
   document.getElementById(id+"Cap").innerHTML=rich(caption);
 }
-function runChips(attr,H){return '<div class="row" role="group" aria-label="Time period">'+[["short",H.shortLabel],["long",H.longLabel]].map(([id,l])=>'<button class="chip" type="button" '+attr+'="'+id+'">'+esc(l)+'</button>').join("")+'<span class="model-badge">Model numbers, not real data</span></div>'}
+function runChips(attr,H,withCtx){return (withCtx?'<div class="row" role="group" aria-label="Place">'+P.contexts.map(c=>'<button class="chip" type="button" data-ctx="'+c.id+'">'+esc(c.name)+'</button>').join("")+'</div>':'')+'<div class="row" role="group" aria-label="Time period">'+[["short",H.shortLabel],["long",H.longLabel]].map(([id,l])=>'<button class="chip" type="button" '+attr+'="'+id+'">'+esc(l)+'</button>').join("")+'<span class="model-badge">Model numbers, not real data</span></div>'}
 function homeBlock(){
   const Hm=P.transfer.home;if(!Hm)return "";
   const H=Hm.srlr;
