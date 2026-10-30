@@ -827,7 +827,7 @@ function quoteable(t){t=(t||"").trim();if(t.split(/\s+/).filter(Boolean).length<
 function clipq(t,max){t=(t||"").trim();if(!t)return "";if(t.length>max)t=t.slice(0,max).replace(/\s+\S*$/,"")+"…";return esc(t)}
 function vReport(){
   const Rp=P.report;
-  if(!S.rep)S.rep={headline:"",headlineId:null,fix:null,extra:"",showQuotes:true};
+  if(!S.rep)S.rep={headline:"",headlineId:null,fix:null,extra:"",showQuotes:false};
   const R=S.rep,F=Rp.flaws.find(f=>f.id===S.flaw);
   const N=P.commit.numeric,mid=(N.actualLow+N.actualHigh)/2;
   const pick=(P.commit.choice.options.find(o=>o.id===S.choice)||{text:""}).text;
@@ -838,7 +838,7 @@ function vReport(){
     ?fill(Rp.predicted.template,{num:S.num,gnum:N.griffles,closer:Math.abs(S.num-mid)<Math.abs(N.griffles-mid)?Rp.predicted.youCloser:Rp.predicted.grifflesCloser,choice:esc(pick.charAt(0).toLowerCase()+pick.slice(1))})
     :Rp.predicted.none;
   const answers={name:S.name,policyWhy:S.policyWhy,advice:S.advice};
-  const useQ=R.showQuotes!==false;
+  const useQ=R.showQuotes===true; // off until the student ticks the box
   const quotes={};Object.keys(answers).forEach(k=>{quotes[k]=useQ&&quoteable(answers[k])?clipq(answers[k],k==="name"?180:300):""});
   const canQuote=Object.keys(answers).some(k=>quoteable(answers[k]));
   const withQuote=(text,key,intro)=>rich(text)+(quotes[key]?' '+esc(intro)+' “'+quotes[key]+'”':'');
@@ -976,7 +976,7 @@ function briefPlain(){
   const Rp=P.report,R=S.rep||{},F=Rp.flaws.find(f=>f.id===S.flaw),N=P.commit.numeric,mid=(N.actualLow+N.actualHigh)/2;
   const pick=(P.commit.choice.options.find(o=>o.id===S.choice)||{text:""}).text;
   const answers={name:S.name,policyWhy:S.policyWhy,advice:S.advice};
-  const quote=k=>CFG.emailQuotes&&R.showQuotes!==false&&quoteable(answers[k])?answers[k].trim().slice(0,300):"";
+  const quote=k=>CFG.emailQuotes&&R.showQuotes===true&&quoteable(answers[k])?answers[k].trim().slice(0,300):"";
   const ticks=(S.ticks.length?S.ticks:P.transfer.defaultTicks).slice(0,3).map(id=>(P.transfer.ticks.find(t=>t.id===id)||{}).brief).filter(Boolean);
   return {
     headline:R.headline||P.header.headline,
