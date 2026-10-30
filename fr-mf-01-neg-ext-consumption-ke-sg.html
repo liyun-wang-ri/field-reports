@@ -620,6 +620,8 @@ function vPolicy(){
   '<div class="row"><button class="btn ghost" id="ban" type="button"></button><span class="hint" id="banNote"></span></div>'+
   '<div class="readout" id="ro"></div><div id="gNote"></div>'+
   '<div id="why" hidden style="display:flex;flex-direction:column;gap:12px">'+
+   (Po.overTime?'<h3>'+esc(Po.overTime.heading)+'</h3>'+(Po.overTime.intro?'<p>'+rich(Po.overTime.intro)+'</p>':'')+runChips("data-prun",Po.overTime)+
+     '<div class="fig" id="prunFig"></div><div class="readout" id="prunRo"></div><p id="prunCap"></p>'+(Po.overTime.note?'<p class="hint">'+rich(Po.overTime.note)+'</p>':''):'')+
    '<h3>'+esc(Po.tableHeading)+'</h3><p class="hint">'+rich(Po.tableNote)+'</p>'+
    '<div class="tablewrap"><table class="cmp"><thead><tr><th></th>'+Po.tableCols.map(c=>'<th>'+esc(c)+'</th>').join("")+'</tr></thead><tbody>'+
     P.contexts.map(c=>{
@@ -664,7 +666,16 @@ function vPolicy(){
     if(S.ban&&(!ab||r.avail))S.triedBan[S.ctx]=true;
     if(near&&!(S.ban&&!ab))S.hitOpt[S.ctx]=true;
     if(S.tester||Object.keys(S.triedBan).length||Object.keys(S.hitOpt).length)document.getElementById("why").hidden=false;
+    drawPolRun();
   }
+  // How the tax works over time in the chosen place (policy.overTime): the long run depends on whether farmers can switch.
+  function drawPolRun(){
+    const H=Po.overTime;if(!H)return;
+    const w=S.polRun||"short",o=H.byCtx[S.ctx]||{};
+    drawRun("prun",H,w,{k:M.k[S.ctx],cut:o.cut||0,cost:o.cost||0},fill(w==="long"?o.long:o.short,{ctx:CTX[S.ctx].name}));
+    stage.querySelectorAll("[data-prun]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.prun===w));
+  }
+  stage.querySelectorAll("[data-prun]").forEach(b=>b.onclick=()=>{S.polRun=b.dataset.prun;log("policy_run",{ctx:S.ctx,run:S.polRun});drawPolRun()});
   stage.querySelectorAll("[data-ctx]").forEach(b=>b.onclick=()=>{S.ctx=b.dataset.ctx;log("policy_ctx",{ctx:S.ctx});draw()});
   ch.oninput=()=>{S.charge=+ch.value;draw();clearTimeout(deb);deb=setTimeout(()=>log("model_charge",{ctx:S.ctx,charge:S.charge,dwl:Math.round(polState(S.ctx,S.charge,S.ban).loss)}),600)};
   banB.onclick=()=>{S.ban=!S.ban;log("model_quantity",{ctx:S.ctx,on:S.ban,type:Qt.type||"quantity"});draw()};
@@ -680,31 +691,37 @@ function vPolicy(){
 // short-run / long-run view of a tax levied per unit of emissions (notes: carbon tax).
 // SR: the tax raises MPC (set at the MEC at Qs). LR: cleaner technology cuts emissions per unit, so MEC and the tax
 // per unit of output both fall; Qs rises towards Qe, output recovers and emissions fall further.
-function srlrState(which){
-  const H=P.transfer.home.srlr,k=H.k,qs0=qsOf(k),t0=k*qs0;
-  if(which!=="long")return {k,dc:0,t:t0,q:qWithCharge(t0),qs:qs0,em:qWithCharge(t0)};
-  const k2=k*(1-H.cut),dc=H.cost||0,t2=t0*(1-H.cut),q=Math.max(0,(M.a-M.c-dc-t2)/(M.b+M.d));
-  return {k:k2,dc,t:t2,q,qs:(M.a-M.c-dc)/(M.b+M.d+k2),em:q*(1-H.cut)};
+function srlrState(which,k,cut,cost){
+  const qs0=qsOf(k),t0=k*qs0;
+  if(which!=="long"||!cut)return {k,dc:0,t:t0,q:qWithCharge(t0),qs:qs0,em:qWithCharge(t0)};
+  const k2=k*(1-cut),dc=cost||0,t2=t0*(1-cut),q=Math.max(0,(M.a-M.c-dc-t2)/(M.b+M.d));
+  return {k:k2,dc,t:t2,q,qs:(M.a-M.c-dc)/(M.b+M.d+k2),em:q*(1-cut)};
 }
+// Draws a short-run / long-run panel into #<id>Fig, #<id>Ro, #<id>Cap.
+function drawRun(id,H,run,par,caption){
+  const r=srlrState(run,par.k,par.cut,par.cost),lr=run==="long"&&par.cut>0;
+  document.getElementById(id+"Fig").innerHTML=diagram({k:r.k,dc:r.dc,q:r.q,t:r.t,policy:true,axisQ:H.axisQ,taxLabel:H.taxLabel,ghostK:lr?par.k:null,ghostLabel:H.ghostLabel,mpcLabel:lr?H.mpcLabel:null});
+  const pct=v=>(v>=0?"+":"")+Math.round(v)+"%";
+  document.getElementById(id+"Ro").innerHTML='<div><span class="label">Output vs no tax (model)</span><div class="big">'+pct(100*(r.q-QE)/QE)+'</div></div>'+
+    '<div><span class="label">Emissions vs no tax (model)</span><div class="big" style="color:var(--good)">'+pct(100*(r.em-QE)/QE)+'</div></div>';
+  document.getElementById(id+"Cap").innerHTML=rich(caption);
+}
+function runChips(attr,H){return '<div class="row" role="group" aria-label="Time period">'+[["short",H.shortLabel],["long",H.longLabel]].map(([id,l])=>'<button class="chip" type="button" '+attr+'="'+id+'">'+esc(l)+'</button>').join("")+'<span class="model-badge">Model numbers, not real data</span></div>'}
 function homeBlock(){
   const Hm=P.transfer.home;if(!Hm)return "";
   const H=Hm.srlr;
   return '<h2>'+esc(Hm.heading)+'</h2>'+(Hm.intro?'<p>'+rich(Hm.intro)+'</p>':'')+
    (Hm.cards&&Hm.cards.length?'<div class="pair">'+Hm.cards.map(c=>factCard(c,(c.paras||[c.body]).map(x=>'<p>'+rich(x)+'</p>').join(""))).join("")+'</div>':'')+
    (H?'<h3>'+esc(H.heading)+'</h3>'+(H.intro?'<p>'+rich(H.intro)+'</p>':'')+
-    '<div class="row" role="group" aria-label="Time period">'+[["short",H.shortLabel],["long",H.longLabel]].map(([id,l])=>'<button class="chip" type="button" data-run="'+id+'">'+esc(l)+'</button>').join("")+'<span class="model-badge">Model numbers, not real data</span></div>'+
+    runChips("data-run",H)+
     '<div class="fig" id="srlrFig"></div><div class="readout" id="srlrRo"></div><p id="srlrCap"></p>'+(H.note?'<p class="hint">'+rich(H.note)+'</p>':''):'')+
    (Hm.griffles?G("curious",Hm.griffles,"asking"):'')+
    '<hr class="split">';
 }
 function drawSrlr(){
   const H=P.transfer.home&&P.transfer.home.srlr;if(!H||!document.getElementById("srlrFig"))return;
-  const w=S.srlr||"short",r=srlrState(w);
-  document.getElementById("srlrFig").innerHTML=diagram({k:r.k,dc:r.dc,q:r.q,t:r.t,policy:true,axisQ:H.axisQ,taxLabel:H.taxLabel,ghostK:w==="long"?H.k:null,ghostLabel:H.ghostLabel,mpcLabel:w==="long"?H.mpcLabel:null});
-  const pct=v=>(v>=0?"+":"")+Math.round(v)+"%";
-  document.getElementById("srlrRo").innerHTML='<div><span class="label">Output vs no tax (model)</span><div class="big">'+pct(100*(r.q-QE)/QE)+'</div></div>'+
-    '<div><span class="label">Emissions vs no tax (model)</span><div class="big" style="color:var(--good)">'+pct(100*(r.em-QE)/QE)+'</div></div>';
-  document.getElementById("srlrCap").innerHTML=rich(w==="long"?H.long:H.short);
+  const w=S.srlr||"short";
+  drawRun("srlr",H,w,{k:H.k,cut:H.cut,cost:H.cost},w==="long"?H.long:H.short);
   stage.querySelectorAll("[data-run]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.run===w));
 }
 function vTransfer(){
