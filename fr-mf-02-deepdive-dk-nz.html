@@ -105,6 +105,9 @@ button{font:inherit;cursor:pointer}
 .opt:has(input:checked){border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .opt input{margin-top:5px;accent-color:var(--accent)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
+.doubts{display:flex;flex-direction:column;gap:8px}
+.doubts .dq{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.doubts .dans{margin:0 0 4px 14px;padding-left:12px;border-left:3px solid var(--accent)}
 .chip{border:1px solid var(--rule);border-radius:999px;padding:6px 12px;font-size:14.5px;background:transparent;color:var(--ink);text-align:left}
 .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 input[type=text],input[type=password],input[type=url],input[type=email],textarea{font:inherit;font-size:16px;width:100%;background:var(--paper);color:var(--ink);border:1px solid var(--rule);border-radius:6px;padding:10px 12px}
@@ -492,8 +495,9 @@ function vHook(){
   stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(0)+'</span>'+
   '<div class="q perc"><span class="label aux">Before we start · quick gut check</span><span class="qtext">'+esc(Pc.question)+'</span>'+scale7("perc0",Pc.low,Pc.high)+
    '<span class="hint">'+(S.perc0?"Locked in. You'll see this question again at the end.":"No right answer. You'll see this question again at the end.")+'</span></div>'+
-  '<h2>'+esc(H.heading)+'</h2>'+
-  '<div class="pair">'+H.cards.map(c=>factCard(c,'<p>'+rich(c.body)+'</p>'+(c.note?'<p class="hint">'+rich(c.note)+'</p>':''))).join("")+'</div>'+
+  (function(){const cards='<div class="pair">'+H.cards.map(c=>factCard(c,'<p>'+rich(c.body)+'</p>'+(c.note?'<p class="hint">'+rich(c.note)+'</p>':''))).join("")+'</div>';
+    // Lite with a cover: the cover already set up the two moves, so the cards fold into a recap.
+    return LITE&&P.header.cover?more(H.recapLabel||"Recap: the two moves, with sources",cards):'<h2>'+esc(H.heading)+'</h2>'+cards})()+
   placeBrief()+
   G("curious",H.griffles,"on assignment")+
   '<button class="btn" id="next" type="button"'+(S.perc0?'':' disabled')+'>'+esc(H.button)+'</button><span class="hint" id="hookHint">'+(S.perc0?'':'Answer the gut check above first.')+'</span></section>';
@@ -565,9 +569,9 @@ function vReveal(){
   '<p class="hint aux">However far off you were, that gap is the point: it shows what surprised you.</p>'+
   '<p>'+rich(R.numeric.body)+'</p>'+srcs(R.numeric.sources)+
   G("surprised",R.numeric.griffles,"reacting")+
-  '<div class="q"><span class="qtext">'+esc(R.doubtsQuestion)+'</span><div class="chips" id="doubts">'+
-   R.doubts.map(d=>'<button type="button" class="chip" data-k="'+d.id+'" aria-pressed="'+(S.doubtShown===d.id)+'">'+esc(d.q)+'</button>').join("")+'</div>'+
-   '<p class="hint" id="doubtNote"></p></div>'+
+  '<div class="q"><span class="qtext">'+esc(R.doubtsQuestion)+'</span><div class="doubts" id="doubts">'+
+   R.doubts.map(d=>'<div class="dq"><button type="button" class="chip" data-k="'+d.id+'" aria-pressed="'+(S.doubtShown===d.id)+'" aria-expanded="'+(S.doubtShown===d.id)+'">'+esc(d.q)+'</button>'+
+     '<div class="hint dans" data-a="'+d.id+'"'+(S.doubtShown===d.id?'':' hidden')+'><p>'+rich(d.a)+'</p>'+(d.sources?srcs(d.sources):"")+'</div></div>').join("")+'</div></div>'+
   '<hr class="split">'+
   '<h2>'+esc(R.choice.heading)+'</h2>'+
   '<p>'+rich(R.choice.body)+'</p>'+
@@ -577,12 +581,13 @@ function vReveal(){
   more("Careful with the evidence",'<p class="hint">'+rich(R.choice.caution)+'</p>')+
   '<button class="btn" id="next" type="button">'+esc(R.button)+'</button></section>';
   // Only the most recently opened question's answer shows; S.doubts records every question opened.
-  function refresh(){const d=R.doubts.find(x=>x.id===S.doubtShown);document.getElementById("doubtNote").innerHTML=d?rich(d.a)+" "+(d.sources?srcs(d.sources):""):""}
+  // Each answer opens directly under its own question.
+  function refresh(){stage.querySelectorAll("#doubts .dans").forEach(p=>p.hidden=p.dataset.a!==S.doubtShown)}
   stage.querySelectorAll("#doubts .chip").forEach(b=>b.onclick=()=>{
     const k=b.dataset.k,on=S.doubtShown!==k;
     S.doubtShown=on?k:null;
     if(on&&!S.doubts.includes(k))S.doubts=S.doubts.concat(k);
-    stage.querySelectorAll("#doubts .chip").forEach(x=>x.setAttribute("aria-pressed",x===b&&on));
+    stage.querySelectorAll("#doubts .chip").forEach(x=>{x.setAttribute("aria-pressed",x===b&&on);x.setAttribute("aria-expanded",x===b&&on)});
     refresh();log("doubt_open",{doubt:k,on,opened_so_far:S.doubts.length});
   });
   refresh();
