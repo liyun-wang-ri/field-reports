@@ -127,7 +127,7 @@ button{font:inherit;color:inherit}
 .rate .chips button[aria-pressed="true"]{background:var(--note-ink);color:var(--note)}
 .rate .ends{display:flex;justify-content:space-between;font-family:var(--display);font-size:3.4cqw;color:var(--note-ink);opacity:.8;padding:0 6cqw}
 
-/* under the picture: one action bar, then the caption */
+/* under the picture: the links to the full packs (last slide only), then the caption */
 .bar{padding:8px 14px 4px;display:flex;flex-direction:column;gap:8px}
 .btn{font-family:var(--display);font-weight:600;font-size:16px;line-height:1.25;background:var(--accent);color:var(--accent-ink);border:1.5px solid var(--accent);border-radius:10px;
   padding:12px 16px;cursor:pointer;text-decoration:none;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;width:100%}
@@ -214,7 +214,7 @@ function sVote(){
     '<div class="poll" id="poll" role="group" aria-label="'+esc(Z.question)+'">'+Z.options.map(o=>
       '<button type="button" data-v="'+o.id+'" aria-pressed="'+(S.guess===o.id)+'"'+(S.guess?' disabled':'')+'><span>'+esc(o.text)+'</span>'+
       (S.guess&&o.id===gb?'<span class="gb">Griffles</span>':'')+'</button>').join("")+'</div>'+
-    (S.guess?'<div class="g pop"><img src="'+IMG+'" alt="Griffles"><div class="bub">'+Z.griffles+'</div></div>'
+    (S.guess?'<div class="g pop"><img src="'+IMG+'" alt="Griffles"><div class="bub">'+Z.griffles+'</div></div><p class="hint">Swipe to see what happened.</p>'
             :'<p class="hint">Tap one. Your vote locks once you tap.</p>')+'</div>';
 }
 function sTwist(){
@@ -278,11 +278,9 @@ function ui(){
   document.getElementById("cap").innerHTML='<b>Griffles</b><span class="'+(c.hand?'hand':'')+'">'+c.text+'</span>'+(c.extra||'');
   const s=document.getElementById("src");s.innerHTML=c.src.length?'Sources: '+c.src.map(srcLink).join(" · "):'';s.hidden=!c.src.length;
   const bar=document.getElementById("bar");
+  bar.hidden=n<total-1;
   if(n<total-1){
-    const blocked=n===VOTE&&!S.guess;
-    const label=n===0?F.button:n===1?"Make your call":n===VOTE?Z.button:T.button;
-    bar.innerHTML='<button class="btn" type="button" id="adv"'+(blocked?' disabled':'')+'><span>'+esc(blocked?"Vote to see what happened":label)+'</span><small>'+(n+2)+' of '+total+'</small></button>';
-    document.getElementById("adv").onclick=()=>goTo(n+1);
+    bar.innerHTML='';
   }else{
     bar.innerHTML=N.links.map((l,i)=>'<a class="btn'+(i?' ghost':'')+'" href="'+esc(l.url)+'" target="_blank" rel="noopener" data-go="'+esc(l.id)+'"><span>'+esc(l.label)+'</span><small>'+esc(String(l.note).split(",")[0])+'</small></a>').join("")+
       '<button class="later" type="button" data-go="later">'+esc(N.later)+'</button><p class="thanks" id="thanks"'+(S.choice?'':' hidden')+'>'+esc(N.thanks)+'</p>';
