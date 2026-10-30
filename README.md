@@ -12,6 +12,8 @@ File = page ID in lower case + the two place codes: `lower(<PREFIX>-<TOPIC>-<NN>
 | Postcard (airmail trailer, computers) | PC-MF-01-POSTCARD | [pc-mf-01-postcard-ke-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-mf-01-postcard-ke-sg.html) |
 | Field Report Lite | FR-MF-01-LITE | [fr-mf-01-lite-ke-sg.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-01-lite-ke-sg.html) |
 | Deep Dive | FR-MF-01-DEEPDIVE | [fr-mf-01-deepdive-ke-sg.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-01-deepdive-ke-sg.html) |
+| Post (Instagram-style trailer, phones) | PC-MF-02-POST | [pc-mf-02-post-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/pc-mf-02-post-dk-nz.html) |
+| Postcard (airmail trailer, computers) | PC-MF-02-POSTCARD | [pc-mf-02-postcard-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/pc-mf-02-postcard-dk-nz.html) |
 | Field Report Lite | FR-MF-02-LITE | [fr-mf-02-lite-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-02-lite-dk-nz.html) |
 | Deep Dive | FR-MF-02-DEEPDIVE | [fr-mf-02-deepdive-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-02-deepdive-dk-nz.html) |
 

@@ -72,6 +72,7 @@ button{font:inherit;color:inherit}
   border-image:repeating-linear-gradient(-45deg,var(--ca) 0 12px,var(--card) 12px 19px,var(--cb) 19px 31px,var(--card) 31px 38px) 9;pointer-events:none}
 .s-front .map{padding:25cqw 0 0;margin:0 -10cqw}
 .s-front .map svg text{fill:var(--ink)}
+.s-front .map.full{margin:0 3cqw}
 .s-front .map svg{width:100%;height:auto;display:block;font-family:var(--display);font-size:13px}
 .s-front .greet{margin-top:auto;padding:0 8cqw 10cqw;font-family:var(--hand);font-weight:700;font-size:10.5cqw;line-height:1.02;color:var(--ink)}
 .s-front .greet small{display:block;font-family:var(--display);font-weight:600;font-size:3.6cqw;color:var(--muted);margin-bottom:1.5cqw}
@@ -197,7 +198,7 @@ function sFront(){
   return '<div class="slide s-front" aria-label="Postcard">'+
     '<div class="postmark">'+esc(F.postmark).replace(/\n/g,"<br>")+'</div>'+
     '<div class="stamp">'+esc(F.stamp)+'<img src="'+IMG+'" alt=""></div>'+
-    '<div class="map">'+(P.svgWorld||'')+'</div>'+
+    '<div class="map'+(F.mapFull?' full':'')+'">'+(P.svgWorld||'')+'</div>'+
     '<p class="greet"><small>'+esc(C.kicker)+'</small>'+esc(C.headline)+'</p>'+
     '<div class="air"></div></div>';
 }
@@ -221,7 +222,7 @@ function sTwist(){
   const [p1,p2]=T.paras;
   return '<div class="slide s-twist" aria-label="'+esc(T.heading)+'"><span class="k">'+esc(T.heading)+'</span>'+
     (T.big?'<p class="big">'+esc(T.big)+'</p>':'')+'<p class="b">'+p1+'</p>'+
-    (p2?'<div class="but"><span class="k">Meanwhile in '+esc(cityOf(Z.cards[0].ctx))+'</span><p class="b">'+p2+'</p></div>':'')+'</div>';
+    (p2?'<div class="but"><span class="k">'+esc(T.meanwhile||("Meanwhile in "+cityOf(Z.cards[0].ctx)))+'</span><p class="b">'+p2+'</p></div>':'')+'</div>';
 }
 function sNext(){
   return '<div class="slide s-next" aria-label="Griffles\'s question"><img class="big-g" src="'+IMG+'" alt="Griffles">'+
@@ -307,7 +308,7 @@ async function send(){
 }
 
 document.getElementById("ava").src=IMG;
-document.getElementById("loc").textContent=(CTX[Z.cards[0].ctx]||{}).city||"";
+document.getElementById("loc").textContent=(CTX[F.ctx||Z.cards[0].ctx]||{}).city||"";
 document.getElementById("tag").textContent=P.id.replace(/^PC-/,"")+" · "+(P.minutes||3)+" min";
 render();log("screen_view");
 </script>
