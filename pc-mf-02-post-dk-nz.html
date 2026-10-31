@@ -301,15 +301,19 @@ function formValues(){
   const pick=(Z.options.find(o=>o.id===S.guess)||{}).text||"";
   const secs={...S.secs};secs[SCREENS[S.i]]=(secs[SCREENS[S.i]]||0)+Math.round((Date.now()-S.stepStart)/1000);
   return {PKG:PID,SES:S.session,DONE:new Date().toISOString(),MIN:Math.max(1,Math.round((Date.now()-S.start)/60000)),TEST:"no",
-    PCHO:pick,CONF:S.curious||"",NOTE:"next: "+(S.choice||""),TPS:Object.entries(secs).map(([k,s])=>k+" "+s).join(", ")};
+    PCHO:pick,CONF:S.curious||"",NOTE:"next: "+(S.choice||"left without choosing"),TPS:Object.entries(secs).map(([k,s])=>k+" "+s).join(", ")};
 }
+// A student who rates their curiosity and then closes or leaves the page still sends their row (once).
+function sendIfLeaving(){if(document.visibilityState==="hidden"&&S.curious&&!S.sent){log("left_after_rating",{curious:S.curious});send()}}
+document.addEventListener("visibilitychange",sendIfLeaving);
+window.addEventListener("pagehide",()=>{if(S.curious&&!S.sent)send()});
 async function send(){
   if(S.sent||!CFG.formTemplate||!CFG.autoSubmit)return;
   S.sent=true;
   let u;try{u=new URL(CFG.formTemplate)}catch(e){return}
   const v=formValues(),body=new URLSearchParams();
   u.searchParams.forEach((val,key)=>{if(key.startsWith("entry.")){const k=val.replace(/^__|__$/g,"");body.append(key,String(k in v?v[k]:""))}});
-  try{await fetch(u.origin+u.pathname.replace(/viewform$/,"formResponse"),{method:"POST",mode:"no-cors",body});log("sent")}catch(e){log("send_blocked")}
+  try{await fetch(u.origin+u.pathname.replace(/viewform$/,"formResponse"),{method:"POST",mode:"no-cors",body,keepalive:true});log("sent")}catch(e){log("send_blocked")}
 }
 
 document.getElementById("ava").src=IMG;
