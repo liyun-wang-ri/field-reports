@@ -420,6 +420,7 @@ function open(id){
   const end=document.createElement("p");end.className="end";end.textContent="You're all caught up. New posts unlock as the term goes on.";feed.appendChild(end);
   v.hidden=false;v.scrollTop=0;document.body.classList.add("lock");
   seen[id]=1;save();render();
+  setHash(id);
   document.getElementById("back").focus();
 }
 function closeViewer(quiet){
@@ -427,6 +428,7 @@ function closeViewer(quiet){
   if(seenObs){seenObs.disconnect();seenObs=null}
   if(quiet)return;
   document.getElementById("viewer").hidden=true;document.body.classList.remove("lock");
+  setHash("");
   if(lastTile&&lastTile.dataset&&lastTile.dataset.id){const t=document.querySelector('.tile[data-id="'+lastTile.dataset.id+'"]');if(t)t.focus()}
 }
 document.getElementById("back").onclick=()=>closeViewer();
@@ -437,5 +439,14 @@ window.addEventListener("pagehide",()=>live.forEach(x=>x.leave()));
 document.getElementById("tab-posts").onclick=()=>{tab="posts";render()};
 document.getElementById("tab-pass").onclick=()=>{tab="pass";render()};
 document.getElementById("passBtn").onclick=()=>{tab="pass";render();document.getElementById("tab-pass").scrollIntoView({block:"nearest"})};
+// Single-post links: griffles-profile.html#mf-02 opens with that post playing. The address follows the open post.
+function setHash(id){try{history.replaceState(null,"",id?"#"+id:location.pathname+location.search)}catch(e){}}
+function fromHash(){
+  const id=decodeURIComponent(location.hash.slice(1)).toLowerCase(), v=document.getElementById("viewer");
+  if(POSTS.some(p=>p.id===id)){if(v.hidden||live.length===0||document.querySelector("#feed article")?.dataset.id!==id)open(id)}
+  else if(!v.hidden&&!id)closeViewer();
+}
+window.addEventListener("hashchange",fromHash);
 render();
+fromHash();
 </script>

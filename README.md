@@ -18,6 +18,6 @@ File = page ID in lower case + the two place codes: `lower(<PREFIX>-<TOPIC>-<NN>
 | Field Report Lite | FR-MF-02-LITE | [fr-mf-02-lite-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-02-lite-dk-nz.html) |
 | Deep Dive | FR-MF-02-DEEPDIVE | [fr-mf-02-deepdive-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-02-deepdive-dk-nz.html) |
 
-The Profile plays each Post on the page; the standalone Post and Postcard pages above stay published as each trailer's own record and link.
+Share the Profile with students; add a post's code to open it directly, e.g. [griffles-profile.html#mf-02](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#mf-02). The Profile plays each Post on the page; the standalone Post and Postcard pages above stay published as each trailer's own record and link.
 
 The other `.html` files are forwarding pages for the old file names (before 30 Oct 2026), so earlier Canvas links keep working.
