@@ -15,7 +15,7 @@
  * The AI drafts; teachers decide. Nothing here is a grade.
  */
 const ETI = {
-  version: '3.0',
+  version: '3.1',
   sheets: {
     list: 'Student_List', roster: 'Roster', credentials: 'Access_Codes_Distribute_Then_Delete',
     responses: 'Responses', profiles: 'AI_Profiles', change: 'Student_Change',
@@ -23,6 +23,9 @@ const ETI = {
     feedback: 'Feedback_Text', personas: 'Profiles',
   },
   modes: ['JC1', 'JC2'],
+  // Shared tester login for colleagues. Works whatever stage is open, allows repeat submissions,
+  // and saves to the Test_Responses tab only. Switch off from ETI Admin → Tester login.
+  tester: { id: 'TESTER', code: '12345678', sheet: 'Test_Responses' },
   associations: 14, habits: 10, beliefs: 14, goals: 6, motives: 9, curiosity: 3,
   aiModel: 'claude-sonnet-5-5',      // change via ETI Admin → AI settings, or Script Property AI_MODEL
   aiBatch: 5,                         // parallel AI requests per batch
@@ -267,6 +270,10 @@ function onOpen() {
     .addItem('Open JC2 inventory', 'openJC2')
     .addItem('Close inventory', 'closeInventory')
     .addItem('Which stage is open?', 'showStage')
+    .addSubMenu(ui.createMenu('Tester login (TESTER / 12345678)')
+      .addItem('Turn tester login on', 'testerOn')
+      .addItem('Turn tester login off', 'testerOff')
+      .addItem('Is tester login on?', 'testerStatus'))
     .addSeparator()
     .addItem('Apply Feedback_Text edits now', 'applyFeedbackEdits')
     .addItem('Rebuild student profiles (personas)', 'buildProfiles')
@@ -452,8 +459,18 @@ function resetAccessCode() {
 function findRoster_(id) {
   return table_(ETI.sheets.roster).rows.find(r => normId_(r.student_id) === id) || null;
 }
+function testerEnabled_() { return prop_('TESTER_ENABLED') !== 'false'; }
+function testerOn() { assertOwner_(); setProp_('TESTER_ENABLED', 'true'); toast_('Tester login is ON (TESTER / 12345678).'); }
+function testerOff() { assertOwner_(); setProp_('TESTER_ENABLED', 'false'); toast_('Tester login is OFF.'); }
+function testerStatus() { toast_('Tester login is ' + (testerEnabled_() ? 'ON' : 'OFF') + '. Tester answers go to the ' + ETI.tester.sheet + ' tab.'); }
+function testerSheet_() { return initSheet_(ETI.tester.sheet, headers_()); }
 function authorize_(request) {
   const id = normId_(request.studentId), code = normCode_(request.accessKey), mode = String(request.mode || '');
+  if (id === ETI.tester.id) {
+    if (!testerEnabled_()) throw new Error('Tester login is switched off.');
+    if (code !== ETI.tester.code || ETI.modes.indexOf(mode) < 0) throw new Error('Tester access code not recognised.');
+    return { id, mode, cohort: 'TEST', klass: 'TEST', tester: true };
+  }
   if (!/^[A-Z0-9][A-Z0-9-]{2,19}$/.test(id) || !/^[A-Z0-9]{8}$/.test(code) || ETI.modes.indexOf(mode) < 0)
     throw new Error('Check your student ID and the 8-character access code from your teacher.');
   const stage = openStage_();
@@ -475,6 +492,7 @@ function existingReceipt_(id, mode) {
 function verifyAccess(request) {
   try {
     const who = authorize_(request);
+    if (who.tester) return { ok: true, mode: who.mode, tester: true, message: 'Tester mode: answers go to the ' + ETI.tester.sheet + ' tab, and you can submit as often as you like.' };
     if (existingReceipt_(who.id, who.mode)) return { ok: false, message: 'A ' + who.mode + ' response has already been submitted for this ID. Contact your teacher if this is an error.' };
     return { ok: true, mode: who.mode };
   } catch (e) { return { ok: false, message: e.message }; }
@@ -512,6 +530,15 @@ function submitInventory(request) {
     const cleaned = validateAnswers_(request.answers);
     const token = String(request.clientToken || '').toUpperCase();
     const receipt = /^[A-F0-9]{12}$/.test(token) ? 'ETI-' + token : 'ETI-' + randomHex_(6);
+    if (who.tester) {
+      const tsh = testerSheet_();
+      const summary = studentSummary_(who.id, who.mode, cleaned, null, true);
+      if (table_(ETI.tester.sheet).rows.some(r => String(r.receipt) === receipt)) return { ok: true, receipt, summary, duplicate: true, tester: true };
+      const tmeta = { submitted_at: new Date(), receipt, student_id: who.id, class: 'TEST', cohort: 'TEST', mode: who.mode, schema_version: ETI.version, minutes_spent: '' };
+      tsh.appendRow(headers_().map(k => Object.prototype.hasOwnProperty.call(tmeta, k) ? tmeta[k] : (cleaned[k] || '')));
+      SpreadsheetApp.flush();
+      return { ok: true, receipt, summary, tester: true };
+    }
     const existing = existingReceipt_(who.id, who.mode);
     if (existing) {
       if (existing === receipt) return { ok: true, receipt, summary: studentSummary_(who.id, who.mode, cleaned), duplicate: true };
@@ -619,9 +646,14 @@ function staticRow_(r, fb, keep) {
   };
   return STATIC_HEADERS.map(h => safe_(o[h]));
 }
-function studentSummary_(id, mode, answers, klass) {
-  const prior = mode === 'JC2' ? table_(ETI.sheets.responses).rows.find(r => normId_(r.student_id) === id && String(r.mode) === 'JC1') : null;
-  const fb = buildFeedback(answers, mode, feedbackTexts_(), prior || null, cohortStats_(mode));
+function studentSummary_(id, mode, answers, klass, tester) {
+  let prior = null;
+  if (mode === 'JC2') {
+    // Testers are compared with the most recent tester JC1 submission.
+    const rows = tester ? (SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ETI.tester.sheet) ? table_(ETI.tester.sheet).rows : []).slice().reverse() : table_(ETI.sheets.responses).rows;
+    prior = rows.find(r => normId_(r.student_id) === id && String(r.mode) === 'JC1') || null;
+  }
+  const fb = buildFeedback(answers, mode, feedbackTexts_(), prior, cohortStats_(mode));
   return { feedback: fb, message: '' };
 }
 /** Recomputes every student's persona and feedback from Responses, keeping teacher columns. */

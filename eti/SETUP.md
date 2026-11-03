@@ -90,8 +90,16 @@ Demo mode (double-clicking `index.html`) always shows the built-in default wordi
 ## 5. Optional later: AI analysis
 **ETI Admin → Optional: AI analysis.** This adds AI-drafted profiles of the written answers, class overviews and JC2 change reports, once you have a Claude API key and school approval. The AI receives answers only, never IDs or classes. Nothing above depends on it.
 
-## 6. Test before the real lesson
-Add 3–4 test IDs. For each persona, submit answers that match it and check the feedback screen reads well on a phone. Then:
+## 6. Tester login for colleagues
+Colleagues can try the questionnaire with **Student ID `TESTER`** and **access code `12345678`**.
+- It works whether the inventory is open or closed. Typing `TESTER` unlocks both the JC1 and JC2 buttons.
+- They can submit as many times as they like and still get the full persona feedback. A JC2 test is compared with the most recent tester JC1.
+- Their answers go to a separate **Test_Responses** tab, never to Responses, Profiles or the summaries.
+- **ETI Admin → Tester login** turns it on or off. It's on by default. Anyone who learns the code can only add rows to Test_Responses, but you may want to switch it off while the real cohort is taking the inventory.
+- To change the ID or code, edit `tester: { id: 'TESTER', code: '12345678' … }` near the top of `Code.gs`, then redeploy a new version.
+
+## 7. Test before the real lesson
+Log in as `TESTER` a few times, choosing answers that match each persona, and check the feedback screen reads well on a phone. Then:
 1. Edit one Feedback_Text row and apply it.
-2. Open JC2 and submit once more to see the change section.
-3. Delete the test rows from Responses and Profiles.
+2. Submit once as a JC2 tester to see the change section.
+3. Delete the Test_Responses rows when you're done (optional).
