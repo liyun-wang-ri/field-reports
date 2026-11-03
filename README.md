@@ -31,5 +31,8 @@ The JC1/JC2 questionnaire is not built by `build.py`; edit the files in `eti/` d
 | [eti/index.html](https://liyun-wang-ri.github.io/field-reports/eti/) | Student page, connected to the Apps Script web app through `API_URL` near the top of its script (a new deployment URL must be pasted there). Add `?demo=1` to the link for a demo that saves nothing. |
 | `eti/Code.gs` | Backend to paste into Apps Script in the response Google Sheet. Contains no keys or student data. |
 | `eti/SETUP.md` | Setup and teacher guide. |
+| `eti/img/` | Griffles and the five Year 5–6 House mascots (school artwork, 360 px tall webp). A chapter's guide is set in `CHAPTERS` / `CAST` near the top of the page script; a missing image falls back to Griffles. |
+
+Sections unlock in order: a student must answer every question in a section before the next opens, and can go back to any finished section to edit before submitting.
 
 Student answers are saved only in the teacher's private Google Sheet, never in this repository.
