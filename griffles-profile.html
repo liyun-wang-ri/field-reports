@@ -219,6 +219,55 @@ body.lock{overflow:hidden}
 @media (prefers-reduced-motion: no-preference){.viewer .track{scroll-behavior:smooth}
 .viewer .pop{animation:pop .35s ease-out}
 @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}}
+@media (hover:hover){.viewer .track{user-select:none;-webkit-user-select:none}}
+@media (min-width:900px) and (hover:hover) and (pointer:fine){.viewer .post{max-width:min(1000px,calc(100vw - 48px));display:grid;grid-template-columns:calc((100vh - 80px)*.8) 1fr;
+   grid-template-rows:auto auto 1fr auto auto;grid-template-areas:"media who" "media cap" "media src" "media dots" "media bar";margin:28px auto}
+.viewer .post .media{grid-area:media;align-self:start}
+.viewer .post .who{grid-area:who;border-bottom:1px solid var(--rule);padding:14px 16px}
+.viewer .post .cap{grid-area:cap;padding:16px 18px 8px;font-size:16px}
+.viewer .post .src{grid-area:src;padding:0 18px 12px}
+.viewer .post .dots{grid-area:dots;border-top:1px solid var(--rule);padding:12px 0 4px}
+.viewer .post .bar{grid-area:bar;padding:8px 18px 18px}}
+/* Computers (900px and up, with a mouse or trackpad), like Instagram on a computer: wide profile header and bigger tiles;
+   a post opens as a window over a lightly dimmed profile, slides left, Griffles's words and buttons right.
+   Placed after the post CSS so these rules win. */
+@media (min-width:900px) and (hover:hover) and (pointer:fine){
+ /* profile header: avatar left, name/stats/bio right, like Instagram on a computer */
+ .demo-note,.profile{max-width:935px}
+ .profile{background:transparent;box-shadow:none;border-radius:0}
+ .profile{display:grid;grid-template-columns:240px 1fr;column-gap:24px}
+ .top{display:contents}
+ .top .ava{width:150px;height:150px;grid-column:1;grid-row:1 / span 3;justify-self:center;align-self:center;margin:28px 0 20px}
+ .bio{grid-column:2;grid-row:1;padding:30px 0 6px;align-self:end}
+ .bio .nm{font-size:22px}
+ .bio p{font-size:16px;max-width:560px}
+ .top .stats{grid-column:2;grid-row:2;display:flex;gap:32px;text-align:left;padding:4px 0 10px}
+ .top .stats b{display:inline;font-size:16px;margin-right:5px}
+ .top .stats span{font-size:16px;color:var(--ink)}
+ .cta{grid-column:2;grid-row:3;padding:4px 0 24px;max-width:420px;align-self:start}
+ .hl,.tabs,#view{grid-column:1 / -1}
+ .hl{padding:8px 0 26px 30px;gap:30px}
+ .hlb{width:86px} .hlb .ring{width:80px;height:80px}
+ .grid{gap:4px}
+ .tile .lbl{font-size:14.5px;left:10px;right:10px;bottom:10px;padding:6px 8px}
+ .tile .code{font-size:12px;top:10px;left:10px;padding:2px 9px}
+ .pass{grid-template-columns:repeat(5,1fr);gap:22px;padding:26px 0}
+ .tabs{max-width:935px}
+
+ /* post opens as a window over the profile: slides on the left, Griffles's words and buttons on the right */
+ .viewer{background:rgba(20,40,42,.38)}
+ .feed{max-width:none;width:min(940px,calc(100vw - 48px));padding:0 0 40px}
+ .viewer .post{max-width:none;display:grid;grid-template-columns:calc((100vh - 120px)*.8) 1fr;
+   grid-template-rows:auto auto 1fr auto auto;grid-template-areas:"media who" "media cap" "media src" "media dots" "media bar";
+   border-radius:6px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.35);border:0;background:var(--card)}
+ .viewer .post .media{grid-area:media;align-self:start;background:var(--sea)}
+ .viewer .post .who{grid-area:who;border-bottom:1px solid var(--rule);padding:14px 16px}
+ .viewer .post .cap{grid-area:cap;padding:16px 18px 8px;font-size:16px}
+ .viewer .post .src{grid-area:src;padding:0 18px 12px}
+ .viewer .post .dots{grid-area:dots;border-top:1px solid var(--rule);padding:12px 0 4px}
+ .viewer .post .bar{grid-area:bar;padding:8px 18px 18px}
+ .upnext{background:var(--card);border-radius:6px;margin-top:16px;padding:16px 18px;max-width:520px;align-self:center;width:100%}
+}
 </style>
 
 <p class="demo-note">Tap a post to play it. Anonymous: no names or accounts are recorded.</p>
@@ -354,17 +403,28 @@ function mountPost(root,P,CFG,IMG,opts){
       S.curious=+b.dataset.n;track.querySelectorAll(".chips button").forEach(x=>x.setAttribute("aria-pressed",x===b));log("curiosity",{value:S.curious});
     });
   }
-  function goTo(n){n=Math.max(0,Math.min(open()-1,n));track.scrollTo({left:n*track.clientWidth});setSlide(n)}
+  let want=-1,wantT=0;
+  function goTo(n){n=Math.max(0,Math.min(open()-1,n));want=n;clearTimeout(wantT);wantT=setTimeout(()=>{want=-1},900);track.scrollTo({left:n*track.clientWidth});setSlide(n)}
   function setSlide(n){
     if(n===S.i)return;
     S.secs[SCREENS[S.i]]=(S.secs[SCREENS[S.i]]||0)+Math.round((Date.now()-S.stepStart)/1000);
     S.i=n;S.seen=Math.max(S.seen,n);S.stepStart=Date.now();log("screen_view");ui();
   }
   let raf=0;
-  track.addEventListener("scroll",()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>setSlide(Math.round(track.scrollLeft/Math.max(1,track.clientWidth))))},{passive:true});
+  track.addEventListener("scroll",()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const n=Math.round(track.scrollLeft/Math.max(1,track.clientWidth));if(want>=0){if(n!==want)return;want=-1}setSlide(n)})},{passive:true});
   // Tapping the right or left side of a slide moves on or back, for apps (like Canvas or Claude on a phone) where swiping inside the page does not work.
-  track.addEventListener("click",e=>{if(e.target.closest("button,a,input,textarea,label,summary"))return;const r=track.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x>.62)goTo(S.i+1);else if(x<.38)goTo(S.i-1)});
+  // Clicking or tapping the right or left third of a slide moves on or back (phones in apps where swiping does not work, and computers).
+  const zone=e=>{const r=track.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;return x>2/3?1:x<1/3?-1:0};
+  let dragX=null,dragged=false;
+  track.addEventListener("click",e=>{if(dragged){dragged=false;return}if(e.target.closest("button,a,input,textarea,label,summary"))return;const z=zone(e);if(z)goTo(S.i+z)});
+  // With a mouse, dragging a slide sideways also moves it, like swiping on a phone.
+  track.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&!e.target.closest("button,a,input,textarea,label"))dragX=e.clientX});
+  window.addEventListener("pointerup",e=>{if(dragX===null)return;const dx=e.clientX-dragX;dragX=null;if(Math.abs(dx)>40){dragged=true;setTimeout(()=>{dragged=false},0);goTo(S.i+(dx<0?1:-1))}});
+  track.addEventListener("dragstart",e=>e.preventDefault());
+  track.addEventListener("mousemove",e=>{if(e.target.closest("button,a,input,textarea,label,summary")){track.style.cursor="";return}const z=zone(e),ok=z&&S.i+z>=0&&S.i+z<open();track.style.cursor=ok?"pointer":""});
   track.addEventListener("keydown",e=>{if(e.key==="ArrowRight"){e.preventDefault();goTo(S.i+1)}if(e.key==="ArrowLeft"){e.preventDefault();goTo(S.i-1)}});
+  // The arrow keys work straight away, without clicking the slides first, while this post is on screen.
+  document.addEventListener("keydown",e=>{if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey||(e.key!=="ArrowRight"&&e.key!=="ArrowLeft"))return;if(e.target.closest&&e.target.closest("input,textarea,select,[contenteditable]"))return;if(!track.offsetParent)return;const r=track.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;e.preventDefault();goTo(S.i+(e.key==="ArrowRight"?1:-1))});
   $(".arrow.l").onclick=()=>goTo(S.i-1);
   $(".arrow.r").onclick=()=>goTo(S.i+1);
   const CAPS=[
