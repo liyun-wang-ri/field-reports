@@ -28,7 +28,7 @@ The JC1/JC2 questionnaire is not built by `build.py`; edit the files in `eti/` d
 
 | File | What it is |
 |---|---|
-| [eti/index.html](https://liyun-wang-ri.github.io/field-reports/eti/) | Student page. Runs in demo mode (nothing saved) until `API_URL` near the top of its script is set to the Apps Script `/exec` URL. Add `?demo=1` to the link to show the demo at any time. |
+| [eti/index.html](https://liyun-wang-ri.github.io/field-reports/eti/) | Student page, connected to the Apps Script web app through `API_URL` near the top of its script (a new deployment URL must be pasted there). Add `?demo=1` to the link for a demo that saves nothing. |
 | `eti/Code.gs` | Backend to paste into Apps Script in the response Google Sheet. Contains no keys or student data. |
 | `eti/SETUP.md` | Setup and teacher guide. |
 
