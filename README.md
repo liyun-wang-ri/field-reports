@@ -21,3 +21,15 @@ File = page ID in lower case + the two place codes: `lower(<PREFIX>-<TOPIC>-<NN>
 Share the Profile with students; add a post's code to open it directly, e.g. [griffles-profile.html#mf-02](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#mf-02). The Profile plays each Post on the page; the standalone Post and Postcard pages above stay published as each trailer's own record and link.
 
 The other `.html` files are forwarding pages for the old file names (before 30 Oct 2026), so earlier Canvas links keep working.
+
+## Economic Thinking Inventory (`eti/`)
+
+The JC1/JC2 questionnaire is not built by `build.py`; edit the files in `eti/` directly.
+
+| File | What it is |
+|---|---|
+| [eti/index.html](https://liyun-wang-ri.github.io/field-reports/eti/) | Student page. Runs in demo mode (nothing saved) until `API_URL` near the top of its script is set to the Apps Script `/exec` URL. Add `?demo=1` to the link to show the demo at any time. |
+| `eti/Code.gs` | Backend to paste into Apps Script in the response Google Sheet. Contains no keys or student data. |
+| `eti/SETUP.md` | Setup and teacher guide. |
+
+Student answers are saved only in the teacher's private Google Sheet, never in this repository.
