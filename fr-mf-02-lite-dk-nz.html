@@ -620,12 +620,9 @@ function vCommit(){
   if(S.choice)lock.disabled=false;
   function showLocked(){
     num.disabled=true;document.getElementById("why").disabled=true;stage.querySelectorAll('input[name=choice]').forEach(r=>r.disabled=true);lock.hidden=true;
-    // Griffles's guesses appear once yours are locked, each right under the question it answers.
-    if(!document.getElementById("gNum")){
-      document.getElementById("qNum").insertAdjacentHTML("afterend",'<div id="gNum">'+G("guessing",N.grifflesLine,"","guess")+'</div>');
-      document.getElementById("qChoice").insertAdjacentHTML("afterend",'<div id="gChoice">'+G("guessing",Ch.grifflesLine,"","guess")+'</div>');}
     document.getElementById("after").innerHTML='<div style="display:flex;flex-direction:column;gap:14px">'+
-     '<p class="hint aux">Yours are locked. Griffles\'s guesses, made before he read anything, are now under each question.</p>'+
+     '<p class="hint aux">Yours are locked. Here are Griffles\'s, made before he read anything:</p>'+
+     G("guessing",N.grifflesLine,"","guess")+G("guessing",Ch.grifflesLine,"","guess")+
      '<button class="btn" id="next" type="button">'+esc(C.button)+'</button></div>';
     document.getElementById("next").onclick=()=>go(2);
   }
