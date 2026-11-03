@@ -427,20 +427,14 @@ return base+shape+'</svg>';
 /* ---------- Griffles and friends ---------- */
 // Images live in eti/img/. A friend whose image file is missing is replaced by Griffles automatically.
 const IMG='img/';
-// [name, image, House, motto]
+// [name, image]
 const CAST={
- griffles:['Griffles','griffles','Raffles Institution',''],
- griffles_mic:['Griffles','griffles-mic','Raffles Institution',''],
- griffles_mega:['Griffles','griffles-megaphone','Raffles Institution',''],
- dragon:['The Dragon','dragon-dance','Buckle-Buckley','In Alis Virtutis · Soaring on the Wings of Courage'],
- stallion:['The Dark Stallion','dark-stallion-chess','Hadley-Hullett','E Tenebris Lux · When Darkness Shines'],
- wolf:['The White Wolf','white-wolf-camera','Morrison-Richardson','Una in Anima Concordes · United as One Soul'],
- seraph:['The Seraph','seraph-paint','Bayley-Waddle','Gloria Omnibus Lucet · Glory on Us All'],
- phoenix:['The Phoenix','phoenix-cards','Moor-Tarbet','Conprendite Flammam · Igniting the Flame'],
- phoenix_stand:['The Phoenix','phoenix','Moor-Tarbet','Conprendite Flammam · Igniting the Flame']};
+ griffles:['Griffles','griffles'],griffles_mic:['Griffles','griffles-mic'],griffles_mega:['Griffles','griffles-megaphone'],
+ dragon:['The Dragon','dragon-dance'],stallion:['The Dark Stallion','dark-stallion-chess'],wolf:['The White Wolf','white-wolf-camera'],
+ seraph:['The Seraph','seraph-paint'],phoenix:['The Phoenix','phoenix-cards'],phoenix_stand:['The Phoenix','phoenix']};
 const GUIDES=[['dragon','dragon'],['stallion','dark-stallion'],['wolf','white-wolf'],['seraph','seraph'],['phoenix','phoenix']];
-function host(who,line){const c=CAST[who]||CAST.griffles;return `<div class="host"><img class="host-img${/dance|chess|cards|mic|megaphone/.test(c[1])?' wide':''}" src="${IMG}${c[1]}.webp" alt="${escapeHtml(c[0])}" onerror="hostFallback(this)"><div class="bubble"><b class="host-name">${c[0]}${c[2]&&who.indexOf('griffles')<0?` <span class="house">· ${c[2]}</span>`:''}</b><p>${escapeHtml(line)}</p></div></div>`}
-function guidesHtml(){return `<div class="guides"><span class="kicker">Meet your guides</span><p class="small">Griffles brings along the five Year 5–6 House mascots. Spot yours along the way!</p><div class="guide-row">${GUIDES.map(([k,img])=>{const c=CAST[k];return `<figure class="guide"><img src="${IMG}${img}.webp" alt="${escapeHtml(c[0])}" loading="lazy"><figcaption><b>${c[0].replace('The ','')}</b><span>${c[2]}</span><i>${escapeHtml(c[3].split(' · ')[0])}</i></figcaption></figure>`}).join('')}</div></div>`}
+function host(who,line){const c=CAST[who]||CAST.griffles;return `<div class="host"><img class="host-img" src="${IMG}${c[1]}.webp" alt="${escapeHtml(c[0])}" onerror="hostFallback(this)"><div class="bubble"><b class="host-name">${c[0]}</b><p>${escapeHtml(line)}</p></div></div>`}
+function guidesHtml(){return `<div class="guides"><span class="kicker">Meet your guides</span><p class="small">Griffles brings five friends along on the journey. Spot them as you go!</p><div class="guide-row">${GUIDES.map(([k,img])=>`<figure class="guide"><img src="${IMG}${img}.webp" alt="${escapeHtml(CAST[k][0])}" loading="lazy"><figcaption><b>${CAST[k][0]}</b></figcaption></figure>`).join('')}</div></div>`}
 function hostFallback(img){img.onerror=null;img.src=IMG+'griffles.webp';const n=img.parentNode.querySelector('.host-name');if(n)n.textContent='Griffles'}
 
 const CHAPTERS=[
@@ -537,14 +531,18 @@ function render(){const s=state;
   app.innerHTML=`<section class="hero"><div class="hero-in"><div class="hero-copy"><span class="kicker light">H1 Economics · A two-year journey</span><h1>How do you <span class="hl">see</span> the world?</h1><p>Every choice has a story. Explore what you notice, what you believe, and how you make sense of the world around you.</p><div class="pills"><span>01 · Think</span><span>02 · See</span><span>03 · Engage</span></div></div><div class="hero-art"><div class="bubble"><b class="host-name">Griffles</b><p>Hi! There are no right answers here — I just want to know how <b>you</b> see the world right now.</p></div><img src="${IMG}griffles-mic.webp" alt="Griffles, the Raffles griffin mascot"></div></div></section>
   <section class="welcome"><div class="intro"><span class="kicker">Your journey</span><h2>Start where you are.</h2><p>This is not a test of what you know. It takes about 30–40 minutes, in 7 short sections${s.mode==='JC2'?' (8 for JC2)':''}. Each section unlocks when you finish the one before, and you can go back to change answers any time before you submit.</p><div class="trust">This does not affect your grades. Answer what you really think.</div><p class="howused"><b>How your answers are used.</b> Your answers are saved with your student ID so your Economics teachers can understand your interests and how you think, and plan learning pathways that suit you. An AI tool may help teachers summarise answers; it sees your answers but not your name or student ID, and teachers make every decision.</p>${DEMO?'<div class="notice warn">Preview mode · nothing will be saved.</div>':''}</div>
   <div class="login-card"><span class="kicker">Step 01 · Get started</span><h2>Your inventory</h2><b>Choose your stage</b><div class="mode"><button class="btn ${s.mode==='JC1'?'':'off'}" data-mode="JC1" ${modeLocked('JC1')}>JC1 · Beginning</button><button class="btn ${s.mode==='JC2'?'':'off'}" data-mode="JC2" ${modeLocked('JC2')}>JC2 · Looking back</button></div>${!DEMO&&s.openStage==='CLOSED'?'<div class="notice warn">The inventory is not open right now. Your teacher will tell you when to start.</div>':''}${s.configError?'<div class="notice error">Cannot reach the inventory server. Check your internet connection, then refresh this page.</div>':''}<div class="field"><label for="loginId">Student ID</label><input id="loginId" autocomplete="off" autocapitalize="characters" placeholder="Your school student ID" value="${escapeHtml(s.id)}"></div><div class="field"><label for="loginKey">Access code</label><input id="loginKey" type="password" autocomplete="off" autocapitalize="characters" placeholder="8 characters, e.g. ABCD-EFGH" value="${escapeHtml(s.key)}"></div>${s.error?`<div class="notice error">${escapeHtml(s.error)}</div>`:''}<button class="btn wide" id="begin" ${s.busy||(!DEMO&&s.openStage==='CLOSED')?'disabled':''}>${s.busy?'Checking…':'Begin the journey →'}</button><p class="small">Use the same student ID and access code for JC1 and JC2.</p></div></section><section class="guides-wrap">${guidesHtml()}</section>`;
-  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{s.mode=b.dataset.mode;s.error='';render()});
+  const idIn=app.querySelector('#loginId'),keyIn=app.querySelector('#loginKey');
+  const unlock=()=>{const t=idIn.value.trim().toUpperCase()==='TESTER';app.querySelectorAll('[data-mode]').forEach(b=>b.disabled=!t&&!!modeLocked(b.dataset.mode));if(!s.busy)app.querySelector('#begin').disabled=!t&&!DEMO&&s.openStage==='CLOSED'};
+  idIn.addEventListener('input',unlock);unlock();
+  app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{s.id=idIn.value.trim().toUpperCase();s.key=keyIn.value;s.mode=b.dataset.mode;s.error='';render()});
   app.querySelector('#begin').onclick=login;
   app.querySelector('#loginKey').onkeydown=e=>{if(e.key==='Enter')login()};
   return;
  }
  if(s.view==='done'){
   const fb=(s.summary&&s.summary.feedback)||null;
-  app.innerHTML=`<div class="success">${host('griffles_mega','You made it! Here’s your snapshot — a starting point for conversations, not a label.')}<span class="kicker">Journey complete</span><h1>Thank you for sharing your perspective.</h1><p>Your responses do not affect your grades.</p><span class="receipt">Receipt: ${escapeHtml(s.receipt)}</span>${DEMO?'<div class="notice warn">Preview only — nothing was saved.</div>':''}${fb?renderFeedback(fb):'<p>Your responses have been recorded.</p>'}<div class="btnrow"><button class="btn" id="saveCopy">⬇ Download my answers and feedback</button></div><p class="small">Keep your access code safe — you will use it again for the JC2 inventory.</p></div>`;
+  app.innerHTML=`<div class="success">${host('griffles_mega','You made it! Here’s your snapshot — a starting point for conversations, not a label.')}<span class="kicker">Journey complete</span><h1>Thank you for sharing your perspective.</h1><p>Your responses do not affect your grades.</p><span class="receipt">Receipt: ${escapeHtml(s.receipt)}</span>${DEMO?'<div class="notice warn">Preview only — nothing was saved.</div>':''}${fb?renderFeedback(fb):'<p>Your responses have been recorded.</p>'}<div class="btnrow"><button class="btn" id="saveCopy">⬇ Download my answers and feedback</button></div><p class="small">${s.tester?'Tester mode: nothing was added to the real data.':'Keep your access code safe — you will use it again for the JC2 inventory.'}</p>${s.tester?'<div class="btnrow"><button class="btn ghost" id="again">Test again</button></div>':''}</div>`;
+  const ag=app.querySelector('#again');if(ag)ag.onclick=()=>{s.view='login';s.tester=false;s.summary=null;s.error='';render();window.scrollTo(0,0)};
   app.querySelector('#saveCopy').onclick=downloadCopy;return;
  }
  if(s.view==='review'){
@@ -557,7 +555,7 @@ function render(){const s=state;
  app.innerHTML=`<div class="form-layout"><aside class="side"><span class="kicker light">Your journey</span><h3>${s.mode} inventory</h3><div class="progress-host"></div><nav class="chapter-list" id="sideList" aria-label="Sections"></nav><p class="side-foot">Sections unlock as you finish each one. You can go back to any finished section. Answers save on this device as you go.</p></aside>
   <section class="main"><div class="mobile-bar"><div class="progress-host"></div><label class="hidden" for="mobileJump">Jump to a section</label><select id="mobileJump" class="mobile-jump"></select></div>
   <header class="chapter-head"><span class="kicker">Chapter ${String(s.step+1).padStart(2,'0')} · Section ${c.l}</span><h2>${escapeHtml(c.t)}</h2><p>${escapeHtml(c.sub)}</p></header>
-  ${host(c.host,c.line)}<div id="countHost"></div>${s.notice?`<div class="notice">${escapeHtml(s.notice)}</div>`:''}
+  ${s.tester?'<div class="notice warn"><b>Tester mode.</b> Answers go to the Test_Responses tab, not the real data. You can submit as often as you like.</div>':''}${host(c.host,c.line)}<div id="countHost"></div>${s.notice?`<div class="notice">${escapeHtml(s.notice)}</div>`:''}
   <div class="questions">${sectionBody(s.step)}</div><div id="missNote" class="hidden" aria-live="polite"></div>
   <div class="btnrow"><button class="btn ghost" id="back">← ${s.step===0?'Start':'Previous'}</button><button class="btn" id="next">${last?'Review answers →':'Continue →'}</button></div></section></div>`;
  document.getElementById('mobileJump').onchange=e=>goToStep(Number(e.target.value));
@@ -620,7 +618,7 @@ async function login(){
  if(DEMO){startForm();render();return}
  if(!s.id||!s.key){s.error='Enter the assigned student ID and private access key.';render();return}
  s.busy=true;render();
- try{const r=await api('verify',{studentId:s.id,accessKey:s.key,mode:s.mode},3);s.busy=false;if(r.ok)startForm();else s.error=r.message||'Unable to sign in.'}
+ try{const r=await api('verify',{studentId:s.id,accessKey:s.key,mode:s.mode},3);s.busy=false;if(r.ok){s.tester=!!r.tester;startForm()}else s.error=r.message||'Unable to sign in.'}
  catch(e){s.busy=false;s.error='Could not reach the server. Check your internet connection and try again.'}
  render();
 }
