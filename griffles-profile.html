@@ -100,7 +100,17 @@ p{margin:0}
 .vbar .t{font-family:var(--display);font-weight:700;font-size:16px;line-height:1.15}
 .vbar .t small{display:block;font-weight:500;font-size:12.5px;color:var(--muted)}
 .feed{max-width:470px;margin:0 auto;padding:16px 0 48px;display:flex;flex-direction:column;gap:18px}
-.feed .more{font-family:var(--display);font-size:13.5px;color:var(--muted);text-align:center}
+.upnext{display:flex;flex-direction:column;gap:10px;padding:4px 16px 8px}
+.upnext .k{font-family:var(--display);font-weight:700;font-size:14px;color:var(--ink)}
+.upnext .sub{font-size:14.5px;color:var(--muted)}
+.nextpost{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;text-align:left;border:1px solid var(--rule);background:var(--card);border-radius:12px;padding:8px 12px 8px 8px;width:100%}
+.nextpost .thumb{width:64px;height:64px;border-radius:8px;overflow:hidden;background:var(--sea);position:relative;display:block}
+.nextpost .thumb svg{position:absolute;width:180%;height:auto;left:-40%;top:8%}
+.nextpost .thumb svg text{display:none}
+.nextpost .txt{display:flex;flex-direction:column;font-family:var(--display);font-size:14px;line-height:1.3}
+.nextpost .txt b{font-size:15px}
+.nextpost .go{font-family:var(--display);font-weight:600;font-size:14px;color:var(--accent)}
+.allposts{align-self:center;background:none;border:0;color:var(--muted);font-family:var(--display);font-size:14px;text-decoration:underline;padding:6px}
 .feed .end{font-family:var(--display);font-size:13.5px;color:var(--muted);text-align:center;padding:0 16px}
 @media (max-width:520px){.feed{padding-top:0;gap:12px}}
 body.lock{overflow:hidden}
@@ -113,6 +123,7 @@ body.lock{overflow:hidden}
 .viewer .who{display:flex;align-items:center;gap:10px;padding:10px 14px}
 .viewer .ava{width:40px;height:40px;border-radius:50%;flex:none;padding:2px;background:conic-gradient(var(--ca),var(--cb),var(--accent),var(--ca))}
 .viewer .ava img{width:100%;height:100%;border-radius:50%;background:var(--card);object-fit:contain;display:block;border:2px solid var(--card)}
+.viewer .tapback{cursor:pointer}
 .viewer .who .nm{font-family:var(--display);font-weight:700;font-size:15px;line-height:1.2}
 .viewer .who .loc{font-family:var(--display);font-size:13px;color:var(--muted);line-height:1.2}
 .viewer .who .tag{margin-left:auto;font-family:var(--display);font-size:12px;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:3px 10px;white-space:nowrap}
@@ -127,8 +138,9 @@ body.lock{overflow:hidden}
   background:rgba(251,252,250,.88);color:#16232A;cursor:pointer;font-size:18px;line-height:34px;display:none;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .viewer .arrow.l{left:10px}
 .viewer .arrow.r{right:10px}
-@media (hover:hover) and (pointer:fine){.viewer .arrow{display:block}
-.viewer .arrow[disabled]{display:none}}
+.viewer .arrow{display:block}
+.viewer .arrow[disabled]{display:none}
+@media (hover:none){.viewer .arrow{width:30px;height:30px;line-height:30px;font-size:16px;background:rgba(251,252,250,.8)}}
 .viewer .dots{display:flex;justify-content:center;gap:5px;padding:10px 0 2px}
 .viewer .dots i{width:6px;height:6px;border-radius:50%;background:var(--rule);transition:background .2s}
 .viewer .dots i.on{background:var(--accent)}
@@ -278,7 +290,7 @@ function render(){
   document.querySelectorAll(".tile[data-id]").forEach(b=>b.onclick=()=>open(b.dataset.id));
 }
 /* The Griffles Post engine, rewritten so several posts can live on one page (no ids, one closure per post). */
-function mountPost(root,P,CFG,IMG){
+function mountPost(root,P,CFG,IMG,opts){
   const PID=P.id+(P.variant?"-"+String(P.variant).toUpperCase():""), KEY="griffles-"+PID+"-log";
   const CTX={};P.contexts.forEach(c=>CTX[c.id]=c);
   const C=P.postcard, F=C.front, Z=C.puzzle, T=C.twist, N=C.next;
@@ -350,6 +362,8 @@ function mountPost(root,P,CFG,IMG){
   }
   let raf=0;
   track.addEventListener("scroll",()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>setSlide(Math.round(track.scrollLeft/Math.max(1,track.clientWidth))))},{passive:true});
+  // Tapping the right or left side of a slide moves on or back, for apps (like Canvas or Claude on a phone) where swiping inside the page does not work.
+  track.addEventListener("click",e=>{if(e.target.closest("button,a,input,textarea,label,summary"))return;const r=track.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;if(x>.62)goTo(S.i+1);else if(x<.38)goTo(S.i-1)});
   track.addEventListener("keydown",e=>{if(e.key==="ArrowRight"){e.preventDefault();goTo(S.i+1)}if(e.key==="ArrowLeft"){e.preventDefault();goTo(S.i-1)}});
   $(".arrow.l").onclick=()=>goTo(S.i-1);
   $(".arrow.r").onclick=()=>goTo(S.i+1);
@@ -391,6 +405,9 @@ function mountPost(root,P,CFG,IMG){
     try{await fetch(u.origin+u.pathname.replace(/viewform$/,"formResponse"),{method:"POST",mode:"no-cors",body,keepalive:true});log("sent")}catch(e){log("send_blocked")}
   }
   $(".ava img").src=IMG;
+  // Like Instagram: tapping Griffles's picture or name goes back to his profile.
+  if(opts&&opts.onWho)[$(".who .ava"),$(".who .nm")].forEach(el=>{el.classList.add("tapback");el.setAttribute("role","button");el.tabIndex=0;el.setAttribute("aria-label","Back to Griffles's profile");
+    el.onclick=opts.onWho;el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();opts.onWho()}}});
   $(".loc").textContent=(CTX[F.ctx||Z.cards[0].ctx]||{}).city||"";
   $(".tag").textContent=P.id.replace(/^PC-/,"")+" · "+(P.minutes||3)+" min";
   render();log("screen_view");
@@ -407,17 +424,22 @@ function open(id){
   const v=document.getElementById("viewer"),feed=document.getElementById("feed");
   closeViewer(true);
   lastTile=document.activeElement;
-  const list=POSTS.filter(p=>topic==="all"||p.topic===topic);
-  const order=[POSTS.find(p=>p.id===id),...list.filter(p=>p.id!==id)];
+  const p=POSTS.find(x=>x.id===id);
   feed.innerHTML="";
-  seenObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!seen[e.target.dataset.id]){seen[e.target.dataset.id]=1;save();render()}}),{root:v,threshold:.5});
-  order.forEach((p,k)=>{
-    if(k===1){const m=document.createElement("p");m.className="more";m.textContent="More from Griffles";feed.appendChild(m)}
-    const el=document.createElement("article");feed.appendChild(el);
-    live.push(mountPost(el,p.pkg,CFG,IMG));
-    el.dataset.id=p.id;seenObs.observe(el);
-  });
-  const end=document.createElement("p");end.className="end";end.textContent="You're all caught up. New posts unlock as the term goes on.";feed.appendChild(end);
+  // One post at a time, then the next post in the same topic: students follow the teaching order, not an endless feed.
+  const el=document.createElement("article");feed.appendChild(el);
+  live.push(mountPost(el,p.pkg,CFG,IMG,{onWho:()=>closeViewer()}));
+  el.dataset.id=p.id;
+  const topicName=(TOPICS.find(t=>t.k===p.topic)||{}).name||p.topic;
+  const next=POSTS.filter(x=>x.topic===p.topic&&(x.pkg.seq||0)>(p.pkg.seq||0)).sort((x,y)=>(x.pkg.seq||0)-(y.pkg.seq||0))[0];
+  const box=document.createElement("div");box.className="upnext";
+  box.innerHTML=next
+    ?'<p class="k">Up next in '+esc(topicName)+'</p><button type="button" class="nextpost" data-id="'+next.id+'"><span class="thumb">'+next.map+'</span><span class="txt"><b>'+esc(next.code)+'</b><span>'+next.places.map(x=>esc(x[1])).join(" · ")+'</span></span><span class="go">Play ›</span></button>'
+    :'<p class="k">That’s the latest in '+esc(topicName)+'.</p><p class="sub">New posts unlock as the term goes on.</p>';
+  box.innerHTML+='<button type="button" class="allposts">Back to all posts</button>';
+  feed.appendChild(box);
+  const nb=box.querySelector(".nextpost");if(nb)nb.onclick=()=>open(nb.dataset.id);
+  box.querySelector(".allposts").onclick=()=>closeViewer();
   v.hidden=false;v.scrollTop=0;document.body.classList.add("lock");
   seen[id]=1;save();render();
   setHash(id);
