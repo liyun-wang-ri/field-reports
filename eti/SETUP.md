@@ -106,3 +106,7 @@ Log in as `TESTER` a few times, choosing answers that match each persona, and ch
 1. Edit one Feedback_Text row and apply it.
 2. Submit once as a JC2 tester to see the change section.
 3. Delete the Test_Responses rows when you're done (optional).
+
+## Design decisions to remember
+- **Same news headline in JC1 and JC2 (D2).** Both years ask about "Singapore considers higher charges for cars entering busy city areas", so changes in students' questions show how their thinking has changed, not a change of topic. (Changed on 4 Nov 2026, before any students had taken the inventory.)
+- **Plastic-bag scenario kept on purpose (B1).** The Griffles Kenya–Singapore field report teaches the same topic. Students who used it may answer B1 better in JC2 because they were taught it, not only because their thinking grew. Read B1 changes with that in mind and lean more on B2–B5 and C1 for evidence of growth.
