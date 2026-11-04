@@ -225,6 +225,11 @@ button:disabled{cursor:not-allowed}
 @media(max-width:900px){.topbar{position:relative}.mobile-bar{top:0}}
 .side .progress-row span:first-child{display:none}.side .progress-row{color:#a5abb3}.side .progress{background:#33363b;margin-bottom:1.2rem}
 .eyebrow{display:block;font-size:.75rem;font-weight:800;letter-spacing:.14em;color:#8fd3b2}
+.tester-tools{border:2px dashed #e0b44f;background:#fffaf0;border-radius:14px;padding:.9rem 1rem;margin:0 0 1.4rem}
+.tester-tools>b{display:block;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:#7a4b00;margin-bottom:.5rem}
+.tt-row{margin:.4rem 0}.tt-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:.4rem}
+.btn.tt{min-height:42px;padding:.45rem .8rem;font-size:.9rem;min-width:0}
+@media(max-width:640px){.tt-btns .btn.tt{flex:1 1 45%}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style></head><body><header class="topbar"><div class="topbar-in"><div class="brand"><span class="brand-mark">ETI</span>Economic Thinking Inventory</div><span class="tag">H1 Economics · Raffles Institution</span></div></header><div class="shell"><main class="panel" id="app"></main><div class="foot">This does not affect your grades. Answer what you really think.</div></div>
 <script>
@@ -525,6 +530,58 @@ function next(){
  render();window.scrollTo(0,0);
 }
 
+
+/* ---------- Tester tools: sample answers (tester login and preview mode only) ---------- */
+const SAMPLE_TEXT={
+ A2:'how people, firms and governments make choices when resources are limited.',
+ B1:'Most people would start bringing their own bags because $1 feels a lot for something you throw away. Shops might sell more reusable bags. Some people who forget will just pay, so the charge also raises money.',
+ B2:'The company and its shareholders gain from lower costs, and customers may get faster replies. The workers who lose their jobs lose out, at least until they find new work. Society could still be better off if the savings mean lower prices and the workers are retrained.',
+ B3:'I would choose healthcare because our population is ageing and more people will need care. By choosing this, we give up better public transport or tax cuts that could have helped families now.',
+ B4:'1 build more housing, 2 tax investors, 3 subsidise buyers, 4 leave the market alone, 5 price controls. Building more housing tackles the shortage directly, even though it takes years.',
+ B5:'Banning it sounds good for the environment, but clothes would cost more for lower-income families and factory workers overseas could lose jobs. A tax or better recycling might work better than a ban.',
+ C1:'No. Electricity would be free, but land, time, workers and materials would still be scarce, so people would still have to make choices.',
+ D2:{JC1:['Who will have to pay the higher charges?','Will it actually reduce traffic, or will people just pay?','What about people who have no other way to get to work?'],
+     JC2:['How much higher will water charges be?','Will households really use less water?','How will lower-income families be protected?']},
+ E2:'I disagreed that something free costs society nothing, because someone still pays for it through taxes or the resources it uses.',
+ G1_other:'My seniors recommended it.',
+ G3_why:'I find the topics interesting, but the exam does push me to study more.',
+ G4:'Someone who can understand the news and make sensible decisions about money and policy.',
+ H1:'My view on higher prices changed the most. I used to think they were always bad, but now I see they can signal scarcity.',
+ H2:'I had to unlearn the idea that Economics is only about money.',
+ H3:'Learning about market failure and reading about carbon taxes in other countries.',
+ H4:'I am still unsure how to balance fairness and efficiency when governments design policies.'};
+// Closed answers that steer the sample towards each persona (with the default cut-offs).
+const SAMPLE_PERSONA={
+ explorer:{G1:[0,1,6],G2_0:7,G2_2:6,G2_3:7,G2_1:3,G3:7,F:[3,2,3]},
+ strategist:{G1:[0,2,6],G2_0:7,G2_2:6,G2_3:6,G2_1:7,G3:4,F:[2,2,2]},
+ navigator:{G1:[2,7,3],G2_0:3,G2_2:2,G2_3:3,G2_1:7,G3:2,F:[0,1,0]},
+ wanderer:{G1:[3,4],G2_0:3,G2_2:3,G2_3:3,G2_1:3,G3:4,F:[0,0,1]}};
+const rnd7=()=>String(1+Math.floor(Math.random()*7));
+function sampleFill(step,persona){
+ const a=state.answers,empty=k=>!answered(k),P=persona?SAMPLE_PERSONA[persona]:null,force=!!P;
+ const put=(k,v)=>{if(force||empty(k))a[k]=String(v)};
+ switch(step){
+  case 0:if(empty('A2'))a.A2=SAMPLE_TEXT.A2;SCHEMA.associations.forEach((_,i)=>{if(empty('A1_'+i))a['A1_'+i]=rnd7()});break;
+  case 1:SCHEMA.scenarios.forEach(([id])=>{if(empty(id))a[id]=SAMPLE_TEXT[id]});break;
+  case 2:if(empty('C1'))a.C1=SAMPLE_TEXT.C1;break;
+  case 3:[0,1,2].forEach(j=>{if(empty('D2_'+j))a['D2_'+j]=SAMPLE_TEXT.D2[state.mode][j]});SCHEMA.habits.forEach((_,i)=>{if(empty('D1_'+i))a['D1_'+i]=rnd7()});break;
+  case 4:SCHEMA.beliefs.forEach((_,i)=>{if(empty('E1_'+i))a['E1_'+i]=rnd7()});if(empty('E2'))a.E2=SAMPLE_TEXT.E2;break;
+  case 5:[0,1,2].forEach(i=>{if(P)a['F_'+i]=String(P.F[i]);else if(empty('F_'+i))a['F_'+i]=String(Math.floor(Math.random()*4))});break;
+  case 6:{
+   if(P||!answered('G1')){const pick=P?P.G1:[0,1,2,3,4,5,6,7].sort(()=>Math.random()-.5).slice(0,1+Math.floor(Math.random()*3));SCHEMA.motives.forEach((_,i)=>a['G1_'+i]=pick.includes(i))}
+   if(a.G1_8===true&&empty('G1_other'))a.G1_other=SAMPLE_TEXT.G1_other;
+   SCHEMA.goals.forEach((_,i)=>{const k='G2_'+i;if(P&&P[k]!==undefined)a[k]=String(P[k]);else if(empty(k))a[k]=rnd7()});
+   if(P)a.G3=String(P.G3);else if(empty('G3'))a.G3=rnd7();
+   if(empty('G3_why'))a.G3_why=SAMPLE_TEXT.G3_why;if(empty('G4'))a.G4=SAMPLE_TEXT.G4;break;}
+  case 7:['H1','H2','H3','H4'].forEach(k=>{if(empty(k))a[k]=SAMPLE_TEXT[k]});break;
+ }
+}
+function testerToolsHtml(){return `<div class="tester-tools"><b>Tester tools</b><div class="tt-row"><button type="button" class="btn ghost tt" data-fill="section">✎ Fill this section with sample answers</button></div><div class="tt-row"><span class="small">Or fill <b>every</b> section and go to review as:</span><div class="tt-btns">${[['explorer','🧭 Explorer'],['strategist','♟️ Strategist'],['navigator','🎯 Navigator'],['wanderer','🌱 Wanderer'],['random','🎲 Random']].map(([k,l])=>`<button type="button" class="btn ghost tt" data-fill-all="${k}">${l}</button>`).join('')}</div></div><p class="small">Only blank questions are filled, except that a persona button also sets the motivation, goal, effort and curiosity answers that decide the persona.</p></div>`}
+function bindTesterTools(){
+ const f=app.querySelector('[data-fill="section"]');if(f)f.onclick=()=>{collect();sampleFill(state.step,null);state.showMissing=false;saveDraft();const y=window.scrollY;render();window.scrollTo(0,y)};
+ app.querySelectorAll('[data-fill-all]').forEach(b=>b.onclick=()=>{collect();let k=b.dataset.fillAll;if(k==='random')k=null;for(let i=0;i<total();i++)sampleFill(i,k);state.showMissing=false;saveDraft();state.view='review';render();window.scrollTo(0,0)});
+}
+
 /* ---------- Views ---------- */
 function render(){const s=state;
  if(s.view==='login'){
@@ -555,12 +612,13 @@ function render(){const s=state;
  app.innerHTML=`<div class="form-layout"><aside class="side"><span class="kicker light">Your journey</span><h3>${s.mode} inventory</h3><div class="progress-host"></div><nav class="chapter-list" id="sideList" aria-label="Sections"></nav><p class="side-foot">Sections unlock as you finish each one. You can go back to any finished section. Answers save on this device as you go.</p></aside>
   <section class="main"><div class="mobile-bar"><div class="progress-host"></div><label class="hidden" for="mobileJump">Jump to a section</label><select id="mobileJump" class="mobile-jump"></select></div>
   <header class="chapter-head"><span class="kicker">Chapter ${String(s.step+1).padStart(2,'0')} · Section ${c.l}</span><h2>${escapeHtml(c.t)}</h2><p>${escapeHtml(c.sub)}</p></header>
-  ${s.tester?'<div class="notice warn"><b>Tester mode.</b> Answers go to the Test_Responses tab, not the real data. You can submit as often as you like.</div>':''}${host(c.host,c.line)}<div id="countHost"></div>${s.notice?`<div class="notice">${escapeHtml(s.notice)}</div>`:''}
+  ${s.tester?'<div class="notice warn"><b>Tester mode.</b> Answers go to the Test_Responses tab, not the real data. You can submit as often as you like.</div>':''}${s.tester||DEMO?testerToolsHtml():''}${host(c.host,c.line)}<div id="countHost"></div>${s.notice?`<div class="notice">${escapeHtml(s.notice)}</div>`:''}
   <div class="questions">${sectionBody(s.step)}</div><div id="missNote" class="hidden" aria-live="polite"></div>
   <div class="btnrow"><button class="btn ghost" id="back">← ${s.step===0?'Start':'Previous'}</button><button class="btn" id="next">${last?'Review answers →':'Continue →'}</button></div></section></div>`;
  document.getElementById('mobileJump').onchange=e=>goToStep(Number(e.target.value));
  app.querySelector('#back').onclick=()=>{collect();state.showMissing=false;if(s.step===0)s.view='login';else s.step--;render();window.scrollTo(0,0)};
  app.querySelector('#next').onclick=next;
+ bindTesterTools();
  updateLive();
 }
 function localSummary(a,mode){return {feedback:buildFeedback(a,mode,{},null,null)}}

@@ -94,6 +94,9 @@ Demo mode (double-clicking `index.html`) always shows the built-in default wordi
 Colleagues can try the questionnaire with **Student ID `TESTER`** and **access code `12345678`**.
 - It works whether the inventory is open or closed. Typing `TESTER` unlocks both the JC1 and JC2 buttons.
 - They can submit as many times as they like and still get the full persona feedback. A JC2 test is compared with the most recent tester JC1.
+- **Tester tools** appear at the top of every section in tester mode, and in the `?demo=1` preview, but never for students:
+  - **Fill this section** fills only the blank questions with realistic sample answers, so testers can type a few answers themselves and fill the rest.
+  - **Fill every section as** 🧭 Explorer, ♟️ Strategist, 🎯 Navigator, 🌱 Wanderer or 🎲 Random fills the whole questionnaire and jumps to the review page. Each persona button sets the closed answers that decide the persona, so the feedback shows that persona with the default cut-offs of 55. If you've changed the cut-offs, a button may land on a neighbouring persona.
 - Their answers go to a separate **Test_Responses** tab, never to Responses, Profiles or the summaries.
 - **ETI Admin → Tester login** turns it on or off. It's on by default. Anyone who learns the code can only add rows to Test_Responses, but you may want to switch it off while the real cohort is taking the inventory.
 - To change the ID or code, edit `tester: { id: 'TESTER', code: '12345678' … }` near the top of `Code.gs`, then redeploy a new version.
