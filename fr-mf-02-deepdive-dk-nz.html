@@ -316,6 +316,84 @@ footer{display:flex;flex-direction:column;gap:10px}
 .pagesrc li span{display:block;font-size:12.5px}
 .pagesrc a{color:var(--muted)}
 .lookup{font-family:var(--display);font-weight:500;font-size:15px;border-left:3px solid var(--rule);padding-left:12px}
+
+/* Central-problem lessons: Griffles's week, the PPC, the rooms board, keep-or-cut */
+.week{display:flex;flex-direction:column;gap:12px}
+.wkbox{display:flex;flex-direction:column;gap:8px}
+.wkgrid{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:2px;padding:6px;border:2.5px solid var(--ink);border-radius:8px;background:var(--paper)}
+.wkgrid i{aspect-ratio:1;border-radius:2px;display:block}
+.wkspill{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wkspill .lab{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ca)}
+.wkgrid.over{grid-template-columns:repeat(24,minmax(0,1fr));border:2.5px dashed var(--ca);background:transparent;flex:1 1 100%}
+.wkgrid i.x{background:repeating-linear-gradient(-45deg,var(--ca) 0 3px,transparent 3px 6px);outline:1.5px solid var(--ca);outline-offset:-1.5px}
+.wkkey{font-family:var(--display);font-size:13px;color:var(--muted);margin:0}
+.s0{background:var(--accent)} .s1{background:var(--cb)} .s2{background:var(--gbar)} .s3{background:var(--warn)}
+.wkover{font-family:var(--display);font-size:16px;margin:0} .wkover .o{color:var(--ca)}
+.wklist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:4px 18px;font-family:var(--display);font-size:15px}
+@media (min-width:560px){.wklist{grid-template-columns:1fr 1fr}}
+.wklist li{display:grid;grid-template-columns:14px 1fr auto;gap:8px;align-items:center}
+.wklist .dot{width:12px;height:12px;border-radius:3px}
+.wklist .h{font-variant-numeric:tabular-nums;color:var(--muted)}
+.wklist .fixed{font-style:normal;font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+.g0{background:var(--muted)} .g1{background:var(--cb)} .g2{background:var(--gbar)}
+.wklist.grouped{grid-template-columns:1fr}
+.wklist .grp{margin-top:6px} .wklist .grp small{font-weight:400;color:var(--muted);font-size:13px}
+.wklist .sub{font-size:14.5px} .wklist .sub .h{color:var(--muted)}
+.wklist .sum{font-weight:700;border-top:1px solid var(--rule);padding-top:4px}
+.wklist .sum .h{color:var(--ink)}
+.ppcbox{display:flex;flex-direction:column;gap:12px}
+.ppcbox svg{width:100%;height:auto;display:block;font-family:var(--display)}
+.ppcbox .ax{stroke:var(--ink);stroke-width:1.5}
+.ppcbox .ppc{fill:none;stroke:var(--accent);stroke-width:3.5}
+.ppcbox svg text{font-family:var(--display)}
+.ppcbox .lbl{fill:var(--ink);font-size:17px;font-weight:600}
+.ppcbox .ppcname{fill:var(--accent);font-weight:700}
+.ppcbox .tick{fill:var(--muted);font-size:15px}
+.ppcbox .guide{stroke:var(--muted);stroke-dasharray:4 4}
+.ppcbox .me{fill:var(--accent);stroke:var(--sheet);stroke-width:3}
+.ppcbox .pt{fill:var(--sheet);stroke:var(--ink);stroke-width:2}
+.ppcbox .pt.out{stroke:var(--ca)} .ppcbox .pt.in{stroke:var(--cb)}
+.ppcread{font-family:var(--display);font-size:17px}
+.ppcpts{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.rooms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.room{border:1px solid var(--rule);border-radius:10px;background:var(--paper);padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-family:var(--display)}
+.room b{font-size:16px;line-height:1.2} .room span{font-size:13px;color:var(--muted)}
+.groups{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.rules .chip{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border-radius:10px;padding:10px 12px;height:auto}
+.rules .chip b{font-family:var(--display);font-size:16px}
+.rules .chip span{font-family:var(--display);font-weight:400;font-size:14px;color:inherit;opacity:.85}
+.board{border-collapse:collapse;width:100%;font-family:var(--display);font-size:15px}
+.board th,.board td{border-bottom:1px solid var(--rule);padding:8px 6px;text-align:left;vertical-align:top}
+.board thead th{font-size:13px;color:var(--muted);font-weight:600}
+.board tr.lost td:nth-child(2){color:var(--ca);font-weight:700}
+.three{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.friend img{width:64px;height:64px;object-fit:contain}
+.kc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.kc li{border:1px solid var(--rule);border-radius:10px;padding:9px 12px;background:var(--sheet);display:flex;flex-direction:column;gap:4px}
+.kc label{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:16px;cursor:pointer}
+.kc input{width:18px;height:18px;margin-top:4px;accent-color:var(--accent)}
+.kc li.top{border-color:var(--accent)} .kc li.low{opacity:.8}
+.kcv{display:flex;flex-direction:column;gap:2px;padding-left:30px;font-family:var(--display);font-size:14px;color:var(--muted)}
+.stars{color:var(--accent);letter-spacing:2px} .stars i{font-style:normal;color:var(--rule)}
+#kcCons .chip,[data-alt]{font-family:var(--display);font-size:15px}
+.street svg{width:100%;height:auto;display:block;font-family:var(--display)}
+.street .road{fill:var(--paper);stroke:var(--rule)}
+.street .sh.a{fill:var(--accent)} .street .sh.b{fill:var(--ca)} .street .sh.t{fill:var(--muted)}
+.street .shopA rect{fill:var(--accent)} .street .shopB rect{fill:var(--ca)}
+.street .shopA text,.street .shopB text{fill:#FFFFFF;font-size:11px;font-weight:700;font-family:var(--display)}
+.street line{stroke:var(--ink);stroke-width:1.5} .street .tick{fill:var(--muted);font-size:12px}
+.stcount{display:flex;flex-wrap:wrap;gap:4px 16px;font-family:var(--display);font-size:15px}
+.stcount .you b{color:var(--accent)} .stcount .riv b{color:var(--ca)}
+.stgoal{border-left:4px solid var(--accent);padding:8px 12px;background:var(--paper)}
+.stkey{list-style:none;padding:0;margin:4px 0 10px;display:flex;flex-direction:column;gap:2px;font-family:var(--display);font-size:14px;color:var(--muted)}
+.stkey li{display:flex;align-items:center;gap:6px}.stkey i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.stkey i.a{background:var(--accent)} .stkey i.b{background:var(--ca)} .stkey i.t{background:var(--muted)}
+.stbtns .btn{font-size:15px;padding:9px 12px}
+.prog{border:1px solid var(--rule);border-left:5px solid var(--cb);border-radius:10px;background:var(--paper);padding:10px 14px;font-family:var(--display);display:flex;flex-direction:column;gap:2px}
+.prog b{font-size:17px} .prog span{font-size:14px;color:var(--muted)} .prog ul{margin:2px 0 0;padding-left:18px;font-size:15px}
+.kcres .big{font-family:var(--display);font-size:34px;font-weight:700}
+.kcres .big small{font-size:16px;color:var(--muted);font-weight:500}
 </style>
 
 <div class="wrap">
@@ -357,7 +435,8 @@ footer{display:flex;flex-direction:column;gap:10px}
 const P=JSON.parse(document.getElementById("pkg").textContent);
 const CFG=JSON.parse(document.getElementById("cfg").textContent);
 const SHORT=P.id.replace(/^FR-/,"");
-const STEPS=["Hook","Commit","Reveal","Name","Compare","Policy","Transfer","Report","Check-in"];
+const CPE=P.kind==="cpe"; // central-problem lessons: steps 5 and 6 are the halls board and keep-or-cut
+const STEPS=P.stepNames||(CPE?["Hook","Commit","Reveal","Name","Allocate","Choose","Transfer","Report","Check-in"]:["Hook","Commit","Reveal","Name","Compare","Policy","Transfer","Report","Check-in"]);
 const sn=i=>"Step "+(i+1)+" of "+STEPS.length+" · "+STEPS[i];
 const LITE=P.ui==="lite";
 const PID=P.id+(P.variant?"-"+String(P.variant).toUpperCase():"");
@@ -418,7 +497,7 @@ function fresh(){return {step:0,maxStep:0,session:rid(),start:Date.now(),stepSta
   num:P.commit.numeric.start,choice:null,why:"",committed:false,
   doubts:[],doubtShown:null,
   name:"",named:false,recog:"",
-  ext:null,extLocked:false,ctx:P.compare.defaultCtx,
+  ext:null,extLocked:false,ctx:P.compare?P.compare.defaultCtx:P.contexts[0].id,keep:[],keepChecked:false,consider:[],kcAlt:false,kcAltSeen:false,rulesTried:[],
   charge:0,ban:false,triedBan:{},hitOpt:{},policyWhy:"",
   advice:"",adviceFiled:false,ticks:[],
   flaw:pickFlaw(),flawFound:false,flawTries:0,rep:null,reportFiled:false,headline:"",
@@ -514,7 +593,7 @@ function go(n){
 
 /* ---------- economic model (illustrative) ---------- */
 // MPB = MSB = a − bQ ; MPC = c + dQ ; MEC = kQ, so MSC = MPC + MEC fans out above MPC as in the notes' figures.
-const M=P.model;
+const M=P.model||{a:30,b:.25,c:2,d:.1,k:{general:.3}};
 let ARW=0;
 const msb=q=>M.a-M.b*q, mpc=q=>M.c+M.d*q, msc=(q,k)=>mpc(q)+k*q;
 const QE=(M.a-M.c)/(M.b+M.d);
@@ -570,7 +649,8 @@ function vHook(){
   stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(0)+'</span>'+
   '<div class="q perc"><span class="label aux">Before we start · quick gut check</span><span class="qtext">'+esc(Pc.question)+'</span>'+scale7("perc0",Pc.low,Pc.high)+
    '<span class="hint">'+(S.perc0?"Locked in. You'll see this question again at the end.":"No right answer. You'll see this question again at the end.")+'</span></div>'+
-  (function(){const cards='<div class="pair">'+H.cards.map(c=>factCard(c,'<p>'+rich(c.body)+'</p>'+(c.note?'<p class="hint">'+rich(c.note)+'</p>':''))).join("")+'</div>';
+  (H.week?weekBlock(H.week):'')+
+  (function(){if(!H.cards)return "";const cards='<div class="pair">'+H.cards.map(c=>factCard(c,'<p>'+rich(c.body)+'</p>'+(c.note?'<p class="hint">'+rich(c.note)+'</p>':''))).join("")+'</div>';
     // Lite with a cover: the cover already set up the two moves, so the cards fold into a recap.
     return LITE&&P.header.cover?more(H.recapLabel||"The two policy moves",cards):'<h2>'+esc(H.heading)+'</h2>'+cards})()+
   placeBrief()+
@@ -692,7 +772,7 @@ function vName(){
    '<p class="hint aux">You wrote: “<span id="echo"></span>”</p><div id="recog"></div>'+
    '<h2>'+esc(Nm.concept)+'</h2><p>'+rich(Nm.intro)+'</p>'+
    '<ol class="steps7">'+Nm.steps.map(t=>'<li>'+rich(t)+'</li>').join("")+'</ol>'+
-   '<div class="fig">'+diagram({k:M.k.general,q:QE,letters:true})+'</div>'+
+   (CPE?(P.ppc?ppcBlock():''):'<div class="fig">'+diagram({k:M.k.general,q:QE,letters:true})+'</div>')+
    '<p class="hint">'+rich(Nm.diagramCaption)+'</p>'+
    '<button class="btn" id="next" type="button">'+esc(Nm.next)+'</button>'+
   '</div></section>';
@@ -704,9 +784,9 @@ function vName(){
     document.getElementById("recog").innerHTML=G(r.kind==="core"?"pleased":"curious",r.msg,"reading your answer");
     return r;
   }
-  nmGo.onclick=()=>{S.name=nm.value.trim();S.named=true;const r=open();log("name_attempt",{text:S.name,recognised:r.kind})};
+  nmGo.onclick=()=>{S.name=nm.value.trim();S.named=true;const r=open();log("name_attempt",{text:S.name,recognised:r.kind});if(CPE&&P.ppc)bindPpc()};
   document.getElementById("next").onclick=()=>go(4);
-  if(S.named)open();
+  if(S.named){open();if(CPE&&P.ppc)bindPpc()}
 }
 
 /* ---------- 5 Compare ---------- */
@@ -1025,7 +1105,7 @@ function formValues(){
   const rs=S.repSummary||{};
   return {PKG:PID,SES:S.session,DONE:new Date(S.endAt||Date.now()).toISOString(),MIN:Math.max(1,Math.round(((S.endAt||Date.now())-S.start)/60000)),
     TEST:S.tester?"yes":"no",P0:S.perc0||"",P1:S.ci.percAfter||"",PNUM:S.committed?S.num:"",PCHO:choice,PWHY:clip(S.why,300),
-    DOUB:S.doubts.join(", "),NAME:clip(S.name,300),NREC:S.recog,CMP:S.ext||"",POL:clip(S.policyWhy,500),ADV:clip(S.advice,600),
+    DOUB:S.doubts.join(", "),NAME:clip(S.name,300),NREC:S.recog,CMP:S.ext||"",POL:clip(S.policyWhy+(CPE&&S.keep.length?" [kept: "+S.keep.join(", ")+"; considered: "+S.consider.join(", ")+"]":""),500),ADV:clip(S.advice,600),
     TICK:S.ticks.join(", "),HL:clip(rs.headline||"",200),HLX:S.reportFiled?(rs.overstated?"yes":"no"):"",
     FLAW:S.reportFiled?S.flaw+" · "+S.flawTries+" tap"+(S.flawTries===1?"":"s"):"",QUO:S.reportFiled?(rs.quotes?"yes":"no"):"",NOTE:clip(rs.extra||"",300),
     SUR:S.ci.surprise||"",SURW:clip(S.ci.surpriseWhat,300),CONF:S.ci.conf||"",WON:clip(S.ci.wonder,300),GRIF:S.ci.gr||"",
@@ -1162,7 +1242,221 @@ function vCheckin(){
 }
 
 stage.addEventListener("toggle",e=>{if(e.target.tagName!=="DETAILS")return;if(e.target.classList.contains("placebrief")){const c=e.target.dataset.brief;S.briefsOpen=S.briefsOpen||{};S.briefsOpen[c]=e.target.open;if(e.target.open)log("brief_opened",{ctx:c})}else if(e.target.classList.contains("more")){if(e.target.open)log("more_opened",{what:e.target.querySelector("summary").textContent})}else if(e.target.open)log("model_answer_opened")},true);
-const VIEWS=[vHook,vCommit,vReveal,vName,vCompare,vPolicy,vTransfer,vReport,vCheckin];
+/* ---------- Central-problem lessons (P.kind === "cpe") ----------
+   Four pieces the externality lessons don't need: Griffles's week (step 1), a PPC (step 4),
+   a board for sharing out scarce rooms (step 5) and a keep-or-cut page (step 6).
+   All numbers come from the package; the engine only draws and counts. */
+
+// Step 1: Griffles's wants for the week, against the hours in a week.
+function weekBlock(W){
+  const total=W.total||168,sum=W.items.reduce((a,i)=>a+i.hours,0);
+  // With groups (e.g. timetabled / basics / choices), each group gets one colour; otherwise colours cycle.
+  const GR=W.groups||null,gi=i=>GR?Math.max(0,GR.findIndex(g=>g.id===i.group)):null;
+  const cls=(i,k)=>GR?'g'+gi(i):'s'+(k%4);
+  let cells=[];W.items.forEach((i,k)=>{for(let h=0;h<i.hours;h++)cells.push('<i class="'+cls(i,k)+'" title="'+esc(i.label)+'"></i>')});
+  const inBox=cells.slice(0,total),spill=cells.slice(total);
+  const box='<div class="wkbox" role="img" aria-label="'+esc("A box of "+total+" squares, one per hour of the week, filled with Griffles's wants. "+(sum>total?(sum-total)+" hours don't fit.":""))+'">'+
+     '<div class="wkgrid">'+inBox.join("")+'</div>'+
+     (spill.length?'<div class="wkspill"><span class="lab">'+esc(W.spillLabel||"Doesn't fit")+': '+spill.length+' h</span><div class="wkgrid over">'+spill.map(c=>c.replace('<i class="','<i class="x ')).join("")+'</div></div>':'')+
+     '<p class="wkkey">'+esc(W.boxNote||("Each square is one hour. The box holds "+total+"."))+'</p></div>';
+  const row=(i,k)=>'<li><span class="dot '+cls(i,k)+'"></span><span>'+esc(i.label)+'</span><span class="h">'+i.hours+' h</span></li>';
+  const list=GR?GR.map((g,n)=>{const its=W.items.filter(i=>gi(i)===n);return '<li class="grp"><span class="dot g'+n+'"></span><span><b>'+esc(g.label)+'</b>'+(g.note?' <small>'+esc(g.note)+'</small>':'')+'</span><span class="h"><b>'+its.reduce((a,i)=>a+i.hours,0)+' h</b></span></li>'+its.map(i=>'<li class="sub"><span></span><span>'+esc(i.label)+'</span><span class="h">'+i.hours+' h</span></li>').join("")}).join("")
+     :W.items.map(row).join("");
+  return '<div class="week"><h2>'+esc(W.heading)+'</h2>'+(W.intro?'<p>'+rich(W.intro)+'</p>':'')+
+   (sum>total?'<p class="wkover"><b>'+sum+' h</b> wanted · <b>'+total+' h</b> in a week · <b class="o">'+(sum-total)+' h over</b></p>':'')+box+
+   '<ul class="wklist'+(GR?' grouped':'')+'">'+list+
+    '<li class="sum"><span></span><span>'+esc(W.sumLabel||"What he wants")+'</span><span class="h">'+sum+' h</span></li>'+
+    '<li class="sum"><span></span><span>'+esc(W.totalLabel||"Hours in a week")+'</span><span class="h">'+total+' h</span></li></ul>'+
+   (W.note?'<p class="hint">'+rich(W.note)+'</p>':'')+'</div>';
+}
+
+// Step 4: a production possibility curve for one person's spare hours.
+// x = output of one activity (e.g. topics revised), y = hours left for the other (e.g. sleep).
+// Output from h hours is maxX·sqrt(h/H), so each extra unit takes more hours: the curve bows outwards.
+function ppcY(x){const C=P.ppc;return C.hours*(1-Math.pow(x/C.maxX,2))}
+function ppcBlock(){
+  const C=P.ppc;
+  return '<div class="ppcbox"><h3>'+esc(C.heading)+'</h3>'+(C.intro?'<p>'+rich(C.intro)+'</p>':'')+
+   '<div class="fig" id="ppcFig"></div>'+
+   '<div class="q try"><p class="qtext">'+esc(C.tryLabel||"Drag the slider to move along the curve.")+'</p>'+
+    '<input type="range" class="slider" id="ppcX" min="0" max="'+C.maxX+'" step="1" value="'+(S.ppcX!=null?S.ppcX:C.start)+'" aria-label="'+esc(C.xLabel)+'">'+
+    '<p class="ppcread" id="ppcRead" aria-live="polite"></p></div>'+
+   '<span class="model-badge">Model numbers, not real data</span>'+
+   (C.points?'<ul class="ppcpts">'+C.points.map(p=>'<li><b>'+esc(p.id)+'</b> '+rich(p.text)+'</li>').join("")+'</ul>':'')+
+   (C.caption?'<p class="hint">'+rich(C.caption)+'</p>':'')+'</div>';
+}
+function drawPpc(x){
+  const C=P.ppc,W=400,H=300,l=40,r=14,t=34,b=44,X=v=>l+(W-l-r)*v/(C.maxX*1.25),Y=v=>H-b-(H-t-b)*v/(C.hours*1.2);
+  let d="";for(let i=0;i<=60;i++){const v=C.maxX*i/60;d+=(i?"L":"M")+X(v).toFixed(1)+" "+Y(ppcY(v)).toFixed(1)}
+  const px=X(x),py=Y(ppcY(x));
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(C.heading)+'">'+
+   '<line x1="'+l+'" y1="'+(H-b)+'" x2="'+(W-r)+'" y2="'+(H-b)+'" class="ax"/><line x1="'+l+'" y1="'+t+'" x2="'+l+'" y2="'+(H-b)+'" class="ax"/>'+
+   '<text x="'+(W-r)+'" y="'+(H-8)+'" text-anchor="end" class="lbl">'+esc(C.xLabel)+' →</text>'+
+   '<text x="'+(l-30)+'" y="'+(t-16)+'" class="lbl">↑ '+esc(C.yLabel)+'</text>';
+  for(let v=0;v<=C.maxX;v+=Math.max(1,Math.round(C.maxX/5)))s+='<text x="'+X(v)+'" y="'+(H-b+16)+'" text-anchor="middle" class="tick">'+v+'</text>';
+  for(let v=0;v<=C.hours;v+=Math.max(1,Math.round(C.hours/4)))s+='<text x="'+(l-8)+'" y="'+(Y(v)+4)+'" text-anchor="end" class="tick">'+v+'</text>';
+  s+='<path d="'+d+'" class="ppc"/><text x="'+(X(C.maxX*.55)+8)+'" y="'+(Y(ppcY(C.maxX*.55))-10)+'" class="lbl ppcname">'+esc(C.curveLabel||"PPC")+'</text>';
+  (C.points||[]).forEach(p=>{s+='<circle cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="6" class="pt '+(p.kind||"")+'"/><text x="'+(X(p.x)+10)+'" y="'+(Y(p.y)-8)+'" class="lbl">'+esc(p.id)+'</text>'});
+  s+='<line x1="'+px+'" y1="'+py+'" x2="'+px+'" y2="'+(H-b)+'" class="guide"/><line x1="'+l+'" y1="'+py+'" x2="'+px+'" y2="'+py+'" class="guide"/>'+
+   '<circle cx="'+px+'" cy="'+py+'" r="8" class="me"/></svg>';
+  document.getElementById("ppcFig").innerHTML=s;
+  const y=ppcY(x),nx=Math.min(C.maxX,x+1),cost=ppcY(x)-ppcY(nx),f=v=>(Math.round(v*10)/10).toString();
+  document.getElementById("ppcRead").innerHTML=fill(C.readout,{x:x,y:f(y),next:x<C.maxX?fill(C.nextCost,{cost:f(cost)}):esc(C.atMax||"")});
+}
+function bindPpc(){
+  const r=document.getElementById("ppcX");if(!r)return;
+  fillSlider(r);const show=()=>{S.ppcX=+r.value;drawPpc(S.ppcX)};
+  r.oninput=()=>{show();S.ppcMoved=(S.ppcMoved||0)+1};r.onchange=()=>log("ppc_move",{x:+r.value});show();
+}
+
+// Step 5: share out scarce rooms. The student picks a rule; the board shows who gets what and what each group gives up.
+function vHalls(){
+  const Hl=P.halls,rule=Hl.rules.find(r=>r.id===S.ext);
+  const room=id=>id?Hl.rooms.find(r=>r.id===id):null;
+  stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(4)+'</span>'+
+   '<h2>'+esc(Hl.heading)+'</h2><p>'+rich(Hl.intro)+'</p>'+
+   '<div class="rooms">'+Hl.rooms.map(r=>'<div class="room"><b>'+esc(r.name)+'</b><span>'+esc(r.note)+'</span></div>').join("")+'</div>'+
+   '<h3>'+esc(Hl.groupsHeading)+'</h3><ul class="groups">'+Hl.groups.map(g=>'<li><b>'+esc(g.name)+'</b> '+esc(g.needs)+'</li>').join("")+'</ul>'+
+   G("curious",Hl.griffles,"asking")+
+   '<div class="q"><span class="qtext">'+esc(Hl.ruleQuestion)+'</span><div class="rules">'+
+    Hl.rules.map(r=>'<button type="button" class="chip" data-rule="'+r.id+'" aria-pressed="'+(S.ext===r.id)+'"><b>'+esc(r.label)+'</b><span>'+esc(r.how)+'</span></button>').join("")+'</div></div>'+
+   '<div id="board" aria-live="polite">'+(rule?
+     '<h3>'+esc(fill(Hl.boardHeading,{rule:rule.label}))+'</h3><table class="board"><thead><tr><th>Group</th><th>Gets</th><th>Gives up</th></tr></thead><tbody>'+
+      Hl.groups.map(g=>{const rm=room(rule.result[g.id]);return '<tr class="'+(rm?'':'lost')+'"><th>'+esc(g.name)+'</th><td>'+(rm?esc(rm.name):'No room')+'</td><td>'+esc(g.givesUp[rule.result[g.id]||"none"])+'</td></tr>'}).join("")+
+     '</tbody></table>'+(rule.note?'<p class="hint">'+rich(rule.note)+'</p>':''):'<p class="hint">Pick a rule to see who gets which room.</p>')+'</div>'+
+   (rule&&Hl.friend?friendLine(Hl.friend):'')+
+   (S.rulesTried.length>=Math.min(2,Hl.rules.length)&&rule?
+     '<div class="q"><span class="qtext">'+esc(Hl.questionsHeading)+'</span><ol class="three">'+Hl.threeQuestions.map(t=>'<li>'+rich(t)+'</li>').join("")+'</ol>'+
+     '<p class="hint">'+rich(Hl.notes)+'</p></div>'+
+     '<button class="btn" id="next" type="button">'+esc(Hl.button)+'</button>'
+     :(rule?'<p class="hint">'+esc(Hl.tryAnother||"Now try a different rule and compare.")+'</p>':''))+
+  '</section>';
+  stage.querySelectorAll("[data-rule]").forEach(b=>b.onclick=()=>{
+    S.ext=b.dataset.rule;S.extLocked=true;if(!S.rulesTried.includes(S.ext))S.rulesTried=S.rulesTried.concat(S.ext);
+    log("rule_pick",{rule:S.ext,tried:S.rulesTried.length});vHalls();pageSources();
+    const bd=document.getElementById("board");if(bd)bd.scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
+  const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(5);
+}
+function friendLine(F){
+  return '<div class="g friend"><img src="'+(F.img||"")+'" alt="'+esc(F.name)+'"><div class="bubble"><b>'+esc(F.name)+'</b> '+rich(F.text)+'</div></div>';
+}
+
+// Step 6: keep or cut. Room for only so many lines. Each line's value depends on what the reader is looking for,
+// so students read the programme's focus and say what should decide first. After checking, they can see how the
+// best page changes for a programme with a different focus (keepCut.alt).
+function vKeepCut(){
+  const K=P.keepCut,room=K.room,kept=new Set(S.keep),A=K.alt,alt=!!(A&&S.kcAlt);
+  const mbOf=l=>alt?l.mbAlt:l.mb, whyOf=l=>alt?l.whyAlt:l.why;
+  const bestOf=f=>K.lines.slice().sort((a,b)=>f(b)-f(a)).slice(0,room).map(l=>l.id);
+  const best=bestOf(mbOf);
+  const val=ids=>ids.reduce((a,id)=>a+mbOf(K.lines.find(l=>l.id===id)||{mb:0,mbAlt:0}),0);
+  const stars=n=>'<span class="stars" aria-label="'+n+' out of 5">'+"●".repeat(n)+'<i>'+"○".repeat(5-n)+'</i></span>';
+  const prog=pr=>'<div class="prog"><b>'+esc(pr.name)+'</b><span>'+esc(pr.lookForLabel||"Looks for")+':</span><ul>'+pr.lookFor.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>';
+  const considered=S.consider.length>0, ready=considered&&kept.size===room;
+  stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(5)+'</span>'+
+   '<h2>'+esc(K.heading)+'</h2><p>'+rich(K.intro)+'</p>'+prog(K.programme)+
+   G("guessing",K.griffles,"","guess")+
+   '<div class="q"><span class="qtext">'+esc(K.considerQuestion)+'</span><div class="chips" id="kcCons">'+
+    K.considerations.map(c=>'<button type="button" class="chip" data-c="'+c.id+'" aria-pressed="'+S.consider.includes(c.id)+'"'+(S.keepChecked?' disabled':'')+'>'+esc(c.text)+'</button>').join("")+'</div>'+
+    '<p class="hint">'+esc(K.considerHint||"Pick up to three.")+'</p></div>'+
+   '<div class="q"><span class="qtext">'+esc(fill(K.question,{room:room}))+'</span>'+
+    (S.keepChecked&&A?'<div class="row" role="group" aria-label="Which programme"><button type="button" class="chip" data-alt="0" aria-pressed="'+!alt+'">'+esc(K.programme.short)+'</button><button type="button" class="chip" data-alt="1" aria-pressed="'+alt+'">'+esc(A.short)+'</button></div>'+(alt?prog(A):''):'')+
+    '<p class="hint" id="kcCount">'+(considered?kept.size+' of '+room+' lines kept':'Answer the question above first.')+'</p>'+
+    '<ul class="kc">'+K.lines.map(l=>'<li class="'+(S.keepChecked?(best.includes(l.id)?'top':'low'):'')+'"><label><input type="checkbox" value="'+l.id+'"'+(kept.has(l.id)?' checked':'')+(S.keepChecked||!considered?' disabled':'')+'><span>'+esc(l.text)+'</span></label>'+
+      (S.keepChecked?'<span class="kcv">'+stars(mbOf(l))+'<small>'+esc(whyOf(l))+'</small></span>':'')+'</li>').join("")+'</ul>'+
+    (S.keepChecked?'':'<button class="btn" id="kcGo" type="button"'+(ready?'':' disabled')+'>'+esc(K.checkButton||"Check my page")+'</button>')+'</div>'+
+   (S.keepChecked?
+     '<div class="kcres"><p class="big">'+val(S.keep)+' <small>out of a possible '+val(best)+(alt?' for '+esc(A.short):'')+'</small></p><p>'+rich(alt?A.scoreLine:K.scoreLine)+'</p></div>'+
+     G(alt?"curious":(val(S.keep)===val(best)?"pleased":"curious"),alt?A.griffles:K.grifflesAfter,"reacting")+
+     (A&&!S.kcAltSeen?'<p class="hint">'+esc(K.altPrompt)+'</p>':'')+
+     '<h3>'+esc(K.ideaHeading)+'</h3><p>'+rich(K.idea)+'</p>'+
+     '<div class="q"><label class="qtext" for="whyTxt">'+esc(K.whyQuestion)+'</label><textarea id="whyTxt" maxlength="800" style="min-height:80px">'+esc(S.policyWhy)+'</textarea></div>'+
+     '<button class="btn" id="whyGo" type="button">'+esc(K.whyButton||"Save my reason")+'</button><div id="kcNext"'+(S.policyWhy?'':' hidden')+'><button class="btn" id="next" type="button">'+esc(K.button)+'</button></div>'
+     :'')+
+  '</section>';
+  stage.querySelectorAll("#kcCons .chip").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.c;
+    if(S.consider.includes(id))S.consider=S.consider.filter(x=>x!==id);
+    else if(S.consider.length<3)S.consider=S.consider.concat(id);
+    log("keep_consider",{picked:S.consider});vKeepCut();pageSources();
+  });
+  stage.querySelectorAll(".kc input").forEach(c=>c.onchange=()=>{
+    const on=[...stage.querySelectorAll(".kc input:checked")].map(x=>x.value);
+    if(on.length>room){c.checked=false;return}
+    S.keep=on;document.getElementById("kcCount").textContent=on.length+" of "+room+" lines kept";
+    document.getElementById("kcGo").disabled=on.length!==room;
+  });
+  stage.querySelectorAll("[data-alt]").forEach(b=>b.onclick=()=>{S.kcAlt=b.dataset.alt==="1";if(S.kcAlt)S.kcAltSeen=true;log("keep_alt",{alt:S.kcAlt});vKeepCut();pageSources()});
+  const go6=document.getElementById("kcGo");
+  if(go6)go6.onclick=()=>{S.keepChecked=true;log("keep_check",{kept:S.keep,considered:S.consider,value:val(S.keep),best:val(best)});vKeepCut();pageSources()};
+  const wg=document.getElementById("whyGo");
+  if(wg)wg.onclick=()=>{S.policyWhy=document.getElementById("whyTxt").value.trim();log("policy_why",{text:S.policyWhy});document.getElementById("kcNext").hidden=!S.policyWhy};
+  const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(6);
+}
+
+// Step 5 (alternative to the rooms board): the two-shop street game (Hotelling, 1929).
+// Shoppers stand evenly along a street and walk to the nearer shop. The student moves their shop one step;
+// the rival answers with the one-step move that wins it the most shoppers. Both end up in the middle.
+function streetCount(a,b){const T=P.street,n=T.shoppers,L=T.length;let A=0,B=0,far=0;
+  for(let i=0;i<n;i++){const x=L*i/(n-1),da=Math.abs(x-a),db=Math.abs(x-b);if(da<db)A++;else if(db<da)B++;else{A+=.5;B+=.5}far=Math.max(far,Math.min(da,db))}
+  return {A,B,far}}
+function rivalMove(a,b){const T=P.street,s=T.step;let best=b,bv=streetCount(a,b).B;
+  for(const nb of [b-s,b+s]){if(nb<0||nb>T.length)continue;const v=streetCount(a,nb).B;if(v>bv+1e-9){bv=v;best=nb}}return best}
+function vStreet(){
+  const T=P.street;
+  if(S.stA==null){S.stA=T.startA;S.stB=T.startB;S.stMoves=0}
+  const c=streetCount(S.stA,S.stB),done=S.stA===S.stB||Math.abs(S.stA-S.stB)<=T.step&&rivalMove(S.stA,S.stB)===S.stB&&S.stMoves>0&&S.stSettled;
+  const spread=streetCount(T.startA,T.startB);
+  stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(4)+'</span>'+
+   '<h2>'+esc(T.heading)+'</h2><p>'+rich(T.intro)+'</p>'+
+   (T.goal?'<p class="stgoal">'+rich(T.goal)+'</p>':'')+
+   (T.friend?friendLine(T.friend):'')+
+   '<div class="fig street" id="stFig"></div>'+
+   (T.key?'<ul class="stkey">'+['a','b','t'].filter(k=>T.key[k]).map(k=>'<li><i class="'+k+'"></i>'+esc(T.key[k])+'</li>').join('')+'</ul>':'')+
+   '<div class="stcount"><span class="you"><b>'+fmtH(c.A)+'</b> shoppers to your shop</span><span class="riv"><b>'+fmtH(c.B)+'</b> to the rival</span><span>Longest walk: <b>'+c.far+' m</b></span></div>'+
+   '<div class="row stbtns"><button class="btn ghost" type="button" data-mv="-1"'+(S.stA<=0?' disabled':'')+'>◀ Move my shop</button><button class="btn ghost" type="button" data-mv="1"'+(S.stA>=T.length?' disabled':'')+'>Move my shop ▶</button><button class="btn ghost" type="button" id="stStay">Stay put</button></div>'+
+   '<p class="hint" id="stMsg" aria-live="polite">'+esc(S.stMsg||T.startHint)+'</p>'+
+   (S.stDone?
+     '<div class="kcres"><p>'+rich(fill(T.doneLine,{far:c.far,spreadFar:spread.far}))+'</p></div>'+
+     G("surprised",T.grifflesAfter,"reacting")+
+     '<div class="q"><span class="qtext">'+esc(T.question)+'</span><div class="opts">'+T.options.map(o=>'<label class="opt"><input type="radio" name="stq" value="'+o.id+'"'+(S.ext===o.id?' checked':'')+(S.extLocked?' disabled':'')+'><span>'+esc(o.text)+'</span></label>').join("")+'</div>'+
+      '<div id="stAns">'+(S.extLocked?'<p class="hint">'+rich(T.answer)+'</p>':'')+'</div></div>'+
+     (S.extLocked?'<p>'+rich(T.idea)+'</p><button class="btn" id="next" type="button">'+esc(T.button)+'</button>':'')
+     :'')+
+  '</section>';
+  drawStreet();
+  stage.querySelectorAll("[data-mv]").forEach(bn=>bn.onclick=()=>stepStreet(+bn.dataset.mv));
+  document.getElementById("stStay").onclick=()=>stepStreet(0);
+  stage.querySelectorAll('input[name=stq]').forEach(r=>r.onchange=()=>{S.ext=r.value;S.extLocked=true;log("street_answer",{choice:r.value,correct:r.value===T.correct});vStreet();pageSources()});
+  const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(5);
+}
+function fmtH(v){const w=Math.floor(v),h=v-w>0.25;return h?(w?w+"½":"½"):String(w)} // a tourist exactly halfway counts half to each shop
+function stepStreet(d){
+  const T=P.street,a0=S.stA,b0=S.stB;
+  S.stA=Math.max(0,Math.min(T.length,S.stA+d*T.step));S.stMoves++;
+  const nb=rivalMove(S.stA,S.stB);
+  const before=streetCount(a0,b0).A,mid=streetCount(S.stA,b0).A;
+  S.stMsg=(d?(mid>before?fill(T.gainMsg,{n:fmtH(mid-before)}):mid<before?fill(T.lossMsg,{n:fmtH(before-mid)}):T.sameMsg):T.stayMsg)+' '+(nb!==S.stB?T.rivalMoves:T.rivalStays);
+  S.stB=nb;
+  // Settled: neither shop can gain by a one-step move.
+  const c=streetCount(S.stA,S.stB),youBest=[S.stA-T.step,S.stA+T.step].filter(x=>x>=0&&x<=T.length).every(x=>streetCount(x,S.stB).A<=c.A+1e-9);
+  if(rivalMove(S.stA,S.stB)===S.stB&&youBest&&!S.stDone){S.stDone=true;S.stMsg=T.settledMsg;log("street_settled",{a:S.stA,b:S.stB,moves:S.stMoves})}
+  log("street_move",{dir:d,a:S.stA,b:S.stB});vStreet();pageSources();
+}
+function drawStreet(){
+  const T=P.street,W=400,H=150,l=20,r=20,X=v=>l+(W-l-r)*v/T.length,y=88;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc("Street "+T.length+" metres long. Your shop at "+S.stA+" m, the rival at "+S.stB+" m.")+'">'+
+   '<rect x="'+l+'" y="'+(y-14)+'" width="'+(W-l-r)+'" height="28" rx="6" class="road"/>';
+  for(let i=0;i<T.shoppers;i++){const x=T.length*i/(T.shoppers-1),da=Math.abs(x-S.stA),db=Math.abs(x-S.stB);
+    s+='<circle cx="'+X(x)+'" cy="'+y+'" r="5" class="sh '+(da<db?'a':db<da?'b':'t')+'"/>'}
+  const shop=(v,cls,lab,up)=>'<g class="'+cls+'"><rect x="'+(X(v)-21)+'" y="'+(up?y-58:y+22)+'" width="42" height="30" rx="5"/><text x="'+X(v)+'" y="'+(up?y-38:y+42)+'" text-anchor="middle">'+lab+'</text><line x1="'+X(v)+'" y1="'+(up?y-28:y+22)+'" x2="'+X(v)+'" y2="'+(up?y-14:y+14)+'"/></g>';
+  s+=shop(S.stA,"shopA","You",true)+shop(S.stB,"shopB","Rival",false);
+  s+='<text x="'+l+'" y="'+(H-4)+'" class="tick">0 m</text><text x="'+(W-r)+'" y="'+(H-4)+'" text-anchor="end" class="tick">'+T.length+' m</text></svg>';
+  document.getElementById("stFig").innerHTML=s;
+}
+
+const VIEWS=CPE?[vHook,vCommit,vReveal,vName,P.street?vStreet:vHalls,vKeepCut,vTransfer,vReport,vCheckin]:[vHook,vCommit,vReveal,vName,vCompare,vPolicy,vTransfer,vReport,vCheckin];
 
 
 /* ---------- lite cover (optional: header.cover) ---------- */
@@ -1210,8 +1504,9 @@ document.getElementById("tExit").onclick=()=>{log("tester_off");setTester(false)
 document.getElementById("tFill").onclick=()=>{
   const X=P.sample;
   Object.assign(S,{perc0:3,percLocked:true,num:X.num,choice:X.choice,why:X.why,committed:true,doubts:X.doubts||[],
-    name:X.name,named:true,ext:X.ext,extLocked:true,ctx:CTX[X.ext]?X.ext:P.compare.defaultCtx,triedBan:{[CTX[X.ext]?X.ext:P.compare.defaultCtx]:true},policyWhy:X.policyWhy,
+    name:X.name,named:true,ext:X.ext,extLocked:true,ctx:CTX[X.ext]?X.ext:(P.compare?P.compare.defaultCtx:P.contexts[0].id),triedBan:{},policyWhy:X.policyWhy,
     advice:X.advice,adviceFiled:true,ticks:X.ticks||[],rep:null});
+  if(CPE)Object.assign(S,{stDone:!!P.street,stA:P.street?P.street.length/2:null,stB:P.street?P.street.length/2:null,ext:X.rule,extLocked:true,rulesTried:[X.rule],keep:X.keep.slice(),consider:(X.consider||[]).slice(),keepChecked:true});
   log("tester_fill");
   const b=document.getElementById("tFill");b.textContent="Sample answers filled";setTimeout(()=>b.textContent="Fill sample answers",2000);
   VIEWS[S.step]();pageSources();
