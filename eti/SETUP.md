@@ -1,4 +1,11 @@
-# Economic Thinking Inventory v3.0 — setup guide
+# Economic Thinking Inventory v3.3 — setup guide
+
+> **New in v3.3 (16 Nov 2026):**
+> - The two tracks are now called the **Focus track** and the **Enrichment track**.
+> - The end of section G has a short track explainer and a new question, **G5**. JC1 asks which track appeals now; JC2 asks which track they were on and whether they'd choose it again.
+> - The D2 news headline is now **water charges in both years**.
+>
+> To update a Sheet already running v3.2, see *Updating from v3.2* at the end.
 
 **What's new in v3:** every student gets instant feedback when they submit, built from fixed rules and ready-written text. **No AI and no API key needed.** All the wording sits in a Sheet tab that teachers can edit. The AI analysis from v2 is still there as an optional extra for later.
 
@@ -22,8 +29,8 @@
 
 |  | Exam focus low | Exam focus high |
 |---|---|---|
-| **Interest high** | 🧭 The Explorer (suggested track: interest) | ♟️ The Strategist (balanced) |
-| **Interest low** | 🌱 The Wanderer (balanced) | 🎯 The Navigator (exam) |
+| **Interest high** | 🧭 The Explorer (suggested track: Enrichment) | ♟️ The Strategist (either) |
+| **Interest low** | 🌱 The Wanderer (either) | 🎯 The Navigator (Focus) |
 
 **What students see after submitting:**
 - **Persona card:** name, tagline, description, "What you bring" and "Something to try".
@@ -42,9 +49,14 @@
 
 Students **don't** see the suggested track. That's for teachers only.
 
+**The track question (G5, end of section G).**
+- **JC1:** students first see a short explainer of both tracks. Both cover the full syllabus and prepare students for the A-Level. Students choose with teacher advice, can switch at the end of each topic, and resources from both tracks are open to everyone. Then G5 asks: *Which track appeals to you right now?* (Focus / Enrichment / Not sure yet), plus a reason. It doesn't sign them up for anything.
+- **JC2:** *Which track were you on for most of H1?* (Focus / Enrichment / I switched), *Would you choose it again?* (Yes / No / Not sure), plus a reason.
+- Teachers see the student's answer next to the persona's suggested track in Profiles and Student_View, and as counts in Class_Summary. The teacher's own decision still goes in `teacher_track_decision`.
+
 ## Editing the wording (no code)
 1. Open the **Feedback_Text** tab. It has one row per piece of text: `key`, `text`, and `used_for`, which explains where each row appears.
-2. Edit the `text` column, e.g. rename "The Explorer", rewrite a belief prompt, or change a persona's suggested track (interest / balanced / exam).
+2. Edit the `text` column, e.g. rename "The Explorer", rewrite a belief prompt, or change a persona's suggested track (focus / either / enrichment). The `track.*` rows hold the track names and the explainer wording on the questionnaire page; students see changes the next time they open the page, with no redeploy needed.
    - Keep `{placeholders}` such as `{from}` and `{a}` in the JC2 change lines.
 3. Run **ETI Admin → Apply Feedback_Text edits now**. New submissions use the new wording straight away, and the Profiles tab is rebuilt.
    - Without this step, edits still take effect within about 2 minutes.
@@ -82,8 +94,8 @@ Demo mode (double-clicking `index.html`) always shows the built-in default wordi
 ## 4. Teacher views
 | Tab | What it shows |
 |---|---|
-| **Profiles** | One row per student per stage, filled in automatically at submission: persona, scores, habits, beliefs to explore, JC2 change lines, suggested track. Fill in **teacher_track_decision** and **teacher_notes**; they're kept when profiles are rebuilt. |
-| **Class_Summary** | Run **3. Build class & cohort summaries…** for one row per class plus COHORT: average scores, persona counts, track counts (your decisions override the suggestions), most-agreed beliefs, least-asked questions. |
+| **Profiles** | One row per student per stage, filled in automatically at submission: persona, scores, habits, beliefs to explore, JC2 change lines, suggested track, and the student's own track answer and reason. Fill in **teacher_track_decision** and **teacher_notes**; they're kept when profiles are rebuilt. |
+| **Class_Summary** | Run **3. Build class & cohort summaries…** for one row per class plus COHORT: average scores, persona counts, track counts (Focus / either / Enrichment; your decisions override the suggestions), students' own track preferences, most-agreed beliefs, least-asked questions. |
 | **Student_View** | Run **4. Build / refresh Student_View**, then pick a student ID in B1 to see persona, feedback and every answer, JC1 next to JC2. |
 | Responses | The raw answers. |
 
@@ -108,5 +120,17 @@ Log in as `TESTER` a few times, choosing answers that match each persona, and ch
 3. Delete the Test_Responses rows when you're done (optional).
 
 ## Design decisions to remember
-- **Same news headline in JC1 and JC2 (D2).** Both years ask about "Singapore considers higher charges for cars entering busy city areas", so changes in students' questions show how their thinking has changed, not a change of topic. (Changed on 4 Nov 2026, before any students had taken the inventory.)
+- **Same news headline in JC1 and JC2 (D2): water charges.** Both years ask about "Singapore considers higher charges for water use during dry periods", so changes in students' questions show how their thinking has changed, not a change of topic. On 4 Nov the shared headline was car charges. On 16 Nov it was switched to water, because the department's *Yes, but…* and *Tug of war* routine cards use ERP as their worked example, so by JC2 students would have practised the car-charges case. Both changes were made before any students had taken the inventory.
+- **Track names: Focus and Enrichment (16 Nov).** "Focus" replaced "Exam" as a neutral name that is still clearly not Enrichment. "Express" was avoided because it echoes Singapore's old Express stream. The explainer promises only what the department has committed to: the full syllabus on both tracks, switching at topic breaks, and resources open to everyone. What "opt-in stretch" means on the Focus track is still a department decision.
+- **No rubric scoring of the scenarios for now (16 Nov).** Scoring B2 and B5 with the shared 0–3 thesis/antithesis/evaluation rubric was considered and deferred. See `eti/two-track-alignment.md` in the project.
 - **Plastic-bag scenario kept on purpose (B1).** The Griffles Kenya–Singapore field report teaches the same topic. Students who used it may answer B1 better in JC2 because they were taught it, not only because their thinking grew. Read B1 changes with that in mind and lean more on B2–B5 and C1 for evidence of growth.
+
+## Updating from v3.2
+1. Copy the new `Code.gs` from the repo (`eti/Code.gs`, **Copy raw file**) and paste it over the old code in **Extensions → Apps Script**. Save.
+2. **Deploy → Manage deployments → ✏️ → Version: New version → Deploy.** The link stays the same.
+3. In the Sheet, run **ETI Admin → Apply Feedback_Text edits now**. This adds the new `track.*` wording rows and rebuilds Profiles.
+
+That's all. Existing tabs upgrade themselves:
+- Responses, Profiles and Test_Responses gain their new columns (`G5`, `G5_again`, `G5_why`; `student_track`, `student_would_choose_again`, `student_track_reason`) at the end, and existing rows stay where they are.
+- Older `interest / balanced / exam` wording in Feedback_Text or in teachers' decisions is read as Enrichment / either / Focus automatically.
+- Class_Summary gets its new columns the next time you build it.

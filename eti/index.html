@@ -230,10 +230,19 @@ button:disabled{cursor:not-allowed}
 .tt-row{margin:.4rem 0}.tt-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:.4rem}
 .btn.tt{min-height:42px;padding:.45rem .8rem;font-size:.9rem;min-width:0}
 @media(max-width:640px){.tt-btns .btn.tt{flex:1 1 45%}}
+.track-box{background:var(--black);color:#fff;border-radius:18px;padding:1.3rem 1.4rem;margin:2rem 0 1rem}
+.track-box h3{margin:0 0 .4rem;font-size:1.25rem}
+.track-box>p{color:#d6d9dd;margin:0 0 1rem}
+.track-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.track-card{background:#fff;color:var(--ink);border-radius:14px;padding:1rem 1.1rem;border-top:6px solid var(--green)}
+.track-card.enr{border-top-color:#e0b44f}
+.track-card b{font-size:1.1rem}.track-card p{margin:.4rem 0 0;font-size:.95rem}
+.track-switch{margin:1rem 0 0!important;color:#8fd3b2!important;font-weight:700}
+@media(max-width:640px){.track-cards{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style></head><body><header class="topbar"><div class="topbar-in"><div class="brand"><span class="brand-mark">ETI</span>Economic Thinking Inventory</div><span class="tag">H1 Economics · Raffles Institution</span></div></header><div class="shell"><main class="panel" id="app"></main><div class="foot">This does not affect your grades. Answer what you really think.</div></div>
 <script>
-const SCHEMA={"associations":["Money","Business and companies","Human behaviour","Choices","Scarcity","Trade-offs","Incentives","Government policy","Fairness","Sustainability","Data and evidence","Decision-making","Understanding how the real world works","Noticing hidden trade-offs in daily life"],"habits":["What are the trade-offs?","Who benefits?","Who bears the cost?","What incentives are created?","Could there be unintended consequences?","What evidence supports this claim?","What assumptions am I making?","Is this efficient?","Is this fair?","What happens in the long run?"],"beliefs":["Most economic problems have one best solution.","Higher prices are usually bad for society.","Large company profits usually mean consumers are being exploited.","Governments generally solve problems better than markets.","Markets generally solve problems better than governments.","Buying imported goods is generally bad for Singapore.","New technology mainly destroys jobs.","If GDP increases, people’s lives usually improve.","The fairest policy is usually the one that gives everyone the same.","Economics is mainly about money.","If everyone acts in their own interest, society ends up best off.","A policy that worked in one country will usually work in another.","If something is free to use, it costs society nothing.","Policies with good intentions usually produce good results."],"goals":["Understanding how the economy works","Doing well in examinations","Explaining current affairs","Developing critical thinking","Learning useful life skills","Preparing for university or future work"],"motives":["I want to understand how the world works.","I enjoy current affairs.","I want to do well in the A-Level examination.","H1 Economics fits my subject combination.","Economics may be useful for my future career.","I want to become a more informed citizen.","I enjoy analysing real-world issues.","I mainly want to pass the subject.","Other"],"curiosity":["I read or watched something about an economic or social issue outside lessons.","I discussed an economic or social issue with friends or family outside lessons.","I sought more information because I was curious about an economic or social issue."],"scenarios":[["B1","Plastic bags","Imagine Singapore increases a disposable plastic bag charge from $0.20 to $1 per bag. What do you think would happen? Explain your reasoning."],["B2","AI at work","A company replaces half its customer service workers with AI. Who might gain, who might lose, and could society still become better off overall? Explain."],["B3","Public budget","Singapore has an additional $2 billion available. Choose ONE use: healthcare, public transport, defence, climate adaptation, education, or tax cuts. Which would you choose, why, and what are we giving up by making this choice?"],["B4","Housing","Housing prices are rising rapidly. Rank these options from most effective (1) to least effective (5): build more housing; introduce price controls; tax investors; subsidise buyers; leave the market alone. Explain your top choice."],["B5","Fast fashion","Someone says: “The government should ban fast fashion because it pollutes.” What is your first reaction? Explain your reasoning."]],"headline":{"JC1":"Singapore considers higher charges for cars entering busy city areas.","JC2":"Singapore considers higher charges for cars entering busy city areas."},"reflection":["Which answer or belief changed the most since JC1? Why?","What is one assumption or idea you had to unlearn or relearn?","What experience, lesson, or real-world issue most influenced how you now think?","Which economic question or issue are you still curious or uncertain about?"]};
+const SCHEMA={"associations":["Money","Business and companies","Human behaviour","Choices","Scarcity","Trade-offs","Incentives","Government policy","Fairness","Sustainability","Data and evidence","Decision-making","Understanding how the real world works","Noticing hidden trade-offs in daily life"],"habits":["What are the trade-offs?","Who benefits?","Who bears the cost?","What incentives are created?","Could there be unintended consequences?","What evidence supports this claim?","What assumptions am I making?","Is this efficient?","Is this fair?","What happens in the long run?"],"beliefs":["Most economic problems have one best solution.","Higher prices are usually bad for society.","Large company profits usually mean consumers are being exploited.","Governments generally solve problems better than markets.","Markets generally solve problems better than governments.","Buying imported goods is generally bad for Singapore.","New technology mainly destroys jobs.","If GDP increases, people’s lives usually improve.","The fairest policy is usually the one that gives everyone the same.","Economics is mainly about money.","If everyone acts in their own interest, society ends up best off.","A policy that worked in one country will usually work in another.","If something is free to use, it costs society nothing.","Policies with good intentions usually produce good results."],"goals":["Understanding how the economy works","Doing well in examinations","Explaining current affairs","Developing critical thinking","Learning useful life skills","Preparing for university or future work"],"motives":["I want to understand how the world works.","I enjoy current affairs.","I want to do well in the A-Level examination.","H1 Economics fits my subject combination.","Economics may be useful for my future career.","I want to become a more informed citizen.","I enjoy analysing real-world issues.","I mainly want to pass the subject.","Other"],"curiosity":["I read or watched something about an economic or social issue outside lessons.","I discussed an economic or social issue with friends or family outside lessons.","I sought more information because I was curious about an economic or social issue."],"scenarios":[["B1","Plastic bags","Imagine Singapore increases a disposable plastic bag charge from $0.20 to $1 per bag. What do you think would happen? Explain your reasoning."],["B2","AI at work","A company replaces half its customer service workers with AI. Who might gain, who might lose, and could society still become better off overall? Explain."],["B3","Public budget","Singapore has an additional $2 billion available. Choose ONE use: healthcare, public transport, defence, climate adaptation, education, or tax cuts. Which would you choose, why, and what are we giving up by making this choice?"],["B4","Housing","Housing prices are rising rapidly. Rank these options from most effective (1) to least effective (5): build more housing; introduce price controls; tax investors; subsidise buyers; leave the market alone. Explain your top choice."],["B5","Fast fashion","Someone says: “The government should ban fast fashion because it pollutes.” What is your first reaction? Explain your reasoning."]],"headline":{"JC1":"Singapore considers higher charges for water use during dry periods.","JC2":"Singapore considers higher charges for water use during dry periods."},"reflection":["Which answer or belief changed the most since JC1? Why?","What is one assumption or idea you had to unlearn or relearn?","What experience, lesson, or real-world issue most influenced how you now think?","Which economic question or issue are you still curious or uncertain about?"]};
 /* ===== ETI FEEDBACK CORE — identical copy in Code.gs and index.html. Edit wording in the Feedback_Text sheet, not here. ===== */
 const FB_DEFAULTS = {
   'threshold.interest': '55',
@@ -245,7 +254,7 @@ const FB_DEFAULTS = {
   'persona.explorer.body': 'You chose Economics because you want to understand how the world works, and you would keep learning even without an exam at the end. Explorers notice economic questions everywhere — in the news, at the hawker centre, in conversations at home.',
   'persona.explorer.strengths': 'Curiosity, a willingness to follow a question wherever it leads, and a feel for real-world issues.',
   'persona.explorer.try': 'Turn curiosity into structure. When something catches your eye, write two sentences: what is happening, and who gains or loses. That habit becomes strong exam reasoning later.',
-  'persona.explorer.track': 'interest',
+  'persona.explorer.track': 'enrichment',
   'persona.explorer.teacher': 'Likely to thrive with inquiry, case studies and real-world projects. Check that exam technique keeps pace.',
 
   'persona.strategist.icon': '♟️',
@@ -254,7 +263,7 @@ const FB_DEFAULTS = {
   'persona.strategist.body': 'You are interested in how the economy works, and you also care about doing well in the A-Levels. Strategists like to understand ideas properly and then put them to work — in discussions and in exams.',
   'persona.strategist.strengths': 'Balance: you can enjoy the ideas and still keep the end goal in sight.',
   'persona.strategist.try': 'Look for moments where the two meet. When you read about a real issue, ask yourself how you would turn it into a well-argued exam answer.',
-  'persona.strategist.track': 'balanced',
+  'persona.strategist.track': 'either',
   'persona.strategist.teacher': 'Can probably choose either pathway — offer the choice. Stretch with evaluation and judgement.',
 
   'persona.navigator.icon': '🎯',
@@ -263,7 +272,7 @@ const FB_DEFAULTS = {
   'persona.navigator.body': 'Doing well in the A-Levels matters a lot to you right now, and you like knowing exactly what is expected. Navigators are focused and organised — real strengths for a two-year course.',
   'persona.navigator.strengths': 'Focus, discipline and a clear sense of what you are working towards.',
   'persona.navigator.try': 'Take one detour a month: an article, a video or a conversation about an economic issue. Examiners reward real-world examples — and you may find a topic you genuinely enjoy.',
-  'persona.navigator.track': 'exam',
+  'persona.navigator.track': 'focus',
   'persona.navigator.teacher': 'Likely to value structured, exam-skills-focused lessons. Build in short real-world hooks to grow interest.',
 
   'persona.wanderer.icon': '🌱',
@@ -272,7 +281,7 @@ const FB_DEFAULTS = {
   'persona.wanderer.body': 'Neither the subject nor the exam has grabbed you strongly yet — and that is completely normal at the start. Many students only discover what interests them once they begin exploring. Wanderers have the most room to be surprised.',
   'persona.wanderer.strengths': 'An open mind. You have not decided what Economics is "for" yet, so you can come to it fresh.',
   'persona.wanderer.try': 'Start from something you already care about — food prices, transport, your phone, a part-time job — and ask how Economics explains it.',
-  'persona.wanderer.track': 'balanced',
+  'persona.wanderer.track': 'either',
   'persona.wanderer.teacher': 'Worth an early, low-pressure conversation. Relatable, activity-rich starts may spark interest; check in again after Term 1.',
 
   'habit.0': 'Whenever someone makes a choice, ask: what did they give up to get it?',
@@ -315,6 +324,14 @@ const FB_DEFAULTS = {
   'change.habit': 'You now ask “{question}” more often ({a} → {b} out of 7).',
   'change.none': 'Your ratings were quite similar to JC1. Look at your written answers to see how your reasoning has changed.',
 
+  'track.focus.name': 'Focus track',
+  'track.enrichment.name': 'Enrichment track',
+  'track.intro': 'Both tracks cover the full H1 syllabus and prepare you for the A-Level exam. They differ in how you learn.',
+  'track.focus.desc': 'Efficient lessons on the core content and exam skills. If you want more, the Enrichment projects and resources are open to you too.',
+  'track.enrichment.desc': 'Learn through projects and real-world tasks, with the exam essentials built in.',
+  'track.switch': 'You choose, with advice from your teacher. You can switch tracks at the end of each topic, and the resources from both tracks are open to everyone.',
+  'track.nocommit': 'This doesn’t sign you up for anything. It just helps your teacher advise you.',
+
   'cohort.note': 'Cohort average so far ({n} students): interest {interest}, exam focus {exam}.',
   'note.personas': 'Personas describe how you answered today, not who you are. They often change over two years — that is the point.',
 };
@@ -348,6 +365,14 @@ function fbIndices(a) {
     curiosity: cur === null ? null : Math.round(cur * 10) / 10,
   };
 }
+/** Normalises any track wording (including the older exam/balanced/interest labels) to focus / either / enrichment. */
+function fbTrack(v) {
+  const t = String(v || '').toLowerCase();
+  if (/focus|exam/.test(t)) return 'focus';
+  if (/enrich|interest|activ/.test(t)) return 'enrichment';
+  if (/either|balanc/.test(t)) return 'either';
+  return '';
+}
 function fbPersonaId(ix, T) {
   if (ix.interest === null || ix.exam === null) return '';
   const hiI = ix.interest >= Number(T['threshold.interest'] || 55), hiE = ix.exam >= Number(T['threshold.exam'] || 55);
@@ -356,7 +381,7 @@ function fbPersonaId(ix, T) {
 function fbPersona(id, T) {
   if (!id) return null;
   const g = k => T['persona.' + id + '.' + k] || '';
-  return { id, icon: g('icon'), name: g('name'), tagline: g('tagline'), body: g('body'), strengths: g('strengths'), tryThis: g('try'), track: g('track'), teacher: g('teacher') };
+  return { id, icon: g('icon'), name: g('name'), tagline: g('tagline'), body: g('body'), strengths: g('strengths'), tryThis: g('try'), track: fbTrack(g('track')), teacher: g('teacher') };
 }
 
 /** Builds all templated feedback for one response. prior = the same student's JC1 answers (for JC2). */
@@ -468,7 +493,7 @@ function required(step){
   case 3:return ['D2_0','D2_1','D2_2',...SCHEMA.habits.map((_,i)=>'D1_'+i)];
   case 4:return [...SCHEMA.beliefs.map((_,i)=>'E1_'+i),'E2'];
   case 5:return SCHEMA.curiosity.map((_,i)=>'F_'+i);
-  case 6:{const r=['G1',...SCHEMA.goals.map((_,i)=>'G2_'+i),'G3','G3_why','G4'];if(state.answers.G1_8===true)r.splice(1,0,'G1_other');return r}
+  case 6:{const r=['G1',...SCHEMA.goals.map((_,i)=>'G2_'+i),'G3','G3_why','G4','G5',...(state.mode==='JC2'?['G5_again']:[]),'G5_why'];if(state.answers.G1_8===true)r.splice(1,0,'G1_other');return r}
   case 7:return ['H1','H2','H3','H4'];
  }return [];
 }
@@ -496,9 +521,20 @@ function sectionBody(i){
  case 3:return `<div class="q"><h3>D2. News headline</h3><div class="headline"><small>BREAKING</small>“${escapeHtml(SCHEMA.headline[state.mode])}”</div><p>Without discussing this headline with anyone, write the <b>first three questions</b> that come to mind.</p>${[0,1,2].map(j=>`<div class="field" data-q="D2_${j}"><label for="D2_${j}">Question ${j+1}</label><input id="D2_${j}" data-key="D2_${j}" value="${escapeHtml(val('D2_'+j))}" placeholder="Your question…">${tag}</div>`).join('')}</div><div class="q"><h3>D1. When you meet an unfamiliar issue in the news, how often do you naturally ask these questions?</h3>${ratingList('D1_',SCHEMA.habits,'Never','Always')}</div>`;
  case 4:return `<div class="q"><h3>E1. How strongly do you agree or disagree?</h3><p>Answer based on what you believe now.</p>${ratingList('E1_',SCHEMA.beliefs,'Strongly disagree','Strongly agree')}</div>${field('E2','E2. Choose ONE statement above and briefly explain your rating.',3)}`;
  case 5:return `<p class="lead">Think about the past month. Choose what you actually did.</p>${SCHEMA.curiosity.map((s,i)=>`<div class="q" data-q="F_${i}"><h3>F${i+1}. ${escapeHtml(s)}</h3><div class="choices">${['Never','Once','A few times','Weekly or more'].map((v,j)=>`<label class="choice"><input type="radio" name="F_${i}" data-key="F_${i}" value="${j}" ${String(val('F_'+i))===String(j)?'checked':''}>${v}</label>`).join('')}</div>${tag}</div>`).join('')}`;
- case 6:return `<div class="q" data-q="G1"><h3>G1. Why ${state.mode==='JC1'?'are you taking':'did you take'} H1 Economics? Choose up to THREE.</h3><div class="checklist">${SCHEMA.motives.map((s,i)=>`<label class="choice"><input type="checkbox" data-key="G1_${i}" ${val('G1_'+i)?'checked':''}>${escapeHtml(s)}</label>`).join('')}</div><p class="small" id="g1note" aria-live="polite"></p>${tag}</div>${state.answers.G1_8===true?`<div class="field" data-q="G1_other"><label for="G1_other">You chose “Other” — what is your reason?</label><input id="G1_other" data-key="G1_other" value="${escapeHtml(val('G1_other'))}" placeholder="Your reason…">${tag}</div>`:''}<div class="q"><h3>G2. How important are these goals to you?</h3>${ratingList('G2_',SCHEMA.goals,'Not important','Very important')}</div><div class="q"><h3>G3. If there were no A-Level exam for H1 Economics, how much effort would you still put into learning it?</h3>${rating('G3','Your rating','Almost none','Just as much as now')}${field('G3_why','Why did you choose that rating?',2)}</div>${field('G4',state.mode==='JC1'?'G4. By the end of this course, what kind of person do you hope Economics will help you become?':'G4. What kind of person has Economics helped you become?',3)}`;
+ case 6:return `<div class="q" data-q="G1"><h3>G1. Why ${state.mode==='JC1'?'are you taking':'did you take'} H1 Economics? Choose up to THREE.</h3><div class="checklist">${SCHEMA.motives.map((s,i)=>`<label class="choice"><input type="checkbox" data-key="G1_${i}" ${val('G1_'+i)?'checked':''}>${escapeHtml(s)}</label>`).join('')}</div><p class="small" id="g1note" aria-live="polite"></p>${tag}</div>${state.answers.G1_8===true?`<div class="field" data-q="G1_other"><label for="G1_other">You chose “Other” — what is your reason?</label><input id="G1_other" data-key="G1_other" value="${escapeHtml(val('G1_other'))}" placeholder="Your reason…">${tag}</div>`:''}<div class="q"><h3>G2. How important are these goals to you?</h3>${ratingList('G2_',SCHEMA.goals,'Not important','Very important')}</div><div class="q"><h3>G3. If there were no A-Level exam for H1 Economics, how much effort would you still put into learning it?</h3>${rating('G3','Your rating','Almost none','Just as much as now')}${field('G3_why','Why did you choose that rating?',2)}</div>${field('G4',state.mode==='JC1'?'G4. By the end of this course, what kind of person do you hope Economics will help you become?':'G4. What kind of person has Economics helped you become?',3)}${trackBlock()}`;
  case 7:return `<div class="notice">If you kept the copy of your JC1 answers, you may look at it now.</div>${SCHEMA.reflection.map((s,i)=>field('H'+(i+1),`H${i+1}. ${s}`,3)).join('')}`;
  }
+}
+
+/* ---------- Track question (end of section G) ---------- */
+// Wording comes from the shared texts; teachers can override it in the Sheet's Feedback_Text tab (sent with the page's config).
+function TT(k){return (state.texts&&state.texts[k])||FB_DEFAULTS[k]||''}
+function radios(k,opts){return `<div class="choices">${opts.map(([v,l])=>`<label class="choice"><input type="radio" name="${k}" data-key="${k}" value="${v}" ${val(k)===v?'checked':''}>${escapeHtml(l)}</label>`).join('')}</div>`}
+function trackBlock(){
+ const F=TT('track.focus.name'),E=TT('track.enrichment.name');
+ if(state.mode==='JC1')return `<div class="track-box"><h3>Two ways to learn H1 Economics</h3><p>${escapeHtml(TT('track.intro'))}</p><div class="track-cards"><div class="track-card"><b>${escapeHtml(F)}</b><p>${escapeHtml(TT('track.focus.desc'))}</p></div><div class="track-card enr"><b>${escapeHtml(E)}</b><p>${escapeHtml(TT('track.enrichment.desc'))}</p></div></div><p class="track-switch">${escapeHtml(TT('track.switch'))}</p></div>
+ <div class="q" data-q="G5"><h3>G5. Which track appeals to you right now?</h3>${radios('G5',[['focus',F],['enrichment',E],['unsure','Not sure yet']])}<p class="small">${escapeHtml(TT('track.nocommit'))}</p>${tag}</div>${field('G5_why','Why do you lean that way? (one or two sentences)',2)}`;
+ return `<div class="q" data-q="G5"><h3>G5. Which track were you on for most of H1?</h3>${radios('G5',[['focus',F],['enrichment',E],['switched','I switched between them']])}${tag}</div><div class="q" data-q="G5_again"><h3>Would you choose it again?</h3>${radios('G5_again',[['yes','Yes'],['no','No'],['unsure','Not sure']])}${tag}</div>${field('G5_why','Why? (one or two sentences)',2)}`;
 }
 
 /* ---------- Navigation ---------- */
@@ -540,8 +576,9 @@ const SAMPLE_TEXT={
  B4:'1 build more housing, 2 tax investors, 3 subsidise buyers, 4 leave the market alone, 5 price controls. Building more housing tackles the shortage directly, even though it takes years.',
  B5:'Banning it sounds good for the environment, but clothes would cost more for lower-income families and factory workers overseas could lose jobs. A tax or better recycling might work better than a ban.',
  C1:'No. Electricity would be free, but land, time, workers and materials would still be scarce, so people would still have to make choices.',
- D2:{JC1:['Who will have to pay the higher charges?','Will it actually reduce traffic, or will people just pay?','What about people who have no other way to get to work?'],
-     JC2:['Who decides which areas count as busy?','Will people switch to public transport, or just pay more?','Who gains and who loses if the charges go up?']},
+ D2:{JC1:['How much higher will water charges be?','Will households really use less water, or just pay more?','How will lower-income families be protected?'],
+     JC2:['How will the government decide when it counts as a dry period?','Who uses the most water, and will they change their habits?','Would a quantity limit work better than a higher price?']},
+ G5_why:{focus:'I want to cover the content efficiently because I have other subjects to prioritise.',enrichment:'I learn better by doing projects on real issues than by just practising questions.',unsure:'I would like to see what both tracks are like first.',switched:'I started on one track and switched when my workload changed.'},
  E2:'I disagreed that something free costs society nothing, because someone still pays for it through taxes or the resources it uses.',
  G1_other:'My seniors recommended it.',
  G3_why:'I find the topics interesting, but the exam does push me to study more.',
@@ -552,10 +589,10 @@ const SAMPLE_TEXT={
  H4:'I am still unsure how to balance fairness and efficiency when governments design policies.'};
 // Closed answers that steer the sample towards each persona (with the default cut-offs).
 const SAMPLE_PERSONA={
- explorer:{G1:[0,1,6],G2_0:7,G2_2:6,G2_3:7,G2_1:3,G3:7,F:[3,2,3]},
- strategist:{G1:[0,2,6],G2_0:7,G2_2:6,G2_3:6,G2_1:7,G3:4,F:[2,2,2]},
- navigator:{G1:[2,7,3],G2_0:3,G2_2:2,G2_3:3,G2_1:7,G3:2,F:[0,1,0]},
- wanderer:{G1:[3,4],G2_0:3,G2_2:3,G2_3:3,G2_1:3,G3:4,F:[0,0,1]}};
+ explorer:{G5:'enrichment',G1:[0,1,6],G2_0:7,G2_2:6,G2_3:7,G2_1:3,G3:7,F:[3,2,3]},
+ strategist:{G5:'focus',G1:[0,2,6],G2_0:7,G2_2:6,G2_3:6,G2_1:7,G3:4,F:[2,2,2]},
+ navigator:{G5:'focus',G1:[2,7,3],G2_0:3,G2_2:2,G2_3:3,G2_1:7,G3:2,F:[0,1,0]},
+ wanderer:{G5:'unsure',G1:[3,4],G2_0:3,G2_2:3,G2_3:3,G2_1:3,G3:4,F:[0,0,1]}};
 const rnd7=()=>String(1+Math.floor(Math.random()*7));
 function sampleFill(step,persona){
  const a=state.answers,empty=k=>!answered(k),P=persona?SAMPLE_PERSONA[persona]:null,force=!!P;
@@ -572,7 +609,13 @@ function sampleFill(step,persona){
    if(a.G1_8===true&&empty('G1_other'))a.G1_other=SAMPLE_TEXT.G1_other;
    SCHEMA.goals.forEach((_,i)=>{const k='G2_'+i;if(P&&P[k]!==undefined)a[k]=String(P[k]);else if(empty(k))a[k]=rnd7()});
    if(P)a.G3=String(P.G3);else if(empty('G3'))a.G3=rnd7();
-   if(empty('G3_why'))a.G3_why=SAMPLE_TEXT.G3_why;if(empty('G4'))a.G4=SAMPLE_TEXT.G4;break;}
+   if(empty('G3_why'))a.G3_why=SAMPLE_TEXT.G3_why;if(empty('G4'))a.G4=SAMPLE_TEXT.G4;
+   {const opts=state.mode==='JC1'?['focus','enrichment','unsure']:['focus','enrichment','switched'];
+    let g=P?P.G5:null;if(g&&!opts.includes(g))g='switched';
+    if(g)a.G5=g;else if(empty('G5'))a.G5=opts[Math.floor(Math.random()*3)];
+    if(state.mode==='JC2'&&empty('G5_again'))a.G5_again='yes';
+    if(empty('G5_why')||P)a.G5_why=SAMPLE_TEXT.G5_why[a.G5]||SAMPLE_TEXT.G5_why.unsure;}
+   break;}
   case 7:['H1','H2','H3','H4'].forEach(k=>{if(empty(k))a[k]=SAMPLE_TEXT[k]});break;
  }
 }
@@ -655,7 +698,7 @@ async function api(action,payload,tries=1){
 function modeLocked(m){return(!DEMO&&state.openStage&&state.openStage!==m)?'disabled title="Not open right now"':''}
 async function loadConfig(){
  if(DEMO)return;
- try{const r=await api('config',{},3);state.openStage=r.openStage||'CLOSED';if(['JC1','JC2'].includes(state.openStage))state.mode=state.openStage;state.configError=false}
+ try{const r=await api('config',{},3);state.openStage=r.openStage||'CLOSED';if(r.texts)state.texts=r.texts;if(['JC1','JC2'].includes(state.openStage))state.mode=state.openStage;state.configError=false}
  catch(e){state.configError=true}
  if(state.view==='login')render();
 }
@@ -713,6 +756,10 @@ function buildCopy(a,mode,receipt){
  SCHEMA.goals.forEach((t,i)=>add(`G2. Importance of "${t}" (1–7)`,a['G2_'+i]));
  add('G3. Effort if there were no A-Level exam (1–7)',a.G3);add('G3. Why',a.G3_why);
  add(mode==='JC1'?'G4. The person you hope Economics helps you become':'G4. The person Economics has helped you become',a.G4);
+ const TN={focus:FB_DEFAULTS['track.focus.name'],enrichment:FB_DEFAULTS['track.enrichment.name'],unsure:'Not sure yet',switched:'I switched between them'};
+ add(mode==='JC1'?'G5. The track that appeals to you right now':'G5. The track you were on for most of H1',TN[a.G5]||a.G5);
+ if(mode==='JC2')add('G5. Would you choose it again?',{yes:'Yes',no:'No',unsure:'Not sure'}[a.G5_again]);
+ add('G5. Why',a.G5_why);
  if(mode==='JC2')SCHEMA.reflection.forEach((t,i)=>add(`H${i+1}. ${t}`,a['H'+(i+1)]));
  return L.join('\n');
 }
