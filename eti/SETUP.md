@@ -3,7 +3,7 @@
 > **New in v3.3 (16 Nov 2026):**
 > - The two tracks are now called the **Focus track** and the **Enrichment track**.
 > - The end of section G has a short track explainer and a new question, **G5**. JC1 asks which track appeals now; JC2 asks which track they were on and whether they'd choose it again.
-> - The D2 news headline is now **water charges in both years**.
+> - The D2 news headline is now a **food delivery fee in both years**, with a one-line context.
 >
 > To update a Sheet already running v3.2, see *Updating from v3.2* at the end.
 
@@ -120,7 +120,12 @@ Log in as `TESTER` a few times, choosing answers that match each persona, and ch
 3. Delete the Test_Responses rows when you're done (optional).
 
 ## Design decisions to remember
-- **Same news headline in JC1 and JC2 (D2): water charges.** Both years ask about "Singapore considers higher charges for water use during dry periods", so changes in students' questions show how their thinking has changed, not a change of topic. On 4 Nov the shared headline was car charges. On 16 Nov it was switched to water, because the department's *Yes, but…* and *Tug of war* routine cards use ERP as their worked example, so by JC2 students would have practised the car-charges case. Both changes were made before any students had taken the inventory.
+- **Same news headline in JC1 and JC2 (D2): a food delivery fee.** Both years show a one-line context ("Many people in Singapore order meals through food delivery apps, and a rider brings the food to their door.") and the headline "Singapore considers a small fee on every food delivery order." Students write their first three questions, so changes between years show how their thinking has changed, not a change of topic. History of the choice:
+  - 4 Nov: car charges for busy city areas.
+  - 16 Nov (morning): water charges, because the routine cards use ERP.
+  - 16 Nov (afternoon): food delivery, because Griffles DDSS-01 teaches Singapore's water pricing.
+
+  The delivery topic isn't taught anywhere in the current plans, and the Griffles coverage map lists it as reserved. All changes were made before any students took the inventory. The context line deliberately mentions no economic ideas (such as waste, traffic or riders' pay), so the questions students ask are their own.
 - **Track names: Focus and Enrichment (16 Nov).** "Focus" replaced "Exam" as a neutral name that is still clearly not Enrichment. "Express" was avoided because it echoes Singapore's old Express stream. The explainer promises only what the department has committed to: the full syllabus on both tracks, switching at topic breaks, and resources open to everyone. The Focus-track description mentions the optional stretch question each topic ("Stretch Lite", defined in the two-track resource pack on 16 Nov).
 - **No rubric scoring of the scenarios for now (16 Nov).** Scoring B2 and B5 with the shared 0–3 thesis/antithesis/evaluation rubric was considered and deferred. See `eti/two-track-alignment.md` in the project.
 - **Plastic-bag scenario kept on purpose (B1).** The Griffles Kenya–Singapore field report teaches the same topic. Students who used it may answer B1 better in JC2 because they were taught it, not only because their thinking grew. Read B1 changes with that in mind and lean more on B2–B5 and C1 for evidence of growth.
