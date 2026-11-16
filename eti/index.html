@@ -526,6 +526,9 @@ function sectionBody(i){
  }
 }
 
+/* ---------- Compatibility: a backend older than 3.3 doesn't know the G5 track answers, so leave them out ---------- */
+function serverAnswers(){const a=Object.assign({},state.answers);if(state.serverVersion&&state.serverVersion<3.3){delete a.G5;delete a.G5_again;delete a.G5_why}return a}
+
 /* ---------- Track question (end of section G) ---------- */
 // Wording comes from the shared texts; teachers can override it in the Sheet's Feedback_Text tab (sent with the page's config).
 function TT(k){return (state.texts&&state.texts[k])||FB_DEFAULTS[k]||''}
@@ -698,7 +701,7 @@ async function api(action,payload,tries=1){
 function modeLocked(m){return(!DEMO&&state.openStage&&state.openStage!==m)?'disabled title="Not open right now"':''}
 async function loadConfig(){
  if(DEMO)return;
- try{const r=await api('config',{},3);state.openStage=r.openStage||'CLOSED';if(r.texts)state.texts=r.texts;if(['JC1','JC2'].includes(state.openStage))state.mode=state.openStage;state.configError=false}
+ try{const r=await api('config',{},3);state.openStage=r.openStage||'CLOSED';if(r.texts)state.texts=r.texts;state.serverVersion=parseFloat(r.version)||0;if(['JC1','JC2'].includes(state.openStage))state.mode=state.openStage;state.configError=false}
  catch(e){state.configError=true}
  if(state.view==='login')render();
 }
@@ -732,7 +735,7 @@ async function submit(){
  const finish=(receipt,summary)=>{s.summary=summary&&summary.feedback?summary:localSummary(s.answers,s.mode);s.copy=buildCopy(s.answers,s.mode,receipt)+'\n\n========== YOUR FEEDBACK ==========\n\n'+feedbackText(s.summary.feedback);s.receipt=receipt;clearDraft();s.view='done';s.key='';s.answers={}};
  if(DEMO){finish('DEMO-'+newToken().slice(0,6),localSummary(s.answers,s.mode));render();return}
  s.busy=true;render();
- try{const r=await api('submit',{studentId:s.id,accessKey:s.key,mode:s.mode,answers:s.answers,clientToken:s.token,startedAt:s.startedAt},6);s.busy=false;
+ try{const r=await api('submit',{studentId:s.id,accessKey:s.key,mode:s.mode,answers:serverAnswers(),clientToken:s.token,startedAt:s.startedAt},6);s.busy=false;
   if(r.ok)finish(r.receipt,r.summary);else s.error=(r.message||'Submission failed.')+(r.retry?'':' Your answers are still saved on this device.')}
  catch(e){s.busy=false;s.error='Could not reach the server. Your answers are saved on this device — check your connection and press Submit again.'}
  render();
