@@ -15,7 +15,7 @@
  * The AI drafts; teachers decide. Nothing here is a grade.
  */
 const ETI = {
-  version: '3.2',
+  version: '3.3',
   sheets: {
     list: 'Student_List', roster: 'Roster', credentials: 'Access_Codes_Distribute_Then_Delete',
     responses: 'Responses', profiles: 'AI_Profiles', change: 'Student_Change',
@@ -44,7 +44,7 @@ const DIMS = [
   ['judgement','Judgement','weighs considerations against each other to reach a reasoned, qualified conclusion'],
 ];
 const ASSOC_GROUPS = { reasoning: [2,3,4,5,6,11], surface: [0,1,7], values: [8,9,10], relevance: [12,13] };
-const SCHEMA = {"associations":["Money","Business and companies","Human behaviour","Choices","Scarcity","Trade-offs","Incentives","Government policy","Fairness","Sustainability","Data and evidence","Decision-making","Understanding how the real world works","Noticing hidden trade-offs in daily life"],"habits":["What are the trade-offs?","Who benefits?","Who bears the cost?","What incentives are created?","Could there be unintended consequences?","What evidence supports this claim?","What assumptions am I making?","Is this efficient?","Is this fair?","What happens in the long run?"],"beliefs":["Most economic problems have one best solution.","Higher prices are usually bad for society.","Large company profits usually mean consumers are being exploited.","Governments generally solve problems better than markets.","Markets generally solve problems better than governments.","Buying imported goods is generally bad for Singapore.","New technology mainly destroys jobs.","If GDP increases, people’s lives usually improve.","The fairest policy is usually the one that gives everyone the same.","Economics is mainly about money.","If everyone acts in their own interest, society ends up best off.","A policy that worked in one country will usually work in another.","If something is free to use, it costs society nothing.","Policies with good intentions usually produce good results."],"goals":["Understanding how the economy works","Doing well in examinations","Explaining current affairs","Developing critical thinking","Learning useful life skills","Preparing for university or future work"],"motives":["I want to understand how the world works.","I enjoy current affairs.","I want to do well in the A-Level examination.","H1 Economics fits my subject combination.","Economics may be useful for my future career.","I want to become a more informed citizen.","I enjoy analysing real-world issues.","I mainly want to pass the subject.","Other"],"curiosity":["I read or watched something about an economic or social issue outside lessons.","I discussed an economic or social issue with friends or family outside lessons.","I sought more information because I was curious about an economic or social issue."],"scenarios":[["B1","Plastic bags","Imagine Singapore increases a disposable plastic bag charge from $0.20 to $1 per bag. What do you think would happen? Explain your reasoning."],["B2","AI at work","A company replaces half its customer service workers with AI. Who might gain, who might lose, and could society still become better off overall? Explain."],["B3","Public budget","Singapore has an additional $2 billion available. Choose ONE use: healthcare, public transport, defence, climate adaptation, education, or tax cuts. Which would you choose, why, and what are we giving up by making this choice?"],["B4","Housing","Housing prices are rising rapidly. Rank these options from most effective (1) to least effective (5): build more housing; introduce price controls; tax investors; subsidise buyers; leave the market alone. Explain your top choice."],["B5","Fast fashion","Someone says: “The government should ban fast fashion because it pollutes.” What is your first reaction? Explain your reasoning."]],"headline":{"JC1":"Singapore considers higher charges for cars entering busy city areas.","JC2":"Singapore considers higher charges for cars entering busy city areas."},"reflection":["Which answer or belief changed the most since JC1? Why?","What is one assumption or idea you had to unlearn or relearn?","What experience, lesson, or real-world issue most influenced how you now think?","Which economic question or issue are you still curious or uncertain about?"]};
+const SCHEMA = {"associations":["Money","Business and companies","Human behaviour","Choices","Scarcity","Trade-offs","Incentives","Government policy","Fairness","Sustainability","Data and evidence","Decision-making","Understanding how the real world works","Noticing hidden trade-offs in daily life"],"habits":["What are the trade-offs?","Who benefits?","Who bears the cost?","What incentives are created?","Could there be unintended consequences?","What evidence supports this claim?","What assumptions am I making?","Is this efficient?","Is this fair?","What happens in the long run?"],"beliefs":["Most economic problems have one best solution.","Higher prices are usually bad for society.","Large company profits usually mean consumers are being exploited.","Governments generally solve problems better than markets.","Markets generally solve problems better than governments.","Buying imported goods is generally bad for Singapore.","New technology mainly destroys jobs.","If GDP increases, people’s lives usually improve.","The fairest policy is usually the one that gives everyone the same.","Economics is mainly about money.","If everyone acts in their own interest, society ends up best off.","A policy that worked in one country will usually work in another.","If something is free to use, it costs society nothing.","Policies with good intentions usually produce good results."],"goals":["Understanding how the economy works","Doing well in examinations","Explaining current affairs","Developing critical thinking","Learning useful life skills","Preparing for university or future work"],"motives":["I want to understand how the world works.","I enjoy current affairs.","I want to do well in the A-Level examination.","H1 Economics fits my subject combination.","Economics may be useful for my future career.","I want to become a more informed citizen.","I enjoy analysing real-world issues.","I mainly want to pass the subject.","Other"],"curiosity":["I read or watched something about an economic or social issue outside lessons.","I discussed an economic or social issue with friends or family outside lessons.","I sought more information because I was curious about an economic or social issue."],"scenarios":[["B1","Plastic bags","Imagine Singapore increases a disposable plastic bag charge from $0.20 to $1 per bag. What do you think would happen? Explain your reasoning."],["B2","AI at work","A company replaces half its customer service workers with AI. Who might gain, who might lose, and could society still become better off overall? Explain."],["B3","Public budget","Singapore has an additional $2 billion available. Choose ONE use: healthcare, public transport, defence, climate adaptation, education, or tax cuts. Which would you choose, why, and what are we giving up by making this choice?"],["B4","Housing","Housing prices are rising rapidly. Rank these options from most effective (1) to least effective (5): build more housing; introduce price controls; tax investors; subsidise buyers; leave the market alone. Explain your top choice."],["B5","Fast fashion","Someone says: “The government should ban fast fashion because it pollutes.” What is your first reaction? Explain your reasoning."]],"headline":{"JC1":"Singapore considers higher charges for water use during dry periods.","JC2":"Singapore considers higher charges for water use during dry periods."},"reflection":["Which answer or belief changed the most since JC1? Why?","What is one assumption or idea you had to unlearn or relearn?","What experience, lesson, or real-world issue most influenced how you now think?","Which economic question or issue are you still curious or uncertain about?"]};
 
 /* ===== ETI FEEDBACK CORE — identical copy in Code.gs and index.html. Edit wording in the Feedback_Text sheet, not here. ===== */
 const FB_DEFAULTS = {
@@ -57,7 +57,7 @@ const FB_DEFAULTS = {
   'persona.explorer.body': 'You chose Economics because you want to understand how the world works, and you would keep learning even without an exam at the end. Explorers notice economic questions everywhere — in the news, at the hawker centre, in conversations at home.',
   'persona.explorer.strengths': 'Curiosity, a willingness to follow a question wherever it leads, and a feel for real-world issues.',
   'persona.explorer.try': 'Turn curiosity into structure. When something catches your eye, write two sentences: what is happening, and who gains or loses. That habit becomes strong exam reasoning later.',
-  'persona.explorer.track': 'interest',
+  'persona.explorer.track': 'enrichment',
   'persona.explorer.teacher': 'Likely to thrive with inquiry, case studies and real-world projects. Check that exam technique keeps pace.',
 
   'persona.strategist.icon': '♟️',
@@ -66,7 +66,7 @@ const FB_DEFAULTS = {
   'persona.strategist.body': 'You are interested in how the economy works, and you also care about doing well in the A-Levels. Strategists like to understand ideas properly and then put them to work — in discussions and in exams.',
   'persona.strategist.strengths': 'Balance: you can enjoy the ideas and still keep the end goal in sight.',
   'persona.strategist.try': 'Look for moments where the two meet. When you read about a real issue, ask yourself how you would turn it into a well-argued exam answer.',
-  'persona.strategist.track': 'balanced',
+  'persona.strategist.track': 'either',
   'persona.strategist.teacher': 'Can probably choose either pathway — offer the choice. Stretch with evaluation and judgement.',
 
   'persona.navigator.icon': '🎯',
@@ -75,7 +75,7 @@ const FB_DEFAULTS = {
   'persona.navigator.body': 'Doing well in the A-Levels matters a lot to you right now, and you like knowing exactly what is expected. Navigators are focused and organised — real strengths for a two-year course.',
   'persona.navigator.strengths': 'Focus, discipline and a clear sense of what you are working towards.',
   'persona.navigator.try': 'Take one detour a month: an article, a video or a conversation about an economic issue. Examiners reward real-world examples — and you may find a topic you genuinely enjoy.',
-  'persona.navigator.track': 'exam',
+  'persona.navigator.track': 'focus',
   'persona.navigator.teacher': 'Likely to value structured, exam-skills-focused lessons. Build in short real-world hooks to grow interest.',
 
   'persona.wanderer.icon': '🌱',
@@ -84,7 +84,7 @@ const FB_DEFAULTS = {
   'persona.wanderer.body': 'Neither the subject nor the exam has grabbed you strongly yet — and that is completely normal at the start. Many students only discover what interests them once they begin exploring. Wanderers have the most room to be surprised.',
   'persona.wanderer.strengths': 'An open mind. You have not decided what Economics is "for" yet, so you can come to it fresh.',
   'persona.wanderer.try': 'Start from something you already care about — food prices, transport, your phone, a part-time job — and ask how Economics explains it.',
-  'persona.wanderer.track': 'balanced',
+  'persona.wanderer.track': 'either',
   'persona.wanderer.teacher': 'Worth an early, low-pressure conversation. Relatable, activity-rich starts may spark interest; check in again after Term 1.',
 
   'habit.0': 'Whenever someone makes a choice, ask: what did they give up to get it?',
@@ -127,6 +127,14 @@ const FB_DEFAULTS = {
   'change.habit': 'You now ask “{question}” more often ({a} → {b} out of 7).',
   'change.none': 'Your ratings were quite similar to JC1. Look at your written answers to see how your reasoning has changed.',
 
+  'track.focus.name': 'Focus track',
+  'track.enrichment.name': 'Enrichment track',
+  'track.intro': 'Both tracks cover the full H1 syllabus and prepare you for the A-Level exam. They differ in how you learn.',
+  'track.focus.desc': 'Efficient lessons on the core content and exam skills. If you want more, the Enrichment projects and resources are open to you too.',
+  'track.enrichment.desc': 'Learn through projects and real-world tasks, with the exam essentials built in.',
+  'track.switch': 'You choose, with advice from your teacher. You can switch tracks at the end of each topic, and the resources from both tracks are open to everyone.',
+  'track.nocommit': 'This doesn’t sign you up for anything. It just helps your teacher advise you.',
+
   'cohort.note': 'Cohort average so far ({n} students): interest {interest}, exam focus {exam}.',
   'note.personas': 'Personas describe how you answered today, not who you are. They often change over two years — that is the point.',
 };
@@ -160,6 +168,14 @@ function fbIndices(a) {
     curiosity: cur === null ? null : Math.round(cur * 10) / 10,
   };
 }
+/** Normalises any track wording (including the older exam/balanced/interest labels) to focus / either / enrichment. */
+function fbTrack(v) {
+  const t = String(v || '').toLowerCase();
+  if (/focus|exam/.test(t)) return 'focus';
+  if (/enrich|interest|activ/.test(t)) return 'enrichment';
+  if (/either|balanc/.test(t)) return 'either';
+  return '';
+}
 function fbPersonaId(ix, T) {
   if (ix.interest === null || ix.exam === null) return '';
   const hiI = ix.interest >= Number(T['threshold.interest'] || 55), hiE = ix.exam >= Number(T['threshold.exam'] || 55);
@@ -168,7 +184,7 @@ function fbPersonaId(ix, T) {
 function fbPersona(id, T) {
   if (!id) return null;
   const g = k => T['persona.' + id + '.' + k] || '';
-  return { id, icon: g('icon'), name: g('name'), tagline: g('tagline'), body: g('body'), strengths: g('strengths'), tryThis: g('try'), track: g('track'), teacher: g('teacher') };
+  return { id, icon: g('icon'), name: g('name'), tagline: g('tagline'), body: g('body'), strengths: g('strengths'), tryThis: g('try'), track: fbTrack(g('track')), teacher: g('teacher') };
 }
 
 /** Builds all templated feedback for one response. prior = the same student's JC1 answers (for JC2). */
@@ -253,7 +269,11 @@ function json_(obj) {
 function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k); }
 function setProp_(k, v) { PropertiesService.getScriptProperties().setProperty(k, v); }
 function openStage_() { return prop_('OPEN_STAGE') || 'CLOSED'; }
-function publicConfig_() { return { ok: true, openStage: openStage_(), version: ETI.version }; }
+function publicConfig_() {
+  let texts = {};
+  try { const T = feedbackTexts_(); Object.keys(T).filter(k => /^track\./.test(k)).forEach(k => texts[k] = T[k]); } catch (e) {}
+  return { ok: true, openStage: openStage_(), version: ETI.version, texts };
+}
 
 /* =====================================================================
  * 2. Teacher menu
@@ -323,6 +343,7 @@ function headers_() {
   for (let i = 0; i < ETI.goals; i++) h.push('G2_' + i);
   h.push('G3', 'G3_why', 'G4');
   for (let i = 1; i <= 4; i++) h.push('H' + i);
+  h.push('G5', 'G5_again', 'G5_why'); // added in v3.3 (track question), kept at the end so older sheets upgrade in place
   return h;
 }
 const PROFILE_HEADERS = ['student_id','class','stage','generated_at','interest_index','exam_index','computed_lean',
@@ -337,15 +358,25 @@ function sheet_(name) {
   if (!sh) throw new Error('Missing sheet: ' + name + '. Run ETI Admin → 1. Set up sheets first.');
   return sh;
 }
-function initSheet_(name, headers) {
+/** Creates a sheet with headers, or upgrades one whose header row is an older prefix of `headers`.
+ * Derived sheets (rebuilt by the script) may have their header row replaced outright. */
+function initSheet_(name, headers, derived) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName(name) || ss.insertSheet(name);
   if (sh.getLastRow() === 0) {
     sh.appendRow(headers); sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#e5f0f6');
-  } else {
-    const existing = sh.getRange(1, 1, 1, headers.length).getValues()[0];
-    if (JSON.stringify(existing) !== JSON.stringify(headers)) throw new Error('Header mismatch on ' + name + '; not overwriting existing data.');
+    return sh;
+  }
+  const existing = sh.getRange(1, 1, 1, headers.length).getValues()[0].map(String);
+  let k = existing.length; while (k && existing[k - 1] === '') k--;
+  const same = JSON.stringify(existing.slice(0, k)) === JSON.stringify(headers.slice(0, k));
+  if (!same) {
+    if (!derived) throw new Error('Header mismatch on ' + name + '; not overwriting existing data.');
+    sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+  } else if (k < headers.length) {
+    sh.getRange(1, k + 1, 1, headers.length - k).setValues([headers.slice(k)]);
+    sh.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#e5f0f6');
   }
   return sh;
 }
@@ -372,7 +403,7 @@ function setupInventory() {
   initSheet_(S.responses, headers_());
   initSheet_(S.profiles, PROFILE_HEADERS);
   initSheet_(S.change, CHANGE_HEADERS);
-  initSheet_(S.summary, SUMMARY_HEADERS);
+  initSheet_(S.summary, SUMMARY_HEADERS, true);
   initSheet_(S.personas, STATIC_HEADERS);
   syncFeedbackSheet_();
   if (!prop_('OPEN_STAGE')) setProp_('OPEN_STAGE', 'CLOSED');
@@ -510,6 +541,8 @@ function validateAnswers_(a) {
     if ((/^(A1_|D1_|E1_|G2_)/.test(k) || k === 'G3') && v && !/^[1-7]$/.test(v)) throw new Error('Invalid rating for ' + k);
     if (/^F_/.test(k) && v && !/^[0-3]$/.test(v)) throw new Error('Invalid frequency');
     if (/^G1_\d+$/.test(k) && v && !/^(TRUE|FALSE)$/.test(v)) throw new Error('Invalid motivation choice');
+    if (k === 'G5' && v && !/^(focus|enrichment|unsure|switched)$/.test(v)) throw new Error('Invalid track choice');
+    if (k === 'G5_again' && v && !/^(yes|no|unsure)$/.test(v)) throw new Error('Invalid answer to "choose it again"');
     cleaned[k] = safe_(v);
   }
   if (Array.from({ length: ETI.motives }, (_, i) => cleaned['G1_' + i]).filter(x => x === 'TRUE').length > 3) throw new Error('Choose no more than three motivations.');
@@ -528,6 +561,9 @@ function submitInventory(request) {
   try {
     const who = authorize_(request);
     const cleaned = validateAnswers_(request.answers);
+    if (who.mode === 'JC1' && cleaned.G5 === 'switched') throw new Error('Invalid track choice');
+    if (who.mode === 'JC2' && cleaned.G5 === 'unsure') throw new Error('Please choose the track you were on for most of H1.');
+    if (who.mode === 'JC1') delete cleaned.G5_again;
     const token = String(request.clientToken || '').toUpperCase();
     const receipt = /^[A-F0-9]{12}$/.test(token) ? 'ETI-' + token : 'ETI-' + randomHex_(6);
     if (who.tester) {
@@ -548,6 +584,8 @@ function submitInventory(request) {
     const summary = studentSummary_(who.id, who.mode, cleaned);
     const meta = { submitted_at: new Date(), receipt, student_id: who.id, class: who.klass, cohort: who.cohort, mode: who.mode,
       schema_version: ETI.version, minutes_spent: mins !== '' && mins >= 0 && mins < 600 ? mins : '' };
+    initSheet_(ETI.sheets.responses, headers_());
+    initSheet_(ETI.sheets.personas, STATIC_HEADERS);
     sheet_(ETI.sheets.responses).appendRow(headers_().map(k => Object.prototype.hasOwnProperty.call(meta, k) ? meta[k] : (cleaned[k] || '')));
     try { sheet_(ETI.sheets.personas).appendRow(staticRow_(Object.assign({}, cleaned, meta), summary.feedback, null)); }
     catch (err) { console.error('Profile row not written (rebuild profiles to fix): ' + err); }
@@ -588,11 +626,14 @@ function beliefShifts_(j1, j2) {
  * ===================================================================== */
 
 const STATIC_HEADERS = ['student_id','class','stage','updated_at','persona_id','persona','interest_index','exam_index','curiosity_mean',
-  'habits_often','habits_to_try','beliefs_to_explore','change_since_jc1','suggested_track','teacher_track_decision','teacher_notes'];
+  'habits_often','habits_to_try','beliefs_to_explore','change_since_jc1','suggested_track','teacher_track_decision','teacher_notes',
+  'student_track','student_would_choose_again','student_track_reason'];
+const TRACK_LABEL = { focus: 'Focus', either: 'Either', enrichment: 'Enrichment', unsure: 'Not sure yet', switched: 'Switched' };
 
 function usedFor_(k) {
   if (/^threshold/.test(k)) return 'Persona cut-off (0–100). Interest/exam index at or above this counts as "high".';
-  if (/^persona\.\w+\.track$/.test(k)) return 'Suggested track for teachers only: interest, balanced or exam';
+  if (/^persona\.\w+\.track$/.test(k)) return 'Suggested track for teachers only: focus, either or enrichment';
+  if (/^track\./.test(k)) return 'Track explainer and G5 answer labels on the questionnaire page (end of section G). Students see this.';
   if (/^persona\.\w+\.teacher$/.test(k)) return 'Teacher-only note (Profiles sheet)';
   if (/^persona/.test(k)) return 'Student sees this on their persona card';
   if (/^habit\.(\d+)/.test(k)) return 'Tip when a student rarely asks: ' + SCHEMA.habits[k.split('.')[1]];
@@ -641,7 +682,9 @@ function staticRow_(r, fb, keep) {
     habits_to_try: fb.habitsToTry.map(h => h.question).join('\n'),
     beliefs_to_explore: fb.beliefs.map(b => '“' + b.statement + '” (' + b.rating + ')').join('\n'),
     change_since_jc1: fb.change ? fb.change.lines.join('\n') : '',
-    suggested_track: p.track || '',
+    suggested_track: TRACK_LABEL[p.track] || '',
+    student_track: TRACK_LABEL[String(r.G5 || '')] || '', student_would_choose_again: r.mode === 'JC2' ? ({ yes: 'Yes', no: 'No', unsure: 'Not sure' }[String(r.G5_again || '')] || '') : '',
+    student_track_reason: String(r.G5_why || '').replace(/^'/, ''),
     teacher_track_decision: keep ? keep.teacher_track_decision : '', teacher_notes: keep ? keep.teacher_notes : '',
   };
   return STATIC_HEADERS.map(h => safe_(o[h]));
@@ -721,6 +764,9 @@ function labelFor_(k, stage) {
   if (k === 'G3_why') return 'G3. Why that effort rating';
   if (k === 'G4') return stage === 'JC2' ? 'G4. What kind of person Economics has helped them become' : 'G4. What kind of person they hope Economics will help them become';
   if ((m = k.match(/^H(\d)$/))) return 'H' + m[1] + '. ' + SCHEMA.reflection[m[1] - 1];
+  if (k === 'G5') return stage === 'JC2' ? 'G5. Track they were on for most of H1 (focus / enrichment / switched)' : stage === 'JC1' ? 'G5. Track that appeals to them right now (focus / enrichment / unsure)' : 'G5. Track: JC1 = appeals now · JC2 = was on';
+  if (k === 'G5_again') return 'G5. Would choose that track again (JC2 only)';
+  if (k === 'G5_why') return 'G5. Reason for their track answer';
   return k;
 }
 function formatResponses_(r, stage) {
@@ -947,9 +993,7 @@ function showAIProgress() {
  * ===================================================================== */
 
 function trackOf_(p) {
-  const t = String(p.teacher_track_decision || '').toLowerCase();
-  if (/exam/.test(t)) return 'exam'; if (/interest|activ/.test(t)) return 'interest'; if (/balanc/.test(t)) return 'balanced';
-  return String(p.suggested_track || '');
+  return fbTrack(p.teacher_track_decision) || fbTrack(p.suggested_track);
 }
 function groupStats_(profiles, responses, aiProfiles) {
   const n = profiles.length, mean = k => { const v = fbMean(profiles.map(p => fbNum(p[k]))); return v === null ? '' : Math.round(v * 10) / 10; };
@@ -960,11 +1004,12 @@ function groupStats_(profiles, responses, aiProfiles) {
     .sort((a, b) => a.m - b.m).slice(0, 3).map(x => '“' + x.q + '” (mean ' + Math.round(x.m * 10) / 10 + ')').join('\n');
   const an = aiProfiles.length, pct = k => an ? Math.round(100 * aiProfiles.filter(p => ['evident', 'strong'].includes(String(p[k]))).length / an) : '';
   return { n, interest: mean('interest_index'), exam: mean('exam_index'), curiosity: mean('curiosity_mean'),
-    personas: ['explorer', 'strategist', 'navigator', 'wanderer'].map(per), tracks: ['interest', 'balanced', 'exam'].map(tr),
+    personas: ['explorer', 'strategist', 'navigator', 'wanderer'].map(per), tracks: ['focus', 'either', 'enrichment'].map(tr),
+    prefs: ['Focus', 'Enrichment', 'Not sure yet'].map(v => profiles.filter(p => String(p.student_track) === v).length),
     beliefs, habits, dims: DIMS.map(([k]) => pct(k)) };
 }
 const SUMMARY_HEADERS = ['scope','stage','n','interest_mean','exam_mean','curiosity_mean','explorers','strategists','navigators','wanderers',
-  'track_interest','track_balanced','track_exam','most_agreed_beliefs','least_asked_habits',
+  'track_focus','track_either','track_enrichment','prefers_focus','prefers_enrichment','prefers_unsure','most_agreed_beliefs','least_asked_habits',
   ...DIMS.map(d => 'ai_' + d[0] + '_evident_pct'), 'ai_overview','ai_suggestions','generated_at'];
 
 function buildClassSummaries() {
@@ -996,9 +1041,9 @@ function buildClassSummaries() {
     for (let i = 0; i < reqs.length; i += ETI.aiBatch) aiOut = aiOut.concat(claudeBatch_(reqs.slice(i, i + ETI.aiBatch)));
   }
   const now = new Date();
-  const newRows = groups.map((g, i) => { const s = stats[i], a = aiOut[i]; return [g.scope, stage, s.n, s.interest, s.exam, s.curiosity, ...s.personas, ...s.tracks,
+  const newRows = groups.map((g, i) => { const s = stats[i], a = aiOut[i]; return [g.scope, stage, s.n, s.interest, s.exam, s.curiosity, ...s.personas, ...s.tracks, ...s.prefs,
     s.beliefs, s.habits, ...s.dims, a ? (a.ok ? a.json.overview || '' : 'AI error: ' + a.error) : '', a && a.ok ? list_(a.json.suggestions) : '', now].map(safe_); });
-  const sh = sheet_(ETI.sheets.summary);
+  const sh = sheet_(ETI.sheets.summary); // header is rewritten below; old rows are re-read by column name first
   const keep = table_(ETI.sheets.summary).rows.filter(r => String(r.stage) !== stage).map(r => SUMMARY_HEADERS.map(h => r[h]));
   sh.clearContents();
   const all = [SUMMARY_HEADERS].concat(keep, newRows);
@@ -1031,7 +1076,8 @@ function buildStudentView() {
   section('Persona & feedback (automatic, no AI)');
   [['Class', 'class'], ['Persona', 'persona'], ['Interest index (0–100)', 'interest_index'], ['Exam focus (0–100)', 'exam_index'],
    ['Curiosity (0–3)', 'curiosity_mean'], ['Questions often asked', 'habits_often'], ['Questions to try', 'habits_to_try'],
-   ['Beliefs to explore', 'beliefs_to_explore'], ['Change since JC1', 'change_since_jc1'], ['Suggested track (teachers only)', 'suggested_track'],
+   ['Beliefs to explore', 'beliefs_to_explore'], ['Change since JC1', 'change_since_jc1'], ['Suggested track from persona (teachers only)', 'suggested_track'],
+   ['Student’s track answer (G5)', 'student_track'], ['Would choose it again (JC2)', 'student_would_choose_again'], ['Student’s reason', 'student_track_reason'],
    ['TEACHER TRACK DECISION (edit in Profiles)', 'teacher_track_decision'], ['Teacher notes (edit in Profiles)', 'teacher_notes']]
     .forEach(([l, f]) => rows.push([l, Q(f, 'JC1'), Q(f, 'JC2')]));
   section('Optional AI profile (blank unless AI analysis was run)');
