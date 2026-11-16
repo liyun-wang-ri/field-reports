@@ -1489,7 +1489,8 @@ function mkQ(p,k){const M=P.market;return {qd:Math.max(0,M.demand.a-M.demand.b*p
 function mkEq(k){const M=P.market,p=(M.demand.a-mkSupplyA(k))/(M.demand.b+M.supply.b);return {p:p,q:M.demand.a-M.demand.b*p}}
 function vMarket(){
   const M=P.market,at=VIEWS.indexOf(vMarket),n=M.shocks.length;
-  if(S.mkStage==null){S.mkStage=0;S.mkCleared={};S.mkP=mkEq(0).p}
+  if(S.mkStage==null){S.mkStage=0;S.mkP=mkEq(0).p}
+  if(!S.mkCleared){S.mkCleared={};for(let j=1;j<=S.mkStage;j++)S.mkCleared[j]=S.mkLocked||j<S.mkStage}
   const k=S.mkStage,sh=k?M.shocks[k-1]:null,cleared=!k||S.mkCleared[k],done=k===n&&cleared;
   stage.innerHTML='<section class="sheet mkbox"><span class="stepnum">'+sn(at)+'</span>'+
    '<h2>'+esc(M.heading)+'</h2><p>'+rich(M.intro)+'</p>'+
@@ -1507,7 +1508,7 @@ function vMarket(){
      G("curious",M.griffles,"asking")+
      '<div class="q"><span class="qtext">'+esc(M.question)+'</span><div class="opts">'+M.options.map(o=>'<label class="opt"><input type="radio" name="mkq" value="'+o.id+'"'+(S.mkAns===o.id?' checked':'')+(S.mkLocked?' disabled':'')+'><span>'+esc(o.text)+'</span></label>').join("")+'</div>'+
       '<div id="mkAns">'+(S.mkLocked?'<p class="hint">'+rich(M.answer)+'</p>':'')+'</div></div>'+
-     (S.mkLocked?'<h3>'+esc(M.ideaHeading)+'</h3><p>'+rich(M.idea)+'</p><button class="btn" id="next" type="button">'+esc(M.button)+'</button>':'')
+     '<div id="mkIdea">'+(S.mkLocked?mkIdeaHtml():'')+'</div>'
      :'')+
   '</section>';
   drawMarket();
@@ -1517,9 +1518,18 @@ function vMarket(){
     r.onchange=()=>{S.mkMoves=(S.mkMoves||0)+1;log("market_move",{shock:sh.id,p:+r.value})}}
   const b=document.getElementById("mkShock");
   if(b)b.onclick=()=>{S.mkStage=k+1;log("market_shock",{shock:M.shocks[k].id,p:S.mkP});vMarket();pageSources()};
-  stage.querySelectorAll('input[name=mkq]').forEach(x=>x.onchange=()=>{S.mkAns=x.value;S.mkLocked=true;log("market_answer",{choice:x.value,correct:x.value===M.correct});vMarket();pageSources()});
-  const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(at+1);
+  // Answering fills in the explanation where it is, without redrawing the step, then brings the Next button into view
+  // (a full redraw jumped the page about and, in some viewers, left students unable to scroll on).
+  stage.querySelectorAll('input[name=mkq]').forEach(x=>x.onchange=()=>{
+    S.mkAns=x.value;S.mkLocked=true;log("market_answer",{choice:x.value,correct:x.value===M.correct});
+    stage.querySelectorAll('input[name=mkq]').forEach(y=>y.disabled=true);
+    document.getElementById("mkAns").innerHTML='<p class="hint">'+rich(M.answer)+'</p>';
+    document.getElementById("mkIdea").innerHTML=mkIdeaHtml();bindNext();pageSources();
+    const nb=document.getElementById("next");if(nb)setTimeout(()=>nb.scrollIntoView({behavior:"smooth",block:"nearest"}),50)});
+  const bindNext=()=>{const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(at+1)};
+  bindNext();
 }
+function mkIdeaHtml(){const M=P.market;return '<h3>'+esc(M.ideaHeading)+'</h3><p>'+rich(M.idea)+'</p><button class="btn" id="next" type="button">'+esc(M.button)+'</button>'}
 function drawMarket(){
   const M=P.market,k=S.mkStage,W=400,H=320,l=46,r=16,t=30,b=46,X=q=>l+(W-l-r)*q/M.qMax,Y=p=>H-b-(H-t-b)*p/M.pMax;
   const f=v=>Math.round(v).toLocaleString("en-GB");

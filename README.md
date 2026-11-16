@@ -15,6 +15,9 @@ File = page ID in lower case + the two place codes (a country code, or a local p
 | Post (Instagram-style trailer, phones) | PC-CPE-02-POST | [pc-cpe-02-post-ct-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-cpe-02-post-ct-sg.html) |
 | Postcard (airmail trailer, computers) | PC-CPE-02-POSTCARD | [pc-cpe-02-postcard-ct-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-cpe-02-postcard-ct-sg.html) |
 | Field Report Lite | FR-CPE-02-LITE | [fr-cpe-02-lite-ct-sg.html](https://liyun-wang-ri.github.io/field-reports/fr-cpe-02-lite-ct-sg.html) |
+| Post (Instagram-style trailer, phones) | PC-DDSS-01-POST | [pc-ddss-01-post-za-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-ddss-01-post-za-sg.html) |
+| Postcard (airmail trailer, computers) | PC-DDSS-01-POSTCARD | [pc-ddss-01-postcard-za-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-ddss-01-postcard-za-sg.html) |
+| Field Report Lite | FR-DDSS-01-LITE | [fr-ddss-01-lite-za-sg.html](https://liyun-wang-ri.github.io/field-reports/fr-ddss-01-lite-za-sg.html) |
 | Post (Instagram-style trailer, phones) | PC-MF-01-POST | [pc-mf-01-post-ke-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-mf-01-post-ke-sg.html) |
 | Postcard (airmail trailer, computers) | PC-MF-01-POSTCARD | [pc-mf-01-postcard-ke-sg.html](https://liyun-wang-ri.github.io/field-reports/pc-mf-01-postcard-ke-sg.html) |
 | Field Report Lite | FR-MF-01-LITE | [fr-mf-01-lite-ke-sg.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-01-lite-ke-sg.html) |
@@ -24,7 +27,7 @@ File = page ID in lower case + the two place codes (a country code, or a local p
 | Field Report Lite | FR-MF-02-LITE | [fr-mf-02-lite-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-02-lite-dk-nz.html) |
 | Deep Dive | FR-MF-02-DEEPDIVE | [fr-mf-02-deepdive-dk-nz.html](https://liyun-wang-ri.github.io/field-reports/fr-mf-02-deepdive-dk-nz.html) |
 
-Share the Profile with students; add a post's code to open it directly, e.g. [griffles-profile.html#mf-02](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#mf-02) or [#cpe-01](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#cpe-01). Posts are in syllabus order (Central Problem first, then Market Failure). The Profile plays each Post on the page; the standalone Post and Postcard pages above stay published as each trailer's own record and link.
+Share the Profile with students; add a post's code to open it directly, e.g. [griffles-profile.html#mf-02](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#mf-02) or [#cpe-01](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#cpe-01). Posts are in syllabus order (Central Problem, then Price Mechanism, then Market Failure), e.g. [#ddss-01](https://liyun-wang-ri.github.io/field-reports/griffles-profile.html#ddss-01). The Profile plays each Post on the page; the standalone Post and Postcard pages above stay published as each trailer's own record and link.
 
 The other `.html` files are forwarding pages for the old file names (before 30 Oct 2026), so earlier Canvas links keep working.
 

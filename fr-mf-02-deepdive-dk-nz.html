@@ -354,6 +354,21 @@ footer{display:flex;flex-direction:column;gap:10px}
 .ppcbox .pt{fill:var(--sheet);stroke:var(--ink);stroke-width:2}
 .ppcbox .pt.out{stroke:var(--ca)} .ppcbox .pt.in{stroke:var(--cb)}
 .ppcread{font-family:var(--display);font-size:17px}
+.mkbox svg{width:100%;height:auto;display:block;font-family:var(--display)}
+.mkbox .ax{stroke:var(--ink);stroke-width:1.5} .mkbox svg text{font-family:var(--display)}
+.mkbox .lbl{fill:var(--ink);font-size:16px;font-weight:600} .mkbox .tick{fill:var(--muted);font-size:14px}
+.mkbox .dd{stroke:var(--cb);stroke-width:3.5;fill:none} .mkbox .ss{stroke:var(--ca);stroke-width:3.5;fill:none}
+.mkbox .old{stroke:var(--ca);stroke-width:2;stroke-dasharray:6 5;fill:none;opacity:.6}
+.mkbox .dlab{fill:var(--cb);font-weight:700} .mkbox .slab{fill:var(--ca);font-weight:700}
+.mkbox .pline{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 4}
+.mkbox .gap{stroke-width:8;stroke-linecap:round;opacity:.85} .mkbox .gap.short{stroke:var(--warn)} .mkbox .gap.sur{stroke:var(--cb)}
+.mkbox .gaplab{font-size:15px;font-weight:700} .mkbox .gaplab.short{fill:var(--warn)} .mkbox .gaplab.sur{fill:var(--cb)}
+.mkbox .eq{fill:var(--good);stroke:var(--sheet);stroke-width:3} .mkbox .arrow{stroke:var(--ink);stroke-width:2;fill:none;marker-end:url(#mkArr)}
+.mkread{font-family:var(--display);font-size:17px;min-height:2.6em}
+.mkread .ok{color:var(--good);font-weight:700}
+.mkstage{display:flex;flex-direction:column;gap:6px;border-left:4px solid var(--accent);padding:8px 12px;background:var(--paper)}
+.mkdone{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
+.mkdone li::before{content:"✓ ";color:var(--good);font-weight:700}
 .ppcpts{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 .rooms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .room{border:1px solid var(--rule);border-radius:10px;background:var(--paper);padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-family:var(--display)}
@@ -435,8 +450,9 @@ footer{display:flex;flex-direction:column;gap:10px}
 const P=JSON.parse(document.getElementById("pkg").textContent);
 const CFG=JSON.parse(document.getElementById("cfg").textContent);
 const SHORT=P.id.replace(/^FR-/,"");
-const CPE=P.kind==="cpe"; // central-problem lessons: steps 5 and 6 are the halls board and keep-or-cut
-const STEPS=P.stepNames||(CPE?["Hook","Commit","Reveal","Name","Allocate","Choose","Transfer","Report","Check-in"]:["Hook","Commit","Reveal","Name","Compare","Policy","Transfer","Report","Check-in"]);
+const CPE=P.kind==="cpe"||P.kind==="ddss"; // choice lessons (central problem, price mechanism): own steps 5 and 6, no externality model
+const DDSS=P.kind==="ddss"; // price mechanism: step 5 is the market diagram, step 6 the rationing board
+const STEPS=P.stepNames||(DDSS?["Hook","Commit","Reveal","Name","Market","Ration","Transfer","Report","Check-in"]:CPE?["Hook","Commit","Reveal","Name","Allocate","Choose","Transfer","Report","Check-in"]:["Hook","Commit","Reveal","Name","Compare","Policy","Transfer","Report","Check-in"]);
 const sn=i=>"Step "+(i+1)+" of "+STEPS.length+" · "+STEPS[i];
 const LITE=P.ui==="lite";
 const PID=P.id+(P.variant?"-"+String(P.variant).toUpperCase():"");
@@ -1105,7 +1121,7 @@ function formValues(){
   const rs=S.repSummary||{};
   return {PKG:PID,SES:S.session,DONE:new Date(S.endAt||Date.now()).toISOString(),MIN:Math.max(1,Math.round(((S.endAt||Date.now())-S.start)/60000)),
     TEST:S.tester?"yes":"no",P0:S.perc0||"",P1:S.ci.percAfter||"",PNUM:S.committed?S.num:"",PCHO:choice,PWHY:clip(S.why,300),
-    DOUB:S.doubts.join(", "),NAME:clip(S.name,300),NREC:S.recog,CMP:S.ext||"",POL:clip(S.policyWhy+(CPE&&S.keep.length?" [kept: "+S.keep.join(", ")+"; considered: "+S.consider.join(", ")+"]":""),500),ADV:clip(S.advice,600),
+    DOUB:S.doubts.join(", "),NAME:clip(S.name,300),NREC:S.recog,CMP:(S.ext||"")+(S.mkAns?" [market: "+S.mkAns+"]":""),POL:clip(S.policyWhy+(CPE&&S.keep.length?" [kept: "+S.keep.join(", ")+"; considered: "+S.consider.join(", ")+"]":""),500),ADV:clip(S.advice,600),
     TICK:S.ticks.join(", "),HL:clip(rs.headline||"",200),HLX:S.reportFiled?(rs.overstated?"yes":"no"):"",
     FLAW:S.reportFiled?S.flaw+" · "+S.flawTries+" tap"+(S.flawTries===1?"":"s"):"",QUO:S.reportFiled?(rs.quotes?"yes":"no"):"",NOTE:clip(rs.extra||"",300),
     SUR:S.ci.surprise||"",SURW:clip(S.ci.surpriseWhat,300),CONF:S.ci.conf||"",WON:clip(S.ci.wonder,300),GRIF:S.ci.gr||"",
@@ -1310,25 +1326,31 @@ function bindPpc(){
 }
 
 // Step 5: share out scarce rooms. The student picks a rule; the board shows who gets what and what each group gives up.
+// The same board serves any "who gets the scarce thing?" step: rooms (CPE-01) or water (DDSS-01). halls.labels renames
+// the board's columns, halls.showRooms:false hides the list of outcomes, and halls.whyQuestion asks for a reason at the end.
 function vHalls(){
-  const Hl=P.halls,rule=Hl.rules.find(r=>r.id===S.ext);
+  const Hl=P.halls,rule=Hl.rules.find(r=>r.id===S.ext),at=VIEWS.indexOf(vHalls),L=Object.assign({group:"Group",gets:"Gets",givesUp:"Gives up",none:"No room",pick:"Pick a rule to see who gets which room."},Hl.labels||{});
   const room=id=>id?Hl.rooms.find(r=>r.id===id):null;
-  stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(4)+'</span>'+
+  const enough=S.rulesTried.length>=Math.min(2,Hl.rules.length)&&rule;
+  stage.innerHTML='<section class="sheet"><span class="stepnum">'+sn(at)+'</span>'+
    '<h2>'+esc(Hl.heading)+'</h2><p>'+rich(Hl.intro)+'</p>'+
-   '<div class="rooms">'+Hl.rooms.map(r=>'<div class="room"><b>'+esc(r.name)+'</b><span>'+esc(r.note)+'</span></div>').join("")+'</div>'+
+   (Hl.showRooms===false?'':'<div class="rooms">'+Hl.rooms.map(r=>'<div class="room"><b>'+esc(r.name)+'</b><span>'+esc(r.note)+'</span></div>').join("")+'</div>')+
    '<h3>'+esc(Hl.groupsHeading)+'</h3><ul class="groups">'+Hl.groups.map(g=>'<li><b>'+esc(g.name)+'</b> '+esc(g.needs)+'</li>').join("")+'</ul>'+
    G("curious",Hl.griffles,"asking")+
    '<div class="q"><span class="qtext">'+esc(Hl.ruleQuestion)+'</span><div class="rules">'+
     Hl.rules.map(r=>'<button type="button" class="chip" data-rule="'+r.id+'" aria-pressed="'+(S.ext===r.id)+'"><b>'+esc(r.label)+'</b><span>'+esc(r.how)+'</span></button>').join("")+'</div></div>'+
    '<div id="board" aria-live="polite">'+(rule?
-     '<h3>'+esc(fill(Hl.boardHeading,{rule:rule.label}))+'</h3><table class="board"><thead><tr><th>Group</th><th>Gets</th><th>Gives up</th></tr></thead><tbody>'+
-      Hl.groups.map(g=>{const rm=room(rule.result[g.id]);return '<tr class="'+(rm?'':'lost')+'"><th>'+esc(g.name)+'</th><td>'+(rm?esc(rm.name):'No room')+'</td><td>'+esc(g.givesUp[rule.result[g.id]||"none"])+'</td></tr>'}).join("")+
-     '</tbody></table>'+(rule.note?'<p class="hint">'+rich(rule.note)+'</p>':''):'<p class="hint">Pick a rule to see who gets which room.</p>')+'</div>'+
+     '<h3>'+esc(fill(Hl.boardHeading,{rule:rule.label}))+'</h3><table class="board"><thead><tr><th>'+esc(L.group)+'</th><th>'+esc(L.gets)+'</th><th>'+esc(L.givesUp)+'</th></tr></thead><tbody>'+
+      Hl.groups.map(g=>{const rm=room(rule.result[g.id]);return '<tr class="'+(rm&&!rm.lost?'':'lost')+'"><th>'+esc(g.name)+'</th><td>'+(rm?esc(rm.name):esc(L.none))+'</td><td>'+esc(g.givesUp[rule.result[g.id]||"none"])+'</td></tr>'}).join("")+
+     '</tbody></table>'+(rule.note?'<p class="hint">'+rich(rule.note)+'</p>':''):'<p class="hint">'+esc(L.pick)+'</p>')+'</div>'+
    (rule&&Hl.friend?friendLine(Hl.friend):'')+
-   (S.rulesTried.length>=Math.min(2,Hl.rules.length)&&rule?
+   (enough?
      '<div class="q"><span class="qtext">'+esc(Hl.questionsHeading)+'</span><ol class="three">'+Hl.threeQuestions.map(t=>'<li>'+rich(t)+'</li>').join("")+'</ol>'+
      '<p class="hint">'+rich(Hl.notes)+'</p></div>'+
-     '<button class="btn" id="next" type="button">'+esc(Hl.button)+'</button>'
+     (Hl.whyQuestion?
+       '<div class="q"><label class="qtext" for="whyTxt">'+esc(Hl.whyQuestion)+'</label><textarea id="whyTxt" maxlength="800" style="min-height:80px">'+esc(S.policyWhy)+'</textarea></div>'+
+       '<button class="btn" id="whyGo" type="button">'+esc(Hl.whyButton||"Save my reason")+'</button><div id="kcNext"'+(S.policyWhy?'':' hidden')+'><button class="btn" id="next" type="button">'+esc(Hl.button)+'</button></div>'
+       :'<button class="btn" id="next" type="button">'+esc(Hl.button)+'</button>')
      :(rule?'<p class="hint">'+esc(Hl.tryAnother||"Now try a different rule and compare.")+'</p>':''))+
   '</section>';
   stage.querySelectorAll("[data-rule]").forEach(b=>b.onclick=()=>{
@@ -1336,7 +1358,9 @@ function vHalls(){
     log("rule_pick",{rule:S.ext,tried:S.rulesTried.length});vHalls();pageSources();
     const bd=document.getElementById("board");if(bd)bd.scrollIntoView({behavior:"smooth",block:"nearest"});
   });
-  const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(5);
+  const wg=document.getElementById("whyGo");
+  if(wg)wg.onclick=()=>{S.policyWhy=document.getElementById("whyTxt").value.trim();log("policy_why",{text:S.policyWhy});document.getElementById("kcNext").hidden=!S.policyWhy};
+  const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(at+1);
 }
 function friendLine(F){
   return '<div class="g friend"><img src="'+(F.img||"")+'" alt="'+esc(F.name)+'"><div class="bubble"><b>'+esc(F.name)+'</b> '+rich(F.text)+'</div></div>';
@@ -1456,7 +1480,88 @@ function drawStreet(){
   document.getElementById("stFig").innerHTML=s;
 }
 
-const VIEWS=CPE?[vHook,vCommit,vReveal,vName,P.street?vStreet:vHalls,vKeepCut,vTransfer,vReport,vCheckin]:[vHook,vCommit,vReveal,vName,vCompare,vPolicy,vTransfer,vReport,vCheckin];
+// ---------- Price-mechanism lessons (P.kind === "ddss") ----------
+// Step 5: a demand-and-supply diagram. Linear model: Qd = demand.a − demand.b·P, Qs = supplyA + supply.b·P.
+// Each shock moves supply (a drought, then rain). The price stays where it was, so the student sees the shortage
+// (or surplus), then moves the price until the market clears. All numbers come from the package and are labelled as a model.
+function mkSupplyA(k){const M=P.market;return k?M.shocks[k-1].supplyA:M.supply.a}
+function mkQ(p,k){const M=P.market;return {qd:Math.max(0,M.demand.a-M.demand.b*p),qs:Math.max(0,mkSupplyA(k)+M.supply.b*p)}}
+function mkEq(k){const M=P.market,p=(M.demand.a-mkSupplyA(k))/(M.demand.b+M.supply.b);return {p:p,q:M.demand.a-M.demand.b*p}}
+function vMarket(){
+  const M=P.market,at=VIEWS.indexOf(vMarket),n=M.shocks.length;
+  if(S.mkStage==null){S.mkStage=0;S.mkP=mkEq(0).p}
+  if(!S.mkCleared){S.mkCleared={};for(let j=1;j<=S.mkStage;j++)S.mkCleared[j]=S.mkLocked||j<S.mkStage}
+  const k=S.mkStage,sh=k?M.shocks[k-1]:null,cleared=!k||S.mkCleared[k],done=k===n&&cleared;
+  stage.innerHTML='<section class="sheet mkbox"><span class="stepnum">'+sn(at)+'</span>'+
+   '<h2>'+esc(M.heading)+'</h2><p>'+rich(M.intro)+'</p>'+
+   (M.friend?friendLine(M.friend):'')+
+   '<div class="fig" id="mkFig"></div><span class="model-badge">Model numbers, not real data</span>'+
+   '<div class="mkstage" aria-live="polite">'+
+    (k?'<p><b>'+esc(sh.heading)+'</b> '+rich(sh.text)+'</p>':'<p>'+rich(M.before)+'</p>')+
+    (k&&!cleared?'<div class="q try"><p class="qtext">'+esc(sh.ask)+'</p>'+
+      '<input type="range" class="slider" id="mkP" min="0" max="'+M.pMax+'" step="'+(M.pStep||1)+'" value="'+S.mkP+'" aria-label="'+esc(M.yLabel)+'"></div>':'')+
+    '<p class="mkread" id="mkRead"></p>'+
+    (k&&cleared?'<p>'+rich(sh.done)+'</p>':'')+
+    (!done&&cleared?'<button class="btn" type="button" id="mkShock">'+esc(M.shocks[k].button)+'</button>':'')+
+   '</div>'+
+   (done?
+     G("curious",M.griffles,"asking")+
+     '<div class="q"><span class="qtext">'+esc(M.question)+'</span><div class="opts">'+M.options.map(o=>'<label class="opt"><input type="radio" name="mkq" value="'+o.id+'"'+(S.mkAns===o.id?' checked':'')+(S.mkLocked?' disabled':'')+'><span>'+esc(o.text)+'</span></label>').join("")+'</div>'+
+      '<div id="mkAns">'+(S.mkLocked?'<p class="hint">'+rich(M.answer)+'</p>':'')+'</div></div>'+
+     '<div id="mkIdea">'+(S.mkLocked?mkIdeaHtml():'')+'</div>'
+     :'')+
+  '</section>';
+  drawMarket();
+  const r=document.getElementById("mkP");
+  if(r){fillSlider(r);r.oninput=()=>{S.mkP=+r.value;fillSlider(r);drawMarket();
+      const q=mkQ(S.mkP,k);if(Math.abs(q.qd-q.qs)<=(M.tolerance||0)&&!S.mkCleared[k]){S.mkCleared[k]=true;log("market_clear",{shock:sh.id,p:S.mkP,moves:S.mkMoves||0});vMarket();pageSources()}};
+    r.onchange=()=>{S.mkMoves=(S.mkMoves||0)+1;log("market_move",{shock:sh.id,p:+r.value})}}
+  const b=document.getElementById("mkShock");
+  if(b)b.onclick=()=>{S.mkStage=k+1;log("market_shock",{shock:M.shocks[k].id,p:S.mkP});vMarket();pageSources()};
+  // Answering fills in the explanation where it is, without redrawing the step, then brings the Next button into view
+  // (a full redraw jumped the page about and, in some viewers, left students unable to scroll on).
+  stage.querySelectorAll('input[name=mkq]').forEach(x=>x.onchange=()=>{
+    S.mkAns=x.value;S.mkLocked=true;log("market_answer",{choice:x.value,correct:x.value===M.correct});
+    stage.querySelectorAll('input[name=mkq]').forEach(y=>y.disabled=true);
+    document.getElementById("mkAns").innerHTML='<p class="hint">'+rich(M.answer)+'</p>';
+    document.getElementById("mkIdea").innerHTML=mkIdeaHtml();bindNext();pageSources();
+    const nb=document.getElementById("next");if(nb)setTimeout(()=>nb.scrollIntoView({behavior:"smooth",block:"nearest"}),50)});
+  const bindNext=()=>{const nx=document.getElementById("next");if(nx)nx.onclick=()=>go(at+1)};
+  bindNext();
+}
+function mkIdeaHtml(){const M=P.market;return '<h3>'+esc(M.ideaHeading)+'</h3><p>'+rich(M.idea)+'</p><button class="btn" id="next" type="button">'+esc(M.button)+'</button>'}
+function drawMarket(){
+  const M=P.market,k=S.mkStage,W=400,H=320,l=46,r=16,t=30,b=46,X=q=>l+(W-l-r)*q/M.qMax,Y=p=>H-b-(H-t-b)*p/M.pMax;
+  const f=v=>Math.round(v).toLocaleString("en-GB");
+  const dLine=()=>{const A=M.demand.a,B=M.demand.b;
+    const q0=Math.min(A,M.qMax),p0=(A-q0)/B, q1=Math.max(0,A-B*M.pMax),p1=(A-q1)/B;
+    return 'M'+X(q0)+' '+Y(p0)+' L'+X(q1)+' '+Y(Math.min(M.pMax,p1))};
+  const sLine=j=>{const a=mkSupplyA(j),q0=Math.max(0,a),p0=a<0?-a/M.supply.b:0,qT=Math.min(M.qMax,a+M.supply.b*M.pMax),pT=(qT-a)/M.supply.b;
+    return 'M'+X(q0)+' '+Y(p0)+' L'+X(qT)+' '+Y(pT)};
+  const lab=(j,cls,txt)=>{const a=mkSupplyA(j),pp=M.pMax*.88,q=Math.min(M.qMax,a+M.supply.b*pp);return '<text x="'+(X(q)+6)+'" y="'+(Y(pp)+4)+'" class="lbl '+cls+'">'+txt+'</text>'};
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(M.heading+": demand and supply diagram")+'"><defs><marker id="mkArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>'+
+   '<line x1="'+l+'" y1="'+(H-b)+'" x2="'+(W-r)+'" y2="'+(H-b)+'" class="ax"/><line x1="'+l+'" y1="'+t+'" x2="'+l+'" y2="'+(H-b)+'" class="ax"/>'+
+   '<text x="'+(W-r)+'" y="'+(H-8)+'" text-anchor="end" class="lbl">'+esc(M.xLabel)+' →</text><text x="'+(l-36)+'" y="'+(t-12)+'" class="lbl">↑ '+esc(M.yLabel)+'</text>';
+  for(let q=0;q<=M.qMax;q+=M.qTick)s+='<text x="'+X(q)+'" y="'+(H-b+16)+'" text-anchor="middle" class="tick">'+f(q)+'</text>';
+  for(let p=0;p<=M.pMax;p+=M.pTick)s+='<text x="'+(l-8)+'" y="'+(Y(p)+4)+'" text-anchor="end" class="tick">'+p+'</text>';
+  if(k){s+='<path d="'+sLine(k-1)+'" class="old"/>'+lab(k-1,"slab",esc(k-1?"S"+(k-1):"S"));
+    const pm=M.pMax*.75,qa=mkSupplyA(k-1)+M.supply.b*pm,qb=mkSupplyA(k)+M.supply.b*pm,dir=qb<qa?-1:1;
+    s+='<path d="M'+(X(qa)+dir*8)+' '+Y(pm)+' L'+(X(qb)-dir*10)+' '+Y(pm)+'" class="arrow" style="color:var(--ink)"/>'}
+  s+='<path d="'+dLine()+'" class="dd"/><text x="'+(X(Math.max(0,M.demand.a-M.demand.b*M.pMax*.92))-8)+'" y="'+(Y(M.pMax*.92)+4)+'" text-anchor="end" class="lbl dlab">D</text>';
+  s+='<path d="'+sLine(k)+'" class="ss"/>'+lab(k,"slab",k?"S"+k:"S");
+  const P0=S.mkP,q=mkQ(P0,k),gap=q.qd-q.qs,y=Y(P0);
+  s+='<line x1="'+l+'" y1="'+y+'" x2="'+(W-r)+'" y2="'+y+'" class="pline"/>';
+  if(Math.abs(gap)>(M.tolerance||0)){const c=gap>0?"short":"sur";
+    s+='<line x1="'+X(Math.min(q.qd,q.qs))+'" y1="'+y+'" x2="'+X(Math.max(q.qd,q.qs))+'" y2="'+y+'" class="gap '+c+'"/>'+
+      '<text x="'+X((q.qd+q.qs)/2)+'" y="'+(y-12)+'" text-anchor="middle" class="gaplab '+c+'">'+esc(gap>0?M.shortLabel||"Shortage":M.surplusLabel||"Surplus")+' '+f(Math.abs(gap))+'</text>'}
+  else s+='<circle cx="'+X(q.qd)+'" cy="'+y+'" r="8" class="eq"/>';
+  s+='</svg>';
+  document.getElementById("mkFig").innerHTML=s;
+  const rd=document.getElementById("mkRead");
+  if(rd)rd.innerHTML=Math.abs(gap)<=(M.tolerance||0)?'<span class="ok">'+fill(M.readClear,{p:f(P0),q:f(q.qd)})+'</span>':fill(gap>0?M.readShort:M.readSurplus,{p:f(P0),qd:f(q.qd),qs:f(q.qs),gap:f(Math.abs(gap))});
+}
+
+const VIEWS=CPE?[vHook,vCommit,vReveal,vName,P.market?vMarket:P.street?vStreet:vHalls,P.keepCut?vKeepCut:vHalls,vTransfer,vReport,vCheckin]:[vHook,vCommit,vReveal,vName,vCompare,vPolicy,vTransfer,vReport,vCheckin];
 
 
 /* ---------- lite cover (optional: header.cover) ---------- */
@@ -1506,7 +1611,8 @@ document.getElementById("tFill").onclick=()=>{
   Object.assign(S,{perc0:3,percLocked:true,num:X.num,choice:X.choice,why:X.why,committed:true,doubts:X.doubts||[],
     name:X.name,named:true,ext:X.ext,extLocked:true,ctx:CTX[X.ext]?X.ext:(P.compare?P.compare.defaultCtx:P.contexts[0].id),triedBan:{},policyWhy:X.policyWhy,
     advice:X.advice,adviceFiled:true,ticks:X.ticks||[],rep:null});
-  if(CPE)Object.assign(S,{stDone:!!P.street,stA:P.street?P.street.length/2:null,stB:P.street?P.street.length/2:null,ext:X.rule,extLocked:true,rulesTried:[X.rule],keep:X.keep.slice(),consider:(X.consider||[]).slice(),keepChecked:true});
+  if(CPE)Object.assign(S,{stDone:!!P.street,stA:P.street?P.street.length/2:null,stB:P.street?P.street.length/2:null,ext:X.rule,extLocked:true,rulesTried:X.rule?[X.rule,X.rule2||X.rule]:[],keep:(X.keep||[]).slice(),consider:(X.consider||[]).slice(),keepChecked:true});
+  if(P.market)Object.assign(S,{mkStage:P.market.shocks.length,mkP:mkEq(P.market.shocks.length).p,mkAns:P.market.correct,mkLocked:true});
   log("tester_fill");
   const b=document.getElementById("tFill");b.textContent="Sample answers filled";setTimeout(()=>b.textContent="Fill sample answers",2000);
   VIEWS[S.step]();pageSources();
