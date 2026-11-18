@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun · Campaign map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.wrap{max-width:1000px;margin:0 auto;padding:22px 16px 50px}
+h1{font-size:clamp(32px,5vw,50px);line-height:1.05}
+.mapbox{position:relative;margin-top:16px;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#081120}
+.mapbox svg{display:block;width:100%;height:auto}
+.land{fill:#1b3152}
+.fog{fill:url(#fogpat)}
+.pinglow{fill:var(--yellow);opacity:.25;animation:glow 2.4s ease-in-out infinite}
+.pin{fill:var(--yellow);stroke:#fff;stroke-width:2}
+.plab{fill:var(--ink);font:700 15px Inter,system-ui,sans-serif;paint-order:stroke;stroke:#081120;stroke-width:4px}
+@keyframes glow{0%,100%{r:14;opacity:.15}50%{r:24;opacity:.4}}
+.overlay-txt{position:absolute;left:16px;bottom:12px;font-family:"Special Elite","Courier New",monospace;font-size:13px;letter-spacing:.1em;color:#d9c9a3}
+.acts{display:grid;gap:12px;margin-top:18px}
+.act{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.act .n{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:26px;background:var(--card2)}
+.act.done .n{background:var(--teal);color:#05211e}.act.open .n{background:var(--yellow);color:#2a1d00}
+.act.locked{opacity:.5}
+.act h3{font-size:18px}.act .btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.act .btns a{text-decoration:none;padding:9px 14px;font-size:14px}
+@media (max-width:620px){.act{grid-template-columns:52px 1fr}.act .n{width:52px;height:52px}.act .btns{grid-column:1/3;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="classified">Republic of Economics · Campaign map</div>
+  <h1>Econ Speedrun</h1>
+  <p class="mute" style="font-size:17px;max-width:720px">A four-act campaign through Year 6 H1 macro. You start as a junior analyst who has never seen an economy up close, and work your way up to minister. Every case you crack lifts the fog on another corner of the world.</p>
+  <div id="me"></div>
+  <div class="mapbox" id="map"></div>
+  <div class="acts" id="acts"></div>
+  <p class="small mute" id="demo" style="margin-top:18px"></p>
+  <p class="tiny mute">Prototype. Model numbers are a teaching model; real-world figures are sourced in each act.</p>
+</div>
+<script src="fx.js"></script>
+<script src="act1.js"></script>
+<script src="act2.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+const demo=!/github\.io$/.test(location.hostname), suf=demo?'#demo':'';
+const PINS=Object.assign({},Act1.PINS,Act2.PINS), STK=Object.assign({},Act1.STICKERS,Act2.STICKERS);
+const p=FX.profile(), explored=(p.explored||[]).filter(n=>PINS[n]);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// career card
+if(p.name) document.getElementById('me').innerHTML=`<div style="max-width:520px;margin-top:16px">${FX.careerCard(p,{act:p.act2&&p.act2.done?3:p.act1&&p.act1.done?2:1,stickerDefs:STK})}</div>`;
+// fogged map: land drawn under a hatched fog, with clear "holes" around explored countries
+const M=window.WORLD_MAP;
+const holes=explored.map(n=>{const q=PINS[n]; const [x,y]=M.project(q.lon,q.lat); return `<circle cx="${x}" cy="${y}" r="70" fill="black"/>`;}).join('');
+const pins=explored.map((n,i)=>{const q=PINS[n]; const [x,y]=M.project(q.lon,q.lat); return `<circle class="pinglow" cx="${x}" cy="${y}" r="16" style="animation-delay:${i*.3}s"/><circle class="pin" cx="${x}" cy="${y}" r="7"/><text class="plab" x="${q.left?x-12:x+12}" y="${y+5}" text-anchor="${q.left?'end':'start'}">${esc(n)}</text>`;}).join('');
+document.getElementById('map').innerHTML=`<svg viewBox="0 0 ${M.w} ${M.h}">
+  <defs><pattern id="fogpat" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="10" height="10" fill="#0a1424"/><line x1="0" y1="0" x2="0" y2="10" stroke="#13233b" stroke-width="4"/></pattern>
+  <radialGradient id="soft"><stop offset="55%" stop-color="black"/><stop offset="100%" stop-color="white"/></radialGradient>
+  <mask id="fogmask"><rect width="${M.w}" height="${M.h}" fill="white"/>${explored.map(n=>{const q=PINS[n]; const [x,y]=M.project(q.lon,q.lat); return `<circle cx="${x}" cy="${y}" r="80" fill="url(#soft)"/>`;}).join('')}</mask></defs>
+  <path class="land" d="${M.d}"/><rect class="fog" width="${M.w}" height="${M.h}" mask="url(#fogmask)" opacity=".86"/>${pins}</svg>
+  <div class="overlay-txt">${explored.length?`${explored.length} countr${explored.length===1?'y':'ies'} explored`:'Unexplored territory · finish a case to lift the fog'}</div>`;
+// acts
+const done1=!!(p.act1&&p.act1.done), done2=!!(p.act2&&p.act2.done);
+const ACTS=[
+  {n:1, t:'The Analyst', s:'Standard of living & key economic indicators', st:done1?'done':'open', host:'act1-host.html', play:'act1-play.html', note:done1?`Completed · ${p.act1.score} points`:'Mystery economies, trap cards and your own Living Standard formula.'},
+  {n:2, t:'The Economist', s:'AD/AS and the multiplier', st:done2?'done':'open', host:'act2-host.html', play:'act2-play.html', note:done2?`Completed · ${p.act2.score} points`:'Real shocks from 12 economies, animated AD/AS diagrams and the multiplier race.'},
+  {n:3, t:'The Crisis Doctor', s:'Macroeconomic aims & issues', st:'locked', note:'Planned: Economy ER and a cast of citizens.'},
+  {n:4, t:'The Minister', s:'Macroeconomic policies', st:'open', host:'host.html', play:'play.html', note:'Steer the Harbour Republic through a hidden real era and beat the Autopilot.'}
+];
+document.getElementById('acts').innerHTML=ACTS.map(a=>`<div class="act ${a.st}"><div class="n">${a.st==='done'?'✓':a.st==='locked'?'🔒':a.n}</div>
+  <div><div class="tiny mute" style="text-transform:uppercase;letter-spacing:.08em;font-weight:800">Act ${a.n} · ${esc(a.s)}</div><h3>${esc(a.t)}</h3><div class="small mute">${esc(a.note)}</div></div>
+  <div class="btns">${a.host?`<a class="btn ghost" href="${a.host}${suf}">🎛️ Host</a><a class="btn" href="${a.play}${suf}">📱 ${a.st==='done'?'Replay':'Play'}</a>`:''}</div></div>`).join('');
+if(demo) document.getElementById('demo').textContent='Demo mode: class games only work between tabs in this browser. Open the host and a couple of player tabs side by side to try it. Solo play works fully.';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun · Act 1 Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{font-size:16px}
+.wrap{max-width:1280px;margin:0 auto;padding:12px 20px 40px}
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:10px}.hdr h1{font-size:22px}
+.code{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;letter-spacing:.18em}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.big{font-size:clamp(26px,3vw,40px);line-height:1.15}
+.lobby{text-align:center;padding:30px 10px}.lobby .code{font-size:clamp(60px,10vw,120px);color:var(--yellow)}
+#qr{display:inline-block;background:#fff;padding:10px;border-radius:12px;margin-top:10px}
+.teams{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.team{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:6px 14px 6px 6px;animation:bubin .4s both}
+.tag{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
+table.dz{width:100%;border-collapse:collapse;font-size:16px;border-radius:10px;overflow:hidden}
+table.dz th,table.dz td{padding:8px 10px;border-bottom:1px solid #d6c69e;text-align:left}
+table.dz th{background:#e2d3ac}
+table.dz td.v{font-family:"Special Elite","Courier New",monospace;font-weight:700;font-size:19px;text-align:center}
+table.dz th.v{text-align:center}
+table.dz tr.grp td{background:#d8c79c;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#5a4a2a;padding:5px 10px}
+.pop{display:inline-block;height:8px;background:#b0892f;border-radius:4px;vertical-align:middle;margin-right:6px}
+.split{display:grid;gap:7px;margin-top:8px}
+.sp{display:grid;grid-template-columns:1fr 46px;gap:8px;align-items:center}
+.sp .lab{font-weight:600}.sp .track{height:14px;background:#0c1a30;border-radius:7px;overflow:hidden;margin-top:3px}
+.sp .track i{display:block;height:100%;background:var(--blue)}.sp.right .track i{background:var(--teal)}.sp.right .lab{color:var(--teal)}
+.sp .n{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:19px;text-align:right}
+.lb{display:grid;gap:8px}
+.lbr{display:grid;grid-template-columns:28px 1fr 64px;gap:10px;align-items:center}
+.lbr .barw{height:10px;background:#0c1a30;border-radius:5px;overflow:hidden;margin-top:4px}
+.lbr .barw i{display:block;height:100%;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.lbr .sc{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:20px;text-align:right}
+.rk{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;color:var(--mute)}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.endmap svg{width:100%;height:auto;background:#0c1a30;border-radius:12px}
+.endmap path.land{fill:#1f3a62}.endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:2}.endmap circle.new{fill:var(--yellow)}
+.endmap text{fill:var(--ink);font-size:16px;font-weight:800;paint-order:stroke;stroke:#0b1626;stroke-width:4px}
+.wbar{display:grid;grid-template-columns:150px 1fr 40px;gap:10px;align-items:center;margin:6px 0}
+.wbar .t{height:14px;background:#0c1a30;border-radius:7px;overflow:hidden}.wbar .t i{display:block;height:100%;background:var(--violet)}
+.snd{background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;font-size:16px}
+.reveal-card{position:relative}
+.pod .who{font-weight:800}
+</style>
+</head>
+<body class="theme-dossier">
+<div class="wrap" id="app"><p class="mute">Connecting…</p></div>
+<script src="firebase-config.js"></script>
+<script src="act1.js"></script>
+<script src="common.js"></script>
+<script src="fx.js"></script>
+<script src="sync.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+'use strict';
+const A=Act1, R=A.ROUNDS, $=s=>document.querySelector(s), app=$('#app'), esc=UI.esc;
+const H={sync:null, code:null, game:null, shown:{}, prevRanks:null, ranksAtRound:{}, lastPhaseKey:null, celebrated:false};
+const KEY='speedrun-act1-host';
+const playURL=c=>{ const u=new URL('act1-play.html', location.href); u.search='?code='+c; if(H.sync.kind==='local') u.hash='demo'; return u.toString(); };
+
+async function boot(){
+  try{ H.sync=await Sync.connect(); }catch(e){ app.innerHTML=`<div class="card"><h2>Could not connect</h2><p class="mute">${esc(e.code||e.message||e)}</p><p class="small mute">To try it without the internet, add #demo to the address.</p></div>`; return; }
+  let s=null; try{ s=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(s&&s.code&&await H.sync.exists(s.code)) return attach(s.code);
+  app.innerHTML=`<div class="classified">Classified · Analyst division</div><div class="hdr"><h1>Econ Speedrun · Act 1: The Analyst <span class="pill">Host</span></h1><span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo: this browser only</span>':''}</div>
+   <div class="card" style="max-width:820px"><h2>Start the class game</h2>
+    ${FX.griffles('curious','I\'m Griffles. I\'ll be making confident guesses on the big screen. Some of them will even be right.','pop')}
+    <p class="mute">${R.length} files in about 45 minutes: two mystery-economy cases where teams buy clues with coins and bet on their answers, seven trap cards on common misconceptions, and a final mission where each team builds its own Living Standard formula.</p>
+    <p class="small mute">Mission 1 uses Estonia and Uzbekistan, so it doesn't spoil the "Guess the Country" activity in the notes. The final round compares Estonia and Albania. Sound plays on this screen only; use the 🔊 button to mute it.</p>
+    <div class="ctrl"><button class="btn" id="create">Create game</button></div></div>`;
+  $('#create').onclick=async()=>{ $('#create').disabled=true; attach(await H.sync.createGame({scenario:'act1'})); };
+}
+function attach(code){
+  H.code=code; try{ localStorage.setItem(KEY, JSON.stringify({code})); }catch(e){}
+  H.sync.watchGame(code, g=>{ H.game=g; if(!g){ localStorage.removeItem(KEY); return location.reload(); } render(); });
+}
+const st=()=>(H.game&&H.game.state)||{phase:'lobby'};
+const set=p=>H.sync.setState(H.code, Object.assign({}, st(), p));
+const teams=()=>Object.entries((H.game&&H.game.teams)||{}).map(([uid,t])=>Object.assign({uid},t));
+function hdr(){
+  const s=st();
+  return `<div class="classified">Classified · Analyst division</div><div class="hdr"><h1>Act 1 · The Analyst</h1><span class="pill">Code <span class="code">${H.code}</span></span>
+   ${s.phase==='play'||s.phase==='reveal'?`<span class="pill hot">File ${s.r+1} / ${R.length}</span>`:''}<span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo</span>':''}
+   <button class="snd" id="snd" title="Sound on this screen">${FX.soundOn()?'🔊':'🔇'}</button><button class="btn ghost" id="menu" style="padding:7px 12px">⋯</button></div>`;
+}
+function bindHdr(){
+  const sn=$('#snd'); if(sn) sn.onclick=()=>{ FX.setSound(!FX.soundOn()); sn.textContent=FX.soundOn()?'🔊':'🔇'; if(FX.soundOn()) FX.play('coin'); };
+  const m=$('#menu'); if(!m) return; m.onclick=()=>{ const d=document.createElement('div'); d.className='overlay';
+  d.innerHTML=`<div class="box"><h3>Game menu</h3><div class="ctrl"><button class="btn ghost" id="mc">Close</button><button class="btn ghost" id="ml">Leave (keep data)</button><button class="btn alt" id="md">End and delete all game data</button></div></div>`;
+  document.body.appendChild(d); d.querySelector('#mc').onclick=()=>d.remove();
+  d.querySelector('#ml').onclick=()=>{ localStorage.removeItem(KEY); location.reload(); };
+  d.querySelector('#md').onclick=async()=>{ await H.sync.deleteGame(H.code); localStorage.removeItem(KEY); location.reload(); }; }; }
+
+function render(){
+  const s=st(), key=s.phase+':'+s.r, first=key!==H.lastPhaseKey; H.lastPhaseKey=key;
+  if(s.phase==='lobby') return lobby();
+  if(s.phase==='end') return endView(first);
+  const round=R[s.r], reveal=s.phase==='reveal';
+  // the theatre runs once per reveal; live updates afterwards render without animation
+  const theatre = reveal && first && !H.shown[round.id]; if(theatre){ H.shown[round.id]=true; FX.play('reveal'); }
+  if(!reveal && first){ H.ranksAtRound[s.r]=ranks(); }
+  if(round.type==='mystery') mysteryView(round, reveal, theatre);
+  else if(round.type==='quick') quickView(round, reveal, theatre);
+  else formulaView(round, reveal, theatre);
+  if(theatre){ const sc=teams(); const allRight=round.type!=='formula' && sc.filter(t=>{const a=(t.answers||{})[round.id]; const x=A.scoreRound(round,a); return a&&a.locked&&x.right===x.of;}).length; if(allRight && allRight>=Math.ceil(sc.length/2)) setTimeout(()=>FX.confetti(70),900); }
+}
+function lobby(){
+  const T=teams(), url=playURL(H.code);
+  app.innerHTML=hdr()+`<div class="card lobby"><div class="mute">Go to <b style="color:var(--ink)">${esc(url.replace(/\?.*/,'').replace(/^https?:\/\//,''))}</b> and enter</div><div class="code">${H.code}</div><div id="qr"></div>
+   <div class="teams">${T.length?T.map(t=>`<span class="team">${FX.chip(t)}</span>`).join(''):'<span class="mute">Waiting for teams…</span>'}</div>
+   <div class="ctrl" style="justify-content:center;margin-top:22px"><button class="btn" id="start" ${T.length?'':'disabled'}>Open file 1 (${T.length} team${T.length===1?'':'s'})</button></div></div>`;
+  try{ new QRCode($('#qr'),{text:url,width:180,height:180}); }catch(e){ $('#qr').remove(); }
+  bindHdr(); $('#start').onclick=()=>{ FX.play('stamp'); set({phase:'play', r:0}); };
+}
+function lockedCount(round){ const T=teams(); return {n:T.filter(t=>t.answers&&t.answers[round.id]&&t.answers[round.id].locked).length, of:T.length}; }
+function controls(round, reveal){
+  const c=lockedCount(round), s=st();
+  return `<div class="ctrl"><b>${c.n} of ${c.of}</b><span class="mute">teams locked in</span><span class="spacer"></span>
+   ${reveal?`<button class="btn" id="next">${s.r===R.length-1?'Close the case ▶':'Next file ▶'}</button>`:`<button class="btn alt" id="rev">Reveal</button>`}</div>`;
+}
+function bindControls(){ bindHdr(); const s=st();
+  const rv=$('#rev'); if(rv) rv.onclick=()=>{ rv.disabled=true;
+    const d=document.createElement('div'); d.className='drum'; d.innerHTML='<span>DECLASSIFYING…</span>'; document.body.appendChild(d);
+    FX.play('drumroll', FX.reduced()?200:1100); setTimeout(()=>{ d.remove(); FX.play('stamp'); set({phase:'reveal'}); }, FX.reduced()?200:1150); };
+  const nx=$('#next'); if(nx) nx.onclick=()=>{ FX.play('tick'); set(s.r===R.length-1?{phase:'end'}:{phase:'play', r:s.r+1}); }; }
+
+// ---------- leaderboard with rank movement and streaks ----------
+function lastRevealed(){ const s=st(); if(s.phase==='end') return R.length-1; if(s.phase==='reveal') return s.r; return (s.r||0)-1; }
+function scored(){ return teams().map(t=>({uid:t.uid, t, sc:A.totalScore(t.answers, lastRevealed())})).sort((a,b)=>b.sc-a.sc); }
+function ranks(){ const o={}; scored().forEach((x,i)=>o[x.uid]=i); return o; }
+function streak(t){ // consecutive revealed rounds (most recent first) with positive points
+  const s=st(); let n=0; const lastRevealed = s.phase==='reveal'||s.phase==='end' ? s.r : s.r-1;
+  for(let i=Math.min(lastRevealed,R.length-1); i>=0; i--){ const p=A.scoreRound(R[i],(t.answers||{})[R[i].id]).pts; if(p>0) n++; else break; }
+  return n;
+}
+function leaderboard(n){
+  const S=scored().slice(0,n||8); if(!S.length) return '';
+  const before=H.ranksAtRound[st().r]||{}, showMove=st().phase==='reveal'||st().phase==='end';
+  const mx=Math.max(1,...S.map(x=>x.sc)), mn=Math.min(0,...S.map(x=>x.sc));
+  return `<div class="card"><h3>Analyst leaderboard</h3><div class="lb" style="margin-top:10px">${S.map((x,i)=>{
+    const was=before[x.uid], mv=showMove&&was!==undefined?was-i:0, sk=streak(x.t);
+    return `<div class="lbr"><span class="rk">${i+1}</span><div><div>${FX.chip(x.t)}${mv>0?`<span class="rkmove up">▲${mv}</span>`:mv<0?`<span class="rkmove down">▼${-mv}</span>`:''}${sk>=3?`<span class="streak" title="${sk} files in a row">🔥${sk}</span>`:''}</div>
+      <div class="barw"><i style="width:${((x.sc-mn)/(mx-mn||1)*100).toFixed(0)}%;background:${x.t.colour||'var(--teal)'}"></i></div></div><span class="sc">${x.sc}</span></div>`; }).join('')}</div></div>`;
+}
+function splitBars(opts, counts, correct, reveal, theatre){
+  const mx=Math.max(1,...Object.values(counts));
+  return `<div class="split ${theatre?'grow':''}">${opts.map(([k,t])=>`<div class="sp ${reveal&&k===correct?'right':''}"><div><div class="lab">${esc(t)}${reveal&&k===correct?' ✓':''}</div><div class="track"><i style="width:${((counts[k]||0)/mx*100).toFixed(0)}%"></i></div></div><span class="n">${counts[k]||0}</span></div>`).join('')}</div>`;
+}
+function mapCard(r, title){
+  const M=window.WORLD_MAP, all=A.pinsUpTo(r), now=(R[r].reveal&&R[r].reveal.names)||R[r].pins||[];
+  if(!all.length) return '';
+  const dots=all.map(n=>{const p=A.PINS[n]; const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin ${now.includes(n)?'new':''}" cx="${x}" cy="${y}" r="${now.includes(n)?11:8}"/><text x="${p.left?x-13:x+13}" y="${y+5}" text-anchor="${p.left?'end':'start'}">${esc(n)}</text>`;}).join('');
+  return `<div class="card"><h3>${title||'The map so far'}</h3><div class="endmap" style="margin-top:8px"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div></div>`;
+}
+function hostGrif(round, reveal){
+  if(round.type==='quick') return reveal ? FX.griffles('skeptical', `I said: "${esc(round.gut)}" Yeah… don't do what I did.`, 'shake') : FX.griffles('guessing', `<i>My gut says:</i> ${esc(round.gut)}`, 'pop');
+  if(round.type==='mystery') return reveal ? FX.griffles('surprised', round.id==='m1'?'Wait, the one that <i>grew</i> faster is the poorer one? My whole worldview is shaking.':'Sixty-five times richer… or seventeen? Same countries, very different story.', 'hop') : FX.griffles('curious', 'Watch which clues the class is buying. Is anyone paying 4 coins for HDI?', 'pop');
+  return FX.griffles('curious','Is low carbon part of <i>my</i> living standard, or the planet\'s? Asking for a griffin.','pop');
+}
+
+function mysteryView(round, reveal, theatre){
+  const T=teams(), buys={};
+  T.forEach(t=>((t.answers||{})[round.id]||{}).bought?.forEach(k=>buys[k]=(buys[k]||0)+1));
+  const mxb=Math.max(1,...Object.values(buys));
+  let grp='', rows='', i=0;
+  round.clues.forEach(c=>{
+    if(c.group!==grp){ grp=c.group; rows+=`<tr class="grp"><td colspan="4">${esc(grp)}</td></tr>`; }
+    const d=theatre?`style="animation-delay:${(i++*0.12).toFixed(2)}s"`:'', cls=theatre?'flip':'';
+    rows+=`<tr><td>${esc(c.label)} <span class="small" style="opacity:.6">🪙${c.cost}</span></td><td class="v ${cls}" ${d}>${reveal?esc(c.v[0])+(c.unit||''):'<span class="redact"></span>'}</td><td class="v ${cls}" ${d}>${reveal?esc(c.v[1])+(c.unit||''):'<span class="redact"></span>'}</td>
+      <td class="small" style="width:120px;color:#5a4a2a"><span class="pop" style="width:${((buys[c.k]||0)/mxb*60).toFixed(0)}px"></span>${buys[c.k]||0}</td></tr>`;
+  });
+  const qs=round.questions.map(q=>{ const counts={}; T.forEach(t=>{ const a=(t.answers||{})[round.id]; const v=a&&a.locked&&a.a&&a.a[q.id]; if(v) counts[v]=(counts[v]||0)+1; });
+    return `<div style="margin-top:12px"><b>${esc(q.q)}</b>${splitBars(q.opts, counts, q.correct, reveal, theatre)}</div>`; }).join('');
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card folder reveal-card" data-tab="Case file">${reveal?'<div class="stampmark">Declassified</div>':''}<div class="tag">${esc(round.title)} · ${round.year}</div>
+     <p class="mute" style="margin:6px 0 10px;padding-right:${reveal?'150px':'0'}">${round.intro}</p>
+     <table class="dz paper"><tr><th>Indicator</th><th class="v">Country A${reveal?`<br><span style="color:#1f7a6f">${esc(round.reveal.names[0])}</span>`:''}</th><th class="v">Country B${reveal?`<br><span style="color:#1f7a6f">${esc(round.reveal.names[1])}</span>`:''}</th><th class="small">teams who bought it</th></tr>${rows}</table>
+     ${controls(round, reveal)}</div>
+     ${reveal?`<div class="card"><p style="font-size:18px;margin:0">${round.reveal.text}</p><p style="color:var(--yellow);margin:10px 0 0">💡 ${round.reveal.lesson}</p>${round.reveal.sources?`<p class="small mute" style="margin:10px 0 0">Sources: ${round.reveal.sources}</p>`:''}</div>`:''}</div>
+    <div>${hostGrif(round, reveal)}<div class="card"><h3>${reveal?'How the class answered':'Answers so far (hidden until the reveal)'}</h3>${reveal?qs:`<p class="mute">The bars in the table show which clues are selling, live.</p>`}</div>
+     ${reveal?mapCard(st().r):''}${leaderboard(6)}</div></div>`;
+  bindControls();
+}
+function quickView(round, reveal, theatre){
+  const T=teams(), counts={}, bets={1:0,2:0,3:0};
+  T.forEach(t=>{ const a=(t.answers||{})[round.id]; if(a&&a.locked){ counts[a.a]=(counts[a.a]||0)+1; bets[a.bet||1]++; } });
+  const right=counts[round.correct]||0, n=Object.values(counts).reduce((a,b)=>a+b,0);
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card folder reveal-card" data-tab="Trap card">${reveal&&n?`<div class="stampmark ${right>=n/2?'ok':''}">${right>=n/2?'Trap avoided':'Class caught!'}</div>`:''}<div class="tag">${esc(round.title)}</div><h2 class="big" style="margin-top:8px;padding-right:${reveal?'170px':'0'}">${esc(round.q)}</h2>
+     ${splitBars(round.opts, reveal?counts:{}, round.correct, reveal, theatre)}
+     ${reveal?`<p style="font-size:18px;margin:14px 0 0">${round.explain}</p>`:''}
+     ${controls(round, reveal)}</div></div>
+    <div>${hostGrif(round, reveal)}${reveal?`<div class="card"><h3>How confident were they?</h3><p class="mute" style="font-size:18px">🎲 All in: <b>${bets[3]}</b> · Fairly sure: <b>${bets[2]}</b> · Hunch: <b>${bets[1]}</b></p></div>`:`<div class="card"><h3>While they decide…</h3><p class="mute" style="font-size:18px">Cold-call a team: is Griffles right? Which word in the question is the trap?</p></div>`}
+     ${round.pins&&reveal?mapCard(st().r):''}${leaderboard(6)}</div></div>`;
+  bindControls();
+}
+function formulaView(round, reveal, theatre){
+  const T=teams().filter(t=>t.formula&&t.answers&&t.answers[round.id]&&t.answers[round.id].locked);
+  const [C1,C2]=A.FORMULA_COUNTRIES;
+  let body;
+  if(!reveal) body=`<p style="font-size:18px">Teams are deciding how much five parts of living standards should count, from 0 to 5: income, health, education, clean air and low carbon. Their phones show live how ${C1.name} and ${C2.name} score under their formula.</p>
+    <p class="mute" style="font-size:16px">${C1.name} wins under equal weights. ${C2.name} only overtakes it if a team counts <b>low carbon</b> very heavily. While they decide, ask: should a country's carbon emissions count in <i>its own</i> people's standard of living?</p>`;
+  else {
+    const w1=T.filter(t=>A.indexFor(t.formula,C1)>=A.indexFor(t.formula,C2)).length, w2=T.length-w1, f=n=>n===1?'1 team\'s formula puts':n+' teams\' formulas put';
+    const avg=k=>T.length?(T.reduce((s,t)=>s+(+t.formula[k]||0),0)/T.length):0;
+    body=`<h2 class="big">${f(w1)} ${C1.name} first. ${f(w2)} ${C2.name} first.</h2>
+     <h3 style="margin-top:14px">Average weight the class gave each dimension</h3><div class="${theatre?'grow':''}">${A.DIMS.map(d=>`<div class="wbar"><span>${d.t}</span><span class="t"><i style="width:${(avg(d.k)/5*100).toFixed(0)}%"></i></span><b>${avg(d.k).toFixed(1)}</b></div>`).join('')}</div>
+     <p class="mute" style="margin-top:10px">Debate: should low carbon count as much as income? Who decides? This is the weakness of every composite indicator, and why HDI keeps to just three dimensions.</p>`;
+  }
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card folder" data-tab="Final mission"><div class="tag">${esc(round.title)}</div>${body}${controls(round, reveal)}</div></div><div>${hostGrif(round, reveal)}${leaderboard(8)}</div></div>`;
+  bindControls();
+}
+function formulaList(){
+  const T=teams().filter(t=>t.formula).sort((a,b)=>a.name.localeCompare(b.name));
+  return `Econ Speedrun · Act 1 formulas · game ${H.code} · ${new Date().toLocaleDateString('en-SG')}\nOrder: ${A.DIMS.map(d=>d.t).join(', ')}\n`+(T.length?T.map(t=>`${t.name}: ${A.formulaCode(t.formula)}`).join('\n'):'(no formulas saved yet)');
+}
+function endView(first){
+  const S=scored(), top=[S[1],S[0],S[2]];
+  if(first&&!H.celebrated){ H.celebrated=true; FX.play('drumroll',900); setTimeout(()=>{ FX.play('fanfare'); FX.confetti(160); },1700); }
+  const pod=(x,cls,place)=>x?`<div class="pod ${cls}"><div class="who">${FX.chip(x.t)}<div class="mute small">${x.sc} pts</div></div><div class="blk">${place}</div></div>`:'';
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card" style="text-align:center"><div class="tag">Case closed · Act 1 complete</div><h2 class="big" style="margin-top:6px">Top analysts</h2>
+     <div class="podium">${pod(top[0],'p2','2')}${pod(top[1],'p1','1')}${pod(top[2],'p3','3')}</div>
+     <p class="mute" style="font-size:18px;margin-top:14px">Every team is promoted to <b style="color:var(--yellow)">Economist</b>. Next act: how the economy actually works (AD/AS and the multiplier).</p></div>
+     ${FX.griffles('pleased','We survived our first week! Nobody tell my manager I fell for the nominal GDP trap.','hop')}
+     ${mapCard(R.length-1,'Countries explored in Act 1')}</div>
+    <div>${leaderboard(12)}
+     <div class="card"><h3>Back up the team formulas first</h3><p class="small mute">Each team's formula is saved on its phone and shown as a code to screenshot. Keep this list too, in case a team clears its phone. It holds only team names and codes.</p>
+      <textarea id="fl" readonly style="width:100%;min-height:120px;background:#0c1a30;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px;font:15px/1.5 ui-monospace,Menlo,monospace">${esc(formulaList())}</textarea>
+      <div class="ctrl"><button class="btn ghost" id="copy">Copy all team formulas</button><span class="small mute" id="copied"></span></div></div>
+     <div class="card"><p class="small mute">Then clear this game's names and scores from the database:</p><div class="ctrl"><button class="btn alt" id="del">End and delete all game data</button></div></div></div></div>`;
+  $('#copy').onclick=async()=>{ const t=$('#fl'); try{ await navigator.clipboard.writeText(t.value); $('#copied').textContent='Copied.'; }catch(e){ t.select(); $('#copied').textContent='Selected. Press Ctrl/Cmd+C.'; } };
+  bindHdr(); $('#del').onclick=async()=>{ await H.sync.deleteGame(H.code); localStorage.removeItem(KEY); location.reload(); };
+}
+boot();
+})();
+</script>
+</body>
+</html>

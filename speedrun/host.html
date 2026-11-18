@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun: Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{font-size:16px}
+.wrap{max-width:1280px;margin:0 auto;padding:16px 20px 40px}
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.hdr h1{font-size:22px}
+.code{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;letter-spacing:.18em}
+.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.big{font-size:clamp(28px,3.4vw,44px);line-height:1.1}
+.lobby{text-align:center;padding:30px 10px}
+.lobby .code{font-size:clamp(60px,10vw,120px);color:var(--yellow)}
+#qr{display:inline-block;background:#fff;padding:10px;border-radius:12px;margin-top:10px}
+.teams{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.team{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-weight:700}
+.lb{display:grid;gap:7px}
+.lbr{display:grid;grid-template-columns:28px 1fr 64px;gap:10px;align-items:center}
+.lbr .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbr .barw{height:10px;background:#0c1a30;border-radius:5px;margin-top:4px;overflow:hidden}
+.lbr .barw i{display:block;height:100%;background:var(--teal);border-radius:5px;transition:width .6s}
+.lbr.auto .barw i{background:repeating-linear-gradient(45deg,#9db0ca,#9db0ca 6px,#6c819f 6px,#6c819f 12px)}
+.lbr.auto .nm{color:var(--mute)}
+.lbr .sc{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:20px;text-align:right}
+.lbr .meta{font-size:11.5px;color:var(--mute)}
+.rk{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;color:var(--mute)}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.timer{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:30px;font-weight:700;color:var(--yellow);min-width:70px}
+.pollbars{display:grid;gap:9px;margin-top:14px}
+.pb{display:grid;grid-template-columns:1fr 50px;gap:10px;align-items:center}
+.pb .lab{font-weight:600}
+.pb .track{height:16px;background:#0c1a30;border-radius:8px;overflow:hidden;margin-top:4px}
+.pb .track i{display:block;height:100%;background:var(--blue);transition:width .4s}
+.pb.right .track i{background:var(--teal)} .pb.right .lab{color:var(--teal)}
+.pb .n{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:20px;text-align:right}
+.lessonbig h2{font-size:clamp(28px,3vw,40px)} .lessonbig p{font-size:20px}
+.endmap svg{width:100%;height:auto;background:#0c1a30;border-radius:12px}
+.endmap path.land{fill:#1f3a62}
+.endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:2}
+.endmap text{fill:var(--ink);font-size:16px;font-weight:800;paint-order:stroke;stroke:#0b1626;stroke-width:4px}
+select{background:#0c1a30;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+.scen{display:grid;gap:8px;margin-top:10px}
+.scen label{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.scen input{margin-top:4px}
+</style>
+</head>
+<body class="theme-warroom">
+<div class="wrap" id="app"><p class="mute">Connecting…</p></div>
+<script src="firebase-config.js"></script>
+<script src="engine.js"></script>
+<script src="scenarios.js"></script>
+<script src="common.js"></script>
+<script src="sync.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+'use strict';
+const E=Engine, Sc=Scenarios, $=s=>document.querySelector(s), app=$('#app');
+const H={ sync:null, code:null, game:null, sc:null, ap:null, tick:null, autoSecs:0, deadline:null, view:null };
+const playURL = code => { const u=new URL('play.html', location.href); u.search='?code='+code; if(H.sync&&H.sync.kind==='local') u.hash='demo'; return u.toString(); };
+
+async function boot(){
+  try{ H.sync=await Sync.connect(); }catch(e){ app.innerHTML=`<div class="card"><h2>Could not connect</h2><p class="mute">${UI.esc(e.code||e.message||e)}</p><p class="small mute">If the school network blocks Firebase, try a phone hotspot. To try the game without the internet, add <code>#demo</code> to the address.</p></div>`; return; }
+  let saved=null; try{ saved=JSON.parse(localStorage.getItem('speedrun-host')||'null'); }catch(e){}
+  if(saved&&saved.code&&await H.sync.exists(saved.code)) return attach(saved.code);
+  setup();
+}
+
+function setup(){
+  app.innerHTML=`<div class="hdr"><h1>Econ Speedrun · Macro <span class="pill">Host</span></h1><span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo mode: this browser only</span>':''}</div>
+   <div class="card" style="max-width:760px"><h2>Start a class game</h2>
+    <p class="mute">Each team steers its own Harbour Republic through the same shocks. You control the clock, the lessons and the prediction polls. Students join on their phones with a code, and no accounts are needed.</p>
+    <b>Which hidden era?</b> <span class="small mute">Students only find out at the end.</span>
+    <div class="scen">${Sc.SCENARIOS.map((s,i)=>`<label><input type="radio" name="sc" value="${s.id}" ${i===0?'checked':''}><span><b>${UI.esc(s.reveal.title)}</b><br><span class="small mute">${UI.esc(s.reveal.story)}</span></span></label>`).join('')}
+     <label><input type="radio" name="sc" value="random"><span><b>Surprise me</b><br><span class="small mute">You won't know either.</span></span></label></div>
+    <div class="ctrl"><button class="btn" id="create">Create game</button></div>
+    <p class="small mute">Before class: check the reveal facts for the era you pick. They're marked for checking in the scenario file.</p></div>`;
+  $('#create').onclick=async()=>{
+    let id=document.querySelector('input[name=sc]:checked').value;
+    if(id==='random') id=Sc.SCENARIOS[Math.floor(Math.random()*Sc.SCENARIOS.length)].id;
+    $('#create').disabled=true;
+    const code=await H.sync.createGame({scenario:id});
+    attach(code);
+  };
+}
+
+function attach(code){
+  H.code=code; try{ localStorage.setItem('speedrun-host', JSON.stringify({code})); }catch(e){}
+  H.sync.watchGame(code, g=>{ H.game=g; if(!g){ localStorage.removeItem('speedrun-host'); return setup(); }
+    if(!H.sc||H.sc.id!==g.meta.scenario){ H.sc=Sc.byId(g.meta.scenario); }
+    syncAutopilot(); render(); });
+}
+function st(){ return (H.game&&H.game.state)||{phase:'lobby',q:0}; }
+function setState(patch){ const s=Object.assign({}, st(), patch); Object.keys(s).forEach(k=>s[k]===undefined&&delete s[k]); return H.sync.setState(H.code, s); }
+function syncAutopilot(){ const q=st().q||0; if(!H.ap||H.ap.q>q){ H.ap=E.newRun(H.sc,{seed:7}); } while(H.ap.q<Math.min(q,H.sc.quarters)) E.step(H.ap,H.sc,E.DEFAULT_POLICY,{}); }
+function teams(){ return Object.entries((H.game&&H.game.teams)||{}).map(([uid,t])=>Object.assign({uid},t)); }
+
+// what to show at the start of quarter q
+function quarterState(q){
+  const info=UI.quarterInfo(H.sc,q);
+  return { q, lesson: info.unlock?info.unlock.k:null, poll: (!info.unlock&&info.poll)?{id:info.poll.id,q,correct:info.poll.correct,reveal:false}:null };
+}
+
+// ---------- views ----------
+function render(){
+  const s=st();
+  if(s.phase==='lobby') return lobby();
+  if(s.phase==='ended') return endView();
+  if(s.q>=H.sc.quarters) return finalQuarterView();
+  const info=UI.quarterInfo(H.sc,s.q);
+  if(s.lesson&&info.unlock) return lessonView(info);
+  if(s.poll&&info.poll) return pollView(info);
+  planView(info);
+}
+
+function hdr(extra){
+  const s=st();
+  return `<div class="hdr"><h1>Econ Speedrun</h1><span class="pill">Code <span class="code">${H.code}</span></span>
+   ${s.phase==='play'?`<span class="pill hot">${s.q<H.sc.quarters?UI.qLabel(s.q):'Final results'}</span>`:''}<span class="spacer"></span>${extra||''}
+   ${H.sync.kind==='local'?'<span class="pill hot">Demo</span>':''}<button class="btn ghost" id="menu" style="padding:7px 12px">⋯</button></div>`;
+}
+function bindMenu(){ const m=$('#menu'); if(m) m.onclick=menu; }
+function menu(){
+  const d=document.createElement('div'); d.className='overlay';
+  d.innerHTML=`<div class="box"><h3>Game menu</h3><p class="small mute">Game code ${H.code} · era: ${UI.esc(H.sc.reveal.title)}</p>
+   <div class="ctrl"><button class="btn ghost" id="mclose">Close</button><button class="btn ghost" id="mnew">Leave this game (keep data)</button><button class="btn alt" id="mdel">End and delete all game data</button></div></div>`;
+  document.body.appendChild(d);
+  d.querySelector('#mclose').onclick=()=>d.remove();
+  d.querySelector('#mnew').onclick=()=>{ localStorage.removeItem('speedrun-host'); location.reload(); };
+  d.querySelector('#mdel').onclick=async()=>{ d.querySelector('#mdel').textContent='Deleting…'; await H.sync.deleteGame(H.code); localStorage.removeItem('speedrun-host'); location.reload(); };
+}
+
+function lobby(){
+  const T=teams(), url=playURL(H.code);
+  app.innerHTML=hdr()+`<div class="card lobby"><div class="mute">Go to <b style="color:var(--ink)">${UI.esc(url.replace(/\?.*/,'').replace(/^https?:\/\//,''))}</b> and enter</div>
+    <div class="code">${H.code}</div><div id="qr"></div>
+    <div class="teams">${T.length?T.map(t=>`<span class="team">${UI.esc(t.name)}</span>`).join(''):'<span class="mute">Waiting for teams to join…</span>'}</div>
+    <div class="ctrl" style="justify-content:center;margin-top:22px"><button class="btn" id="start" ${T.length?'':'disabled'}>Start the game (${T.length} team${T.length===1?'':'s'})</button></div></div>`;
+  try{ new QRCode($('#qr'),{text:url,width:180,height:180}); }catch(e){ $('#qr').remove(); }
+  bindMenu();
+  $('#start').onclick=()=>setState(Object.assign({phase:'play'}, quarterState(0)));
+}
+
+function leaderboard(){
+  const T=teams().filter(t=>t.q!==undefined);
+  const rows=T.map(t=>({nm:t.name,idx:t.index||100,meta:`G ${t.g}% · π ${t.pi}% · U ${t.u}% · R ${t.reserves}`,ready:t.readyQ===st().q,auto:false}))
+    .concat([{nm:'🤖 Autopilot',idx:H.ap.index,meta:'never changes policy',auto:true}]).sort((a,b)=>b.idx-a.idx);
+  const mn=Math.min(...rows.map(r=>r.idx))-1, mx=Math.max(...rows.map(r=>r.idx))+0.5;
+  return `<div class="card"><div class="row"><h3>Living standard</h3><span class="spacer"></span><span class="small mute">start = 100</span></div><div class="lb" style="margin-top:10px">${rows.map((r,i)=>`
+    <div class="lbr ${r.auto?'auto':''}"><span class="rk">${i+1}</span><div><div class="nm">${UI.esc(r.nm)} ${r.ready?'<span class="pill ok" style="font-size:10px">locked in</span>':''}</div><div class="barw"><i style="width:${((r.idx-mn)/(mx-mn)*100).toFixed(1)}%"></i></div><div class="meta">${r.meta}</div></div><span class="sc">${r.idx.toFixed(1)}</span></div>`).join('')}</div></div>`;
+}
+
+function planView(info){
+  const s=st(), T=teams(), ready=T.filter(t=>t.readyQ===s.q).length;
+  let h=hdr();
+  h+=`<div class="grid"><div>`;
+  info.events.forEach(e=>{ h+=`<div class="card head"><div class="tag">Breaking · ${UI.qLabel(s.q)}</div><h3 class="big">${UI.esc(e.head)}</h3><p class="mute" style="font-size:18px;margin:6px 0 0">${UI.esc(e.body)}</p></div>`; });
+  if(info.quiet) h+=`<div class="card head" style="border-left-color:var(--line)"><div class="tag" style="color:var(--mute)">${UI.qLabel(s.q)}</div><h3 style="font-size:22px">${info.quiet}</h3></div>`;
+  info.news.forEach(n=>{ h+=`<div class="card news"><div class="tag">News · teams decide</div><h3>${UI.esc(n.head)}</h3><div class="mute">${UI.esc(n.body)}</div>${n.choices?`<div class="small" style="margin-top:6px">Choices: ${n.choices.map(c=>UI.esc(c.t)).join(' / ')}</div>`:''}</div>`; });
+  h+=`<div class="card"><div class="row"><div><b>${ready} of ${T.length}</b> teams locked in</div><span class="spacer"></span><span class="timer" id="timer">${H.deadline?Math.max(0,Math.ceil((H.deadline-Date.now())/1000))+'s':''}</span></div>
+    <div class="ctrl"><button class="btn" id="run">Run ${UI.qLabel(s.q)} ▶</button>
+     <label class="small mute"><input type="checkbox" id="auto" ${H.autoSecs?'checked':''}> Auto-run after <select id="secs">${[20,30,45,60,90].map(x=>`<option ${x===(H.autoSecs||45)?'selected':''}>${x}</option>`).join('')}</select> s, or when all teams lock in</label></div>
+    ${info.poll?`<div class="ctrl"><button class="btn ghost" id="repoll">Show the prediction poll again</button></div>`:''}
+    <p class="small mute" style="margin:10px 0 0">Pause to discuss whenever you like: the economy only moves when you press Run.</p></div>`;
+  h+=`</div><div>${leaderboard()}${classPulse()}</div></div>`;
+  app.innerHTML=h; bindMenu();
+  $('#run').onclick=runQuarter;
+  $('#auto').onchange=e=>{ H.autoSecs=e.target.checked?+$('#secs').value:0; armTimer(); };
+  $('#secs').onchange=e=>{ if(H.autoSecs){ H.autoSecs=+e.target.value; armTimer(); } };
+  const rp=$('#repoll'); if(rp) rp.onclick=()=>setState({poll:{id:info.poll.id,q:s.q,correct:info.poll.correct,reveal:true}});
+  if(H.autoSecs && !H.deadline) armTimer();
+  if(H.autoSecs && T.length && ready===T.length) runQuarter();
+}
+function classPulse(){
+  const T=teams().filter(t=>t.q>0); if(!T.length) return '';
+  const avg=k=>(T.reduce((a,t)=>a+(+t[k]||0),0)/T.length).toFixed(1);
+  return `<div class="card"><h3>Class average last quarter</h3><div class="res" style="display:grid;grid-template-columns:repeat(4,1fr);text-align:center;margin-top:8px">
+    <div><div class="tiny mute">Growth</div><b class="disp" style="font-size:22px">${avg('g')}%</b></div><div><div class="tiny mute">Inflation</div><b class="disp" style="font-size:22px">${avg('pi')}%</b></div>
+    <div><div class="tiny mute">Jobless</div><b class="disp" style="font-size:22px">${avg('u')}%</b></div><div><div class="tiny mute">Reserves</div><b class="disp" style="font-size:22px">${avg('reserves')}</b></div></div>
+    <div class="small mute" style="margin-top:6px">Autopilot: G ${H.ap.g}% · π ${H.ap.pi}% · U ${H.ap.u}% · R ${H.ap.reserves}</div></div>`;
+}
+function armTimer(){
+  clearInterval(H.tick); H.deadline=null;
+  if(!H.autoSecs||st().phase!=='play'||st().lesson||st().poll) return;
+  H.deadline=Date.now()+H.autoSecs*1000;
+  H.tick=setInterval(()=>{ const left=Math.ceil((H.deadline-Date.now())/1000); const el=$('#timer'); if(el) el.textContent=Math.max(0,left)+'s'; if(left<=0) runQuarter(); },500);
+}
+function runQuarter(){
+  clearInterval(H.tick); H.deadline=null;
+  if(H.pendingQ===st().q) return; // already running this quarter
+  H.pendingQ=st().q;
+  const q=st().q+1;
+  if(q>=H.sc.quarters) return setState({q, lesson:null, poll:null});
+  setState(quarterState(q)).then(()=>{ if(H.autoSecs) armTimer(); });
+}
+
+function lessonView(info){
+  const s=st();
+  app.innerHTML=hdr()+`<div class="card lessonbig" style="max-width:900px;margin:20px auto">${UI.lessonHTML(info.unlock)}
+    <div class="ctrl" style="margin-top:18px"><button class="btn" id="cont">${info.poll?'Next: prediction poll':'Continue'}</button></div></div>`;
+  bindMenu();
+  $('#cont').onclick=()=>setState({lesson:null, poll: info.poll?{id:info.poll.id,q:s.q,correct:info.poll.correct,reveal:false}:null}).then(()=>{ if(!info.poll&&H.autoSecs) armTimer(); });
+}
+
+function pollView(info){
+  const s=st(), p=info.poll, votes=((H.game.polls||{})[p.id])||{}, n=Object.keys(votes).length, T=teams().length;
+  const counts={}; Object.values(votes).forEach(v=>counts[v]=(counts[v]||0)+1);
+  const max=Math.max(1,...Object.values(counts));
+  const reveal=s.poll.reveal;
+  app.innerHTML=hdr()+`<div class="grid"><div class="card"><div class="lesson"><div class="k">Predict · ${UI.qLabel(s.q)}</div><h2 class="big">${UI.esc(p.ev.head)}</h2><p class="mute" style="font-size:18px">${UI.esc(p.ev.body)}</p><b style="font-size:18px">What does this shock do to the Harbour Republic?</b></div>
+     <div class="pollbars">${Object.entries(Sc.OPTS).map(([k,t])=>`<div class="pb ${reveal&&k===p.correct?'right':''}"><div><div class="lab">${t}${reveal&&k===p.correct?' ✓':''}</div><div class="track"><i style="width:${((counts[k]||0)/max*100).toFixed(0)}%"></i></div></div><span class="n">${counts[k]||0}</span></div>`).join('')}</div>
+     <div class="ctrl"><span class="mute">${n} of ${T} teams have voted</span><span class="spacer"></span>${reveal?`<button class="btn" id="close">Back to the game</button>`:`<button class="btn alt" id="reveal">Reveal the answer</button>`}</div></div>
+    <div>${reveal?`<div class="card"><div class="row" style="align-items:flex-start">${UI.diagram(p.correct,300)}<div style="flex:1;min-width:220px;font-size:18px">${UI.EXPLAIN[p.correct]}</div></div><p class="mute">Ask: which lever works on this side of the economy? How long will it take to work?</p></div>`:`<div class="card"><h3>While they vote…</h3><p class="mute" style="font-size:18px">Cold-call a team: which curve, which way, and why? Is it a demand problem or a cost problem?</p></div>`}${leaderboard()}</div></div>`;
+  bindMenu();
+  const rv=$('#reveal'); if(rv) rv.onclick=()=>setState({poll:Object.assign({},s.poll,{reveal:true})});
+  const cl=$('#close'); if(cl) cl.onclick=()=>setState({poll:null}).then(()=>{ if(H.autoSecs) armTimer(); });
+}
+
+function finalQuarterView(){
+  app.innerHTML=hdr()+`<div class="grid"><div class="card"><h2 class="big">That's all ${H.sc.quarters} quarters!</h2><p class="mute" style="font-size:18px">Before the reveal: which era do the class think they just lived through? Take a few guesses.</p>
+    <div class="ctrl"><button class="btn alt" id="end">Reveal the era</button></div></div><div>${leaderboard()}</div></div>`;
+  bindMenu(); $('#end').onclick=()=>setState({phase:'ended'});
+}
+
+function endView(){
+  const rv=H.sc.reveal, M=window.WORLD_MAP, T=teams().sort((a,b)=>(b.index||0)-(a.index||0));
+  const beat=T.filter(t=>(t.index||0)>H.ap.index).length;
+  const dots=rv.pins.map(p=>{const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin" cx="${x}" cy="${y}" r="9"/><text x="${x+13}" y="${y+5}">${UI.esc(p.name)}</text>`;}).join('');
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card"><div class="pill hot">Reveal</div><h2 class="big" style="margin-top:6px">You just played: ${UI.esc(rv.title)}</h2><p style="font-size:18px">${UI.esc(rv.story)}</p>
+     <div class="endmap"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div>
+     <ul style="font-size:16px">${rv.facts.map(f=>`<li>${UI.esc(f)}</li>`).join('')}</ul></div></div>
+    <div><div class="card"><h2>${beat} of ${T.length} teams beat the Autopilot</h2><p class="mute">Debrief: which team reacted to shocks best? Who over-reacted? Where did policy lags bite?</p></div>${leaderboard()}
+     <div class="card"><div class="ctrl"><button class="btn alt" id="del">End and delete all game data</button></div><p class="small mute">Deletes the team names, scores and poll answers for this game from the database.</p></div></div></div>`;
+  bindMenu();
+  $('#del').onclick=async()=>{ $('#del').textContent='Deleting…'; await H.sync.deleteGame(H.code); localStorage.removeItem('speedrun-host'); location.reload(); };
+}
+
+boot();
+})();
+</script>
+</body>
+</html>

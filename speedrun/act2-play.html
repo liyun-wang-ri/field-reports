@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun · Act 2: The Economist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.wrap{max-width:620px;margin:0 auto;padding:12px 12px 96px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:8px}
+.score{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:32px;font-weight:700;line-height:1}
+.lbl{font-size:11px;color:var(--mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.join{max-width:440px;margin:6vh auto 40px;padding:0 14px}
+.join h1{font-size:32px;line-height:1.1}
+.join input{width:100%;background:#0c1a30;border:1.5px solid var(--line);border-radius:11px;color:var(--ink);padding:12px;font-size:17px;margin-top:6px}
+.join input.code{text-transform:uppercase;letter-spacing:.3em;font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:24px;text-align:center}
+.join label{display:block;margin-top:14px;font-weight:600;font-size:13px;color:var(--mute)}
+.coins{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;color:var(--yellow);font-size:20px;display:inline-block}
+.dossier{display:grid;grid-template-columns:1fr 92px 92px;gap:0;border-radius:10px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.dossier .h{padding:8px 10px;font-weight:800;font-size:12px;text-align:center}
+.dossier .h:first-child{text-align:left}
+.dossier .g{grid-column:1/4;padding:5px 10px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.dossier .c{padding:8px 10px;border-top:1px solid;font-size:13px;display:flex;align-items:center}
+.dossier .v{justify-content:center;text-align:center}
+.buy{margin-left:auto;border:1px solid;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800;white-space:nowrap}
+.buy:disabled{opacity:.3}
+.qs{display:grid;gap:12px}
+.q b{display:block;margin-bottom:6px}
+.choices button.right,.opt.right{border-color:var(--teal);background:rgba(46,196,182,.15)}
+.choices button.wrong,.opt.wrong{border-color:var(--red);background:rgba(255,107,107,.12)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(9,22,40,.96);border-top:1px solid #2b4f80;padding:10px 12px;z-index:10}
+.bar .in{max-width:620px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.res{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:26px;font-weight:700}
+.endmap svg{width:100%;height:auto;background:#0c1a30;border-radius:10px}
+.endmap path.land{fill:#1f3a62}.endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:1.5}
+.endmap text{fill:var(--ink);font-size:14px;font-weight:700;paint-order:stroke;stroke:#0b1626;stroke-width:3px}
+.reveal-card{position:relative}
+.choices.tight button{min-width:48px;font-weight:800;font-size:16px}
+.qnum{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#1b3d6b;color:#bcd6ff;font-size:11px;font-weight:800;margin-right:6px;vertical-align:1px}
+</style>
+</head>
+<body class="theme-lab">
+<div id="app"></div>
+<script src="firebase-config.js"></script>
+<script src="act2.js"></script>
+<script src="common.js"></script>
+<script src="fx.js"></script>
+<script src="adas.js"></script>
+<script src="sync.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+'use strict';
+const A=Act2, R=A.ROUNDS, $=s=>document.querySelector(s), app=$('#app'), esc=UI.esc;
+const params=new URLSearchParams(location.search);
+const G={mode:null, sync:null, code:null, name:'', colour:null, emblem:null, game:null, answers:{}, r:0, soloReveal:false,
+  shownTotal:0, gline:null, seenReveal:{}, stickers:{}, animated:{}};
+const KEY='speedrun-act2';
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({mode:G.mode, code:G.code, name:G.name, colour:G.colour, emblem:G.emblem, answers:G.answers, r:G.r, soloReveal:G.soloReveal, seenReveal:G.seenReveal})); }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
+const lastRevealed=()=>{ const s=cur(); if(s.phase==='end') return R.length-1; if(s.phase==='reveal') return s.r; return (s.r||0)-1; };
+const total=()=>A.totalScore(G.answers, lastRevealed());
+const ans=id=>(G.answers[id]=G.answers[id]||{});
+const say=(mood,text,anim)=>{ G.gline={mood,text,anim}; };
+const STRIP='<div class="labstrip">Forecast lab · Economist division</div>';
+
+// ---------- join ----------
+function joinScreen(msg){
+  const s=load(), p=FX.profile();
+  const id={colour:(s&&s.colour)||p.colour||FX.COLOURS[0], emblem:(s&&s.emblem)||p.emblem||FX.EMBLEMS[0]};
+  app.innerHTML=`<div class="join">${STRIP}
+   <span class="pill hot">Econ Speedrun · Act 2</span>
+   <h1 style="margin-top:10px">The Economist</h1>
+   ${FX.griffles('curious', p.act1&&p.act1.done?'Promoted! We have a lab now. With graph paper. I\'m told we have to <i>predict</i> things.':'Welcome to the forecast lab. We read the news, draw the curves and make the call before the numbers come out.','pop')}
+   <div class="card"><h3>Join your class</h3>
+    <label>Game code</label><input id="code" class="code" maxlength="5" autocomplete="off" value="${esc(params.get('code')||(s&&s.mode==='class'&&s.code)||'')}">
+    <label>Team name (no real names, please)</label><input id="name" maxlength="24" autocomplete="off" value="${esc((s&&s.name)||p.name||'')}" placeholder="e.g. The Multipliers">
+    ${FX.identityPicker(id)}
+    <div class="row" style="margin-top:14px"><button class="btn" id="go">Join game</button><span class="small" id="msg" style="color:var(--red)">${esc(msg||'')}</span></div></div>
+   <div class="card"><h3>Or play solo</h3><p class="small mute" style="margin:6px 0 10px">All ${R.length} rounds at your own pace.</p>
+    <div class="row"><button class="btn ghost" id="solo">Play solo</button>${s&&s.mode==='solo'?'<button class="btn ghost" id="resume">Resume</button>':''}</div></div></div>`;
+  FX.bindPicker(id);
+  const keep=()=>{ G.colour=id.colour; G.emblem=id.emblem; };
+  $('#go').onclick=()=>{ keep(); join(); };
+  $('#solo').onclick=()=>{ keep(); G.name=$('#name').value.trim()||'Solo economist'; startSolo(null); };
+  if($('#resume')) $('#resume').onclick=()=>startSolo(load());
+}
+async function join(){
+  const code=$('#code').value.trim().toUpperCase(), name=$('#name').value.trim();
+  if(!/^[A-Z0-9]{5}$/.test(code)) return joinScreen('Codes have 5 letters or numbers.');
+  if(!name) return joinScreen('Give your team a name.');
+  $('#go').disabled=true;
+  try{
+    G.sync=await Sync.connect();
+    if(!(await G.sync.exists(code))) return joinScreen('No game with that code.');
+    const s=load(); G.mode='class'; G.code=code; G.name=name;
+    if(s&&s.mode==='class'&&s.code===code){ G.answers=s.answers||{}; G.seenReveal=s.seenReveal||{}; } else { G.answers={}; G.seenReveal={}; }
+    FX.updateProfile({name, colour:G.colour, emblem:G.emblem});
+    G.shownTotal=total(); push(); let last=null;
+    G.sync.watchGame(code, g=>{ G.game=g; const k=g?JSON.stringify(g.state||{}):'gone'; if(k!==last){ last=k; G.gline=null; render(); } });
+  }catch(e){ console.error(e); joinScreen('Could not connect ('+(e.code||e.message||e)+').'); }
+}
+function push(){ if(G.mode!=='class') return; save(); G.sync.setTeam(G.code,{name:G.name, colour:G.colour, emblem:G.emblem, score:total(), answers:G.answers, at:Date.now()}).catch(console.error); }
+function startSolo(s){
+  G.mode='solo'; if(s){ G.name=s.name||G.name; G.colour=s.colour||G.colour; G.emblem=s.emblem||G.emblem; }
+  G.answers=(s&&s.answers)||{}; G.r=(s&&s.r)||0; G.soloReveal=!!(s&&s.soloReveal); G.seenReveal=(s&&s.seenReveal)||{};
+  FX.updateProfile({name:G.name, colour:G.colour, emblem:G.emblem}); G.shownTotal=total(); save(); render();
+}
+
+// ---------- state ----------
+function cur(){
+  if(G.mode==='solo') return {phase: G.r>=R.length?'end':(G.soloReveal?'reveal':'play'), r:G.r};
+  if(!G.game) return {phase:'gone'};
+  return G.game.state||{phase:'lobby'};
+}
+
+// ---------- render ----------
+function header(){
+  const st=cur();
+  return `${STRIP}<div class="top"><div><div class="lbl">Economist score</div><div class="score" id="score">${G.shownTotal}</div></div>
+    <div style="text-align:right">${FX.chip({name:G.name,colour:G.colour,emblem:G.emblem})}<div class="small mute" style="margin-top:4px">${st.r!==undefined&&st.r<R.length?`Round ${st.r+1} of ${R.length}`:''}</div></div></div>`;
+}
+function render(){
+  const st=cur();
+  if(st.phase==='gone'){ app.innerHTML=`<div class="join"><h1>Lab closed</h1><p class="mute">Your teacher has closed this game. Thanks for playing!</p></div>`; return; }
+  if(st.phase==='lobby'){ app.innerHTML=`<div class="wrap">${header()}<div class="card folder" data-tab="Briefing"><h3>You're in, ${esc(G.name)}!</h3><p class="mute">Waiting for your teacher to start the first test.</p>${FX.griffles('guessing','Tip: in every round, ask "which part of the economy is hit first?" Then the curve, then the numbers.','hop')}</div></div>`; return; }
+  if(st.phase==='end') return endScreen();
+  const round=R[st.r], reveal=st.phase==='reveal';
+  if(reveal && !G.seenReveal[round.id]) onFirstReveal(round);
+  const body = round.type==='mystery' ? mystery(round, reveal) : round.type==='quick' ? quick(round, reveal) : call(round, reveal);
+  app.innerHTML=`<div class="wrap">${header()}<div class="card folder reveal-card" data-tab="${esc(round.tab)}"><div class="tag small" style="color:var(--orange);font-weight:800;letter-spacing:.06em;text-transform:uppercase">${esc(round.title)}</div>${body}</div>${G.gline?FX.griffles(G.gline.mood,G.gline.text,G.gline.anim):defaultLine(round,reveal)}</div>`+bar(round, reveal);
+  bind(round, reveal);
+  if(reveal) drawDiagram(round);
+  const sc=$('#score'), t=total(); if(t!==G.shownTotal){ FX.countUp(sc,G.shownTotal,t); G.shownTotal=t; }
+}
+function defaultLine(round, reveal){
+  if(reveal) return '';
+  return FX.griffles('guessing', `<i>My gut says:</i> ${round.gut}`);
+}
+function drawDiagram(round){
+  // animate once per round per phone; afterwards draw the finished diagram
+  const anim=!G.animated[round.id]; G.animated[round.id]=true;
+  const go=(el,shift,opts)=>{ if(!el) return; if(anim) ADAS.animate(el,shift,opts); else el.innerHTML=ADAS.svg(shift,opts); };
+  if(round.diagram==='ranges'){ go($('#dg1'),'adR',{start:'flat'}); go($('#dg2'),'adR',{start:'full'}); }
+  else if(round.diagram) go($('#dg1'),round.diagram,{start:'mid'});
+}
+function diagramBox(round){
+  if(!round.diagram) return '';
+  if(round.diagram==='ranges') return `<div class="adasbox"><div class="cap">Same rise in AD</div><div class="adas2"><div><div class="cap" style="text-align:center">🇪🇸 Spain 2013</div><div id="dg1"></div></div><div><div class="cap" style="text-align:center">🇯🇵 Japan 2019</div><div id="dg2"></div></div></div></div>`;
+  return `<div class="adasbox"><div class="cap">${round.diagram==='combo'?'AD right and AS up, together':'The shift'}</div><div id="dg1"></div></div>`;
+}
+
+function onFirstReveal(round){
+  G.seenReveal[round.id]=true; save();
+  FX.addExplored(A.namesOf(round).filter(n=>A.PINS[n]));
+  const a=G.answers[round.id]||{}, s=A.scoreRound(round,a);
+  const before=G.stickers, now=A.stickersFrom(G.answers); G.stickers=now; FX.addStickers(now);
+  const fresh=Object.keys(now).filter(k=>!before[k]);
+  if(!a.locked){ say('surprised','We didn\'t lock in! Next time, make the call before the reveal.','shake'); }
+  else if(s.right===s.of){ say('pleased', (a.bet||1)===3?'ALL IN and all right. Somebody frame this forecast.':'Every call right. I would like it noted that I was also right. (I was not.)','hop'); if((a.bet||1)>=2) setTimeout(()=>FX.confetti(), 150); }
+  else if(s.pts<0){ say('surprised', round.type==='quick'?'That trap got me too. It\'s a very well-built trap.':'Ouch. The curve went the other way.','shake'); setTimeout(()=>FX.shake($('.reveal-card')), 50); }
+  else say('skeptical','Some calls right, some not. Watch the diagram: which curve moved, and which way?','pop');
+  if(fresh.length) setTimeout(()=>toast('Sticker earned: '+fresh.map(k=>A.STICKERS[k].i+' '+A.STICKERS[k].t).join(', ')), 600);
+}
+function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2800); }
+
+function locked(round){ return !!(G.answers[round.id]&&G.answers[round.id].locked); }
+function betRow(round, dis){
+  const a=ans(round.id);
+  return `<div class="q"><b>How sure are you?</b><div class="choices">${A.BETS.map(b=>`<button data-bet="${b.k}" class="${(a.bet||1)===b.k?'sel':''}" ${dis?'disabled':''}>${b.t}<br><small class="mute">${b.s}</small></button>`).join('')}</div></div>`;
+}
+function questions(round, reveal, lk, only){
+  const a=ans(round.id);
+  return round.questions.map((q,i)=>{
+    if(only!==undefined && i!==only) return '';
+    const mine=(a.a||{})[q.id];
+    const tight=q.opts.every(([k,t])=>t.length<=3);
+    return `<div class="q"><b><span class="qnum">${i+1}</span>${esc(q.q)}</b><div class="choices ${tight?'tight':''}">${q.opts.map(([k,t])=>{
+      const ok=A.isRight(q,k), cls = reveal ? (ok?'right':k===mine?'wrong':'') : (k===mine?'sel':'');
+      return `<button data-q="${q.id}" data-k="${k}" class="${cls}" ${lk?'disabled':''}>${esc(t)}${reveal&&ok?' ✓':''}</button>`; }).join('')}</div></div>`;
+  }).join('');
+}
+function card(c){ return `<div class="newscard">${c.pin?`<span class="np">📍 ${esc(c.pin)}</span>`:''}<div class="nh">${esc(c.head)}</div><div class="nb">${esc(c.body)}</div></div>`; }
+function cards(round){ return (round.cards||[]).map(card).join(''); }
+function call(round, reveal){
+  const a=ans(round.id), lk=locked(round)||reveal, s=A.scoreRound(round,a);
+  let h=`${reveal&&a.locked?`<div class="labstamp ${s.pts<0?'bad':''}">${s.right===s.of?'Called it':s.pts<0?'Missed':'Partly right'}</div>`:''}
+    <p class="small" style="margin:6px 0 4px;padding-right:${reveal?'110px':'0'}">${round.intro}</p>
+    ${round.pair ? `<div class="qs">${round.cards.map((c,i)=>`<div>${card(c)}${questions(round, reveal, lk, i)}</div>`).join('')}${betRow(round, lk)}</div>`
+      : `${cards(round)}<div class="qs" style="margin-top:12px">${questions(round, reveal, lk)}${betRow(round, lk)}</div>`}`;
+  if(reveal) h+=revealBox(s, round.reveal.text, round.reveal.lesson)+diagramBox(round)+(round.reveal.sources?`<p class="tiny mute" style="margin:8px 0 0">Sources: ${round.reveal.sources}</p>`:'');
+  return h;
+}
+function mystery(round, reveal){
+  const a=ans(round.id), bought=a.bought||[], lk=locked(round)||reveal;
+  const spent=bought.reduce((s,k)=>s+round.clues.find(c=>c.k===k).cost,0), left=round.budget-spent;
+  let h=`<p class="small mute" style="margin:6px 0 10px">${round.intro}</p>
+    <div class="row" style="margin-bottom:8px"><span class="lbl">Coins left</span><span class="coins" id="coins">🪙 ${left}</span><span class="spacer"></span><span class="small mute">${round.year}</span></div>
+    <div class="dossier sheet"><div class="h">Indicator</div><div class="h">Country A${reveal?`<br><small style="color:#1f7a6f">${esc(round.reveal.names[0])}</small>`:''}</div><div class="h">Country B${reveal?`<br><small style="color:#1f7a6f">${esc(round.reveal.names[1])}</small>`:''}</div>`;
+  let grp='';
+  round.clues.forEach(c=>{
+    if(c.group!==grp){ grp=c.group; h+=`<div class="g">${esc(grp)}</div>`; }
+    const open=bought.includes(c.k)||reveal, fresh=G.justBought===c.k?'declass':'';
+    h+=`<div class="c">${esc(c.label)}${open?'':`<button class="buy" data-buy="${c.k}" ${lk||c.cost>left?'disabled':''}>🪙 ${c.cost}</button>`}</div>
+      <div class="c v ${fresh}">${open?esc(c.v[0])+(c.unit||''):'<span class="redact"></span>'}</div><div class="c v ${fresh}">${open?esc(c.v[1])+(c.unit||''):'<span class="redact"></span>'}</div>`;
+  });
+  G.justBought=null;
+  h+=`</div><div class="qs" style="margin-top:14px">${questions(round, reveal, lk)}${betRow(round, lk)}</div>`;
+  if(reveal) h+=revealBox(A.scoreRound(round,a), round.reveal.text, round.reveal.lesson)+chain(round.reveal.chain)+(round.reveal.sources?`<p class="tiny mute" style="margin:8px 0 0">Sources: ${round.reveal.sources}</p>`:'');
+  return h;
+}
+// The multiplier as a chain of spending rounds: each bar is what is re-spent at home in that round.
+function chain(spec){
+  if(!spec) return '';
+  const maxTot=Math.max(...spec.map(([n,l])=>100/l));
+  return `<div class="adasbox" style="color:#13233b"><div class="cap">Illustration: $100 of new spending, round by round</div><div class="chain">${spec.map(([name,leak])=>{
+    let x=100, bars='', tot=0; for(let i=0;i<8;i++){ tot+=x; bars+=`<i style="flex:0 0 calc(${(x/maxTot*100).toFixed(2)}% - 2px);animation-delay:${i*.12}s;background:${name==='Brazil'?'#2ec4b6':'#6aa8ff'}" title="Round ${i+1}: $${x.toFixed(0)}"></i>`; x*=1-leak; }
+    const k=1/leak;
+    return `<div class="row2"><b>${esc(name)}</b><div class="bars">${bars}</div><span class="tot">≈ $${(100*k).toFixed(0)}</span></div><div class="tiny" style="margin:-2px 0 4px 86px;color:#33465f">If ${Math.round(leak*100)}% of each extra dollar of income leaks out</div>`;
+  }).join('')}</div></div>`;
+}
+function quick(round, reveal){
+  const a=ans(round.id), lk=locked(round)||reveal, ok=a.a===round.correct;
+  let h=`${reveal&&a.locked?`<div class="labstamp ${ok?'':'bad'}">${ok?'Trap avoided':'Caught!'}</div>`:''}<h2 style="font-size:19px;margin:8px 0 10px;padding-right:${reveal?'110px':'0'}">${esc(round.q)}</h2><div class="opts">${round.opts.map(([k,t])=>{
+    const cls = reveal ? (k===round.correct?'right':k===a.a?'wrong':'') : (k===a.a?'sel':'');
+    return `<button class="opt ${cls}" data-pick="${k}" ${lk?'disabled':''}>${esc(t)}${reveal&&k===round.correct?' ✓':''}</button>`; }).join('')}</div>
+    <div style="margin-top:12px">${betRow(round, lk)}</div>`;
+  if(reveal) h+=revealBox(A.scoreRound(round,a), round.explain);
+  return h;
+}
+function revealBox(s, text, lesson){
+  return `<div class="fb"><div class="row"><b>${s.right} of ${s.of} right</b><span class="spacer"></span><span class="res" style="color:${s.pts>=0?'var(--teal)':'var(--red)'}">${s.pts>=0?'+':''}${s.pts}</span></div>
+    ${s.coins!==undefined?`<div class="small mute">including ${s.coins} unspent coins × 2</div>`:''}
+    <p style="margin:8px 0 0">${text}</p>${lesson?`<p class="small" style="margin:8px 0 0;color:var(--yellow)">💡 ${lesson}</p>`:''}</div>`;
+}
+function ready(round){
+  const a=ans(round.id);
+  return round.type==='quick' ? !!a.a : round.questions.every(q=>(a.a||{})[q.id]);
+}
+function bar(round, reveal){
+  if(reveal){
+    if(G.mode==='solo') return `<div class="bar"><div class="in"><span class="small mute">Total ${total()}</span><span class="spacer"></span><button class="btn" id="next">${G.r===R.length-1?'Finish':'Next round ▶'}</button></div></div>`;
+    return `<div class="bar"><div class="in"><span class="small mute">Waiting for your teacher…</span></div></div>`;
+  }
+  const lk=locked(round), rd=ready(round);
+  const n=round.questions?round.questions.filter(q=>(ans(round.id).a||{})[q.id]).length:0;
+  return `<div class="bar"><div class="in"><span class="small mute">${lk?(G.mode==='solo'?'Locked in.':'Locked in. Waiting for the reveal…'):rd?'Ready when you are.':round.questions?`${n} of ${round.questions.length} answered`:'Pick an answer first.'}</span><span class="spacer"></span>
+    ${lk?(G.mode==='solo'?`<button class="btn alt" id="reveal">Reveal</button>`:`<button class="btn ghost" id="unlock">Change</button>`):`<button class="btn" id="lock" ${rd?'':'disabled'}>Lock in ✓</button>`}</div></div>`;
+}
+function bind(round, reveal){
+  const a=ans(round.id);
+  app.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{
+    const c=round.clues.find(x=>x.k===b.dataset.buy), coinsEl=$('#coins');
+    FX.coinFly(b, coinsEl, c.cost);
+    a.bought=(a.bought||[]).concat(c.k); G.justBought=c.k;
+    const left=round.budget-a.bought.reduce((s,k)=>s+round.clues.find(x=>x.k===k).cost,0);
+    if(c.k==='imp') say('pleased','Imports! That\'s a leak. Every dollar spent on foreign goods leaves the circular flow.','pop');
+    else if(c.k==='sav') say('curious','Savings are a leak too. Money saved isn\'t spent… this round, anyway.','pop');
+    else if(left===0) say('skeptical','We\'re out of coins. Hope we bought the leaks.','pop');
+    else G.gline=null;
+    save(); push(); render();
+  });
+  app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ (a.a=a.a||{})[b.dataset.q]=b.dataset.k; G.gline=null; save(); render(); });
+  app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ a.a=b.dataset.pick; save(); render(); });
+  app.querySelectorAll('[data-bet]').forEach(b=>b.onclick=()=>{ a.bet=+b.dataset.bet; if(a.bet===3) say('surprised','All in?! On a <i>forecast</i>? Economists never go all in. Well. Almost never.','shake'); else G.gline=null; save(); render(); });
+  const lk=$('#lock'); if(lk) lk.onclick=()=>{ a.locked=true; a.bet=a.bet||1; say('guessing', G.mode==='solo'?'Locked. Shall we see the numbers?':'Forecast filed. Now we wait for reality to catch up.','pop'); save(); push(); render(); };
+  const ul=$('#unlock'); if(ul) ul.onclick=()=>{ a.locked=false; G.gline=null; save(); push(); render(); };
+  const rv=$('#reveal'); if(rv) rv.onclick=()=>{ G.soloReveal=true; G.gline=null; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); };
+  const nx=$('#next'); if(nx) nx.onclick=()=>{ G.r++; G.soloReveal=false; G.gline=null; save(); render(); window.scrollTo({top:0}); };
+}
+
+function worldMap(names){
+  const M=window.WORLD_MAP;
+  const dots=names.map(n=>{const p=A.PINS[n]; const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin" cx="${x}" cy="${y}" r="7"/><text x="${p.left?x-10:x+10}" y="${y+5}" text-anchor="${p.left?'end':'start'}">${esc(n)}</text>`;}).join('');
+  return `<div class="endmap"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div>`;
+}
+function endScreen(){
+  const per=R.map(r=>({r, s:A.scoreRound(r,G.answers[r.id])}));
+  G.stickers=A.stickersFrom(G.answers); FX.addStickers(G.stickers);
+  const prof=FX.updateProfile({name:G.name, colour:G.colour, emblem:G.emblem, act2:{score:total(), done:true}});
+  FX.addExplored(A.pinsUpTo(R.length-1));
+  app.innerHTML=`<div class="wrap">${header()}
+   <div class="card" style="text-align:center"><div class="lbl">Act 2 complete · ${total()} points</div><h2 style="margin:6px 0 12px">You've been promoted!</h2>
+    ${FX.careerCard(FX.profile(),{act:2,promoted:true,stickerDefs:A.STICKERS})}
+    <p class="small mute" style="margin-top:10px">Stickers you haven't earned yet are greyed out. You can chase them in a replay.</p></div>
+   ${FX.griffles('pleased','Crisis Doctor! Next act, economies get sick: inflation, unemployment, slow growth. We diagnose them. I\'ve bought a stethoscope.','hop')}
+   <div class="card"><h3>Countries you visited in Act 2</h3>${worldMap(A.pinsUpTo(R.length-1))}<p class="small mute" style="margin:8px 0 0">They're now unlocked on your campaign map.</p></div>
+   <div class="card"><h3>Your rounds</h3>${per.map(({r,s})=>`<div class="row small" style="padding:5px 0;border-bottom:1px solid var(--line)"><span>${esc(r.title)}</span><span class="spacer"></span><b style="color:${s.pts>=0?'var(--teal)':'var(--red)'}">${s.pts>=0?'+':''}${s.pts}</b></div>`).join('')}</div>
+   <div class="row">${G.mode==='solo'?`<button class="btn ghost" id="again">Play again</button>`:''}<a class="btn ghost" href="index.html${location.hash}" style="text-decoration:none">Campaign map</a></div>
+   <p class="tiny mute">Real-world figures come from the IMF, World Bank, ILO, Destatis, UN DESA and news reports named in each round. The Harbour Republic is a made-up teaching economy.</p></div>`;
+  if(!G.endCelebrated){ G.endCelebrated=true; setTimeout(()=>FX.confetti(140),300); }
+  const ag=$('#again'); if(ag) ag.onclick=()=>{ localStorage.removeItem(KEY); G.endCelebrated=false; G.animated={}; startSolo(null); };
+}
+
+joinScreen();
+})();
+</script>
+</body>
+</html>
