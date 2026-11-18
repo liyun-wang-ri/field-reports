@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun: Macro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.wrap{max-width:620px;margin:0 auto;padding:12px 12px 90px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.top .ls{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:34px;font-weight:700;line-height:1}
+.top .lsl{font-size:11px;color:var(--mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.vs{font-size:12.5px;font-weight:700}
+.vs.win{color:var(--teal)} .vs.lose{color:var(--red)}
+.join{max-width:420px;margin:8vh auto 0;padding:0 14px}
+.join h1{font-size:30px;line-height:1.1}
+.join input{width:100%;background:#0c1a30;border:1.5px solid var(--line);border-radius:11px;color:var(--ink);padding:12px;font-size:17px;margin-top:6px}
+.join input.code{text-transform:uppercase;letter-spacing:.3em;font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:24px;text-align:center}
+.join label{display:block;margin-top:14px;font-weight:600;font-size:13px;color:var(--mute)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(11,22,38,.96);border-top:1px solid var(--line);padding:10px 12px;z-index:10}
+.bar .in{max-width:620px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;text-align:center}
+.res b{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:18px;display:block}
+ul.tips{margin:6px 0 0;padding-left:18px} ul.tips li{margin:3px 0}
+.endmap svg{width:100%;height:auto;background:#0c1a30;border-radius:10px}
+.endmap path.land{fill:#1f3a62}
+.endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:1.5}
+.endmap text{fill:var(--ink);font-size:13px;font-weight:700;paint-order:stroke;stroke:#0b1626;stroke-width:3px}
+</style>
+</head>
+<body class="theme-warroom">
+<div id="app"></div>
+<div id="ov"></div>
+<script src="firebase-config.js"></script>
+<script src="engine.js"></script>
+<script src="scenarios.js"></script>
+<script src="common.js"></script>
+<script src="sync.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+'use strict';
+const E=Engine, Sc=Scenarios, $=s=>document.querySelector(s), app=$('#app'), ov=$('#ov');
+const params=new URLSearchParams(location.search);
+const G={ mode:null, sc:null, run:null, ap:null, policy:Object.assign({},E.DEFAULT_POLICY), news:{}, decisions:{}, last:null,
+  // class
+  sync:null, code:null, name:'', game:null, voted:{}, readyQ:-1,
+  // solo
+  stage:'plan', soloPred:null };
+
+function store(){ try{ localStorage.setItem('speedrun-play', JSON.stringify({mode:G.mode, code:G.code, name:G.name, sc:G.sc&&G.sc.id, decisions:G.decisions, policy:G.policy, voted:G.voted, stage:G.stage})); }catch(e){} }
+function restore(){ try{ return JSON.parse(localStorage.getItem('speedrun-play')||'null'); }catch(e){ return null; } }
+
+// ---------- join screen ----------
+function joinScreen(msg){
+  const saved=restore();
+  app.innerHTML=`<div class="join">
+   <div class="pill hot">Econ Speedrun · Macro</div>
+   <h1 style="margin-top:10px">Steer the Harbour Republic</h1>
+   <p class="mute">A small, very open, Singapore-like economy. Keep growth up, prices stable and people in work, and beat the Autopilot.</p>
+   <div class="card" style="margin-top:14px">
+    <h3>Join your class</h3>
+    <label>Game code</label><input id="code" class="code" maxlength="5" autocomplete="off" value="${UI.esc(params.get('code')||(saved&&saved.mode==='class'&&saved.code)||'')}">
+    <label>Team name (no real names, please)</label><input id="name" maxlength="24" autocomplete="off" value="${UI.esc((saved&&saved.name)||'')}" placeholder="e.g. Team Merlion Pie">
+    <div class="row" style="margin-top:14px"><button class="btn" id="go">Join game</button><span class="small" id="msg" style="color:var(--red)">${UI.esc(msg||'')}</span></div>
+   </div>
+   <div class="card"><h3>Or play solo</h3><p class="small mute" style="margin:6px 0 10px">A mystery era, at your own pace. Good for homework.</p>
+    <div class="row"><button class="btn ghost" id="solo">Play solo</button>${saved&&saved.mode==='solo'&&saved.sc?'<button class="btn ghost" id="resume">Resume my run</button>':''}</div></div>
+   <p class="tiny mute">Prototype. Every number in the game comes from a simplified teaching model, not real data.</p></div>`;
+  $('#go').onclick=joinClass;
+  $('#solo').onclick=()=>startSolo(null);
+  if($('#resume')) $('#resume').onclick=()=>startSolo(saved);
+}
+
+async function joinClass(){
+  const code=$('#code').value.trim().toUpperCase(), name=$('#name').value.trim();
+  if(!/^[A-Z0-9]{5}$/.test(code)) return joinScreen('Codes have 5 letters or numbers.');
+  if(!name) return joinScreen('Give your team a name.');
+  $('#go').disabled=true; $('#msg').textContent='Connecting…'; $('#msg').style.color='var(--mute)';
+  try{
+    G.sync=await Sync.connect();
+    if(!(await G.sync.exists(code))) return joinScreen('No game with that code. Check with your teacher.');
+    const saved=restore();
+    G.mode='class'; G.code=code; G.name=name;
+    if(saved&&saved.mode==='class'&&saved.code===code){ G.decisions=saved.decisions||{}; G.policy=saved.policy||G.policy; G.voted=saved.voted||{}; }
+    else { G.decisions={}; G.voted={}; }
+    G.sync.watchGame(code, onGame);
+  }catch(e){ console.error(e); joinScreen('Could not connect. Is the school Wi-Fi blocking it? ('+(e.code||e.message||e)+')'); }
+}
+
+function onGame(game){
+  if(!game){ G.game=null; app.innerHTML=`<div class="join"><h1>Game over</h1><p class="mute">Your teacher has closed this game. Thanks for playing!</p><button class="btn ghost" onclick="location.reload()">Back</button></div>`; ov.innerHTML=''; return; }
+  const first=!G.game; G.game=game;
+  if(first||!G.sc){ G.sc=Sc.byId(game.meta.scenario); G.run=E.newRun(G.sc,{seed:7}); G.ap=E.newRun(G.sc,{seed:7}); }
+  const st=game.state||{};
+  // catch up to the teacher's clock
+  let stepped=false;
+  while(G.run.q < Math.min(st.q||0, G.sc.quarters)){ stepOnce(); stepped=true; }
+  if(stepped||first) pushTeam();
+  store(); render();
+}
+
+function pushTeam(){
+  if(G.mode!=='class') return;
+  const r=G.run; G.sync.setTeam(G.code,{name:G.name, q:r.q, index:r.index, g:r.g, pi:r.pi, u:r.u, reserves:r.reserves, ach:Object.keys(r.ach).length, readyQ:G.readyQ, at:Date.now()}).catch(console.error);
+}
+
+// ---------- solo ----------
+function startSolo(saved){
+  G.mode='solo';
+  G.sc = saved&&saved.sc ? Sc.byId(saved.sc) : Sc.SCENARIOS[Math.floor(Math.random()*Sc.SCENARIOS.length)];
+  G.run=E.newRun(G.sc,{seed:7}); G.ap=E.newRun(G.sc,{seed:7});
+  G.decisions=(saved&&saved.decisions)||{}; G.policy=(saved&&saved.policy)||Object.assign({},E.DEFAULT_POLICY);
+  const done=Object.keys(G.decisions).length;
+  for(let i=0;i<done;i++) stepOnce(true);
+  G.stage=(saved&&saved.stage)||'start'; if(!done) G.stage='start';
+  enterQuarter(); render();
+}
+function enterQuarter(){ // solo: decide which overlay comes first this quarter
+  if(G.mode!=='solo'||G.run.q>=G.sc.quarters) return;
+  if(G.stage!=='start'&&G.stage!=='next') return;
+  const info=UI.quarterInfo(G.sc,G.run.q);
+  G.stage = info.unlock?'lesson': info.poll?'poll':'plan'; G.soloPred=null; store();
+}
+
+// ---------- core ----------
+function stepOnce(replay){
+  const q=G.run.q;
+  const d = G.decisions[q] || (G.decisions[q]={policy:Object.assign({},G.policy), news:Object.assign({},G.news)});
+  const res=E.step(G.run,G.sc,d.policy,d.news);
+  E.step(G.ap,G.sc,E.DEFAULT_POLICY,{});
+  if(!replay){ G.last=res; G.news={}; G.readyQ=-1; if(res.achievements.length) toast('🏅 '+res.achievements.map(k=>E.ACHIEVEMENTS[k].t).join(', ')); }
+  else G.last=res;
+  return res;
+}
+function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
+
+function tiles(){
+  const r=G.run, unl=E.unlockedAt(Math.max(0,r.q-1),G.sc), unlNow=E.unlockedAt(r.q,G.sc), H=r.hist, T=E.TARGETS;
+  const t=(k,lab,v,fmt)=>{
+    const open=unlNow.aims.has(k)||unl.aims.has(k);
+    if(!open){ const u=E.unlocksFor(G.sc).find(x=>(x.aims||[]).includes(k)); return `<div class="tile locked"><div class="lab">${lab}</div><div class="val">🔒</div><div class="tgt">${u?UI.qLabel(u.q):''}</div></div>`; }
+    const tg=T[k], ok=(tg.lo===undefined||v>=tg.lo)&&v<=tg.hi, played=H.length>1;
+    return `<div class="tile ${played?(ok?'ok':'bad'):''}"><div class="lab">${lab}</div>${UI.spark(H.map(h=>h[fmt]))}<div class="val">${v.toFixed(1)}%</div><div class="tgt">Target ${tg.label}</div></div>`;
+  };
+  return `<div class="tiles">${t('growth','Growth',r.g,'g')}${t('inflation','Inflation',r.pi,'pi')}${t('unemployment','Jobless',r.u,'u')}
+    <div class="tile ${r.reserves<0?'bad':''}"><div class="lab">Reserves</div><div class="val">${r.reserves}</div><div class="tgt">${r.reserves<0?'Overdrawn!':'rainy-day fund'}</div></div></div>`;
+}
+
+function levers(locked){
+  const unl=E.unlockedAt(G.run.q,G.sc);
+  const one=(key)=>{
+    const L=E.LEVERS[key], open=unl.levers.has(key);
+    const opts=L.options.filter(o=>!o.unlock||unl.levers.has(o.unlock));
+    const u=E.unlocksFor(G.sc).find(x=>(x.levers||[]).includes(key));
+    return `<div class="lever ${open?'':'locked'}"><div class="name"><span>${L.name}</span><span class="mute small">${open?L.lagNote:'🔒 '+(u?UI.qLabel(u.q):'')}</span></div>
+      <div class="seg">${opts.map(o=>`<button data-lever="${key}" data-k="${o.k}" class="${G.policy[key]===o.k?'sel':''}" ${open&&!locked?'':'disabled'}>${o.t}${o.s?`<small>${o.s}</small>`:''}</button>`).join('')}</div></div>`;
+  };
+  return `<div class="card"><h3 style="font-size:15px">Your levers</h3>${one('fiscal')}${one('er')}${one('supply')}</div>`;
+}
+
+function lastCard(){
+  const r=G.run, res=G.last; if(!res) return '';
+  const prev=r.hist[r.hist.length-2]||r.hist[0];
+  const d=(a,b)=>{const x=+(a-b).toFixed(1); return x>0?`▲${x}`:x<0?`▼${-x}`:'·';};
+  return `<div class="card"><div class="row"><b>${UI.qLabel(res.q)} results</b><span class="spacer"></span>${res.achievements.map(k=>`<span class="ach">🏅 ${E.ACHIEVEMENTS[k].t}</span>`).join('')}</div>
+    <div class="res"><div><span class="tiny mute">Growth</span><b>${res.g}%</b><span class="tiny mute">${d(res.g,prev.g)}</span></div>
+    <div><span class="tiny mute">Inflation</span><b>${res.pi}%</b><span class="tiny mute">${d(res.pi,prev.pi)}</span></div>
+    <div><span class="tiny mute">Jobless</span><b>${res.u}%</b><span class="tiny mute">${d(res.u,prev.u)}</span></div></div>
+    ${res.notes.length?`<p class="small" style="color:var(--teal);margin:8px 0 0">${res.notes.join(' ')}</p>`:''}
+    <ul class="tips small">${UI.coach(res,r,G.sc).map(t=>`<li>${t}</li>`).join('')}</ul></div>`;
+}
+
+function quarterCards(locked){
+  const q=G.run.q, info=UI.quarterInfo(G.sc,q);
+  let h='';
+  info.events.forEach(e=>{ h+=`<div class="card head"><div class="tag">Breaking · ${UI.qLabel(q)}</div><h3>${UI.esc(e.head)}</h3><div class="small mute">${UI.esc(e.body)}</div></div>`; });
+  if(info.quiet) h+=`<div class="card head" style="border-left-color:var(--line)"><div class="tag" style="color:var(--mute)">${UI.qLabel(q)}</div><div>${info.quiet}</div></div>`;
+  info.news.forEach(n=>{
+    h+=`<div class="card news"><div class="tag">News</div><h3>${UI.esc(n.head)}</h3><div class="small mute">${UI.esc(n.body)}</div>
+     ${n.choices?`<div class="choices">${n.choices.map((c,i)=>{const sel=(G.news[n.id]||n.choices[n.default||0].k)===c.k; return `<button data-news="${n.id}" data-k="${c.k}" class="${sel?'sel':''}" ${locked?'disabled':''}>${UI.esc(c.t)}</button>`;}).join('')}</div>`:''}</div>`;
+  });
+  return h;
+}
+
+function header(){
+  const r=G.run, ap=G.ap, diff=+(r.index-ap.index).toFixed(1);
+  return `<div class="top"><div><div class="lsl">Living standard</div><div class="ls">${r.index.toFixed(1)}</div>
+     <div class="vs ${diff>0?'win':diff<0?'lose':''}">${r.q?(diff===0?'Level with Autopilot':`${diff>0?'Ahead of':'Behind'} Autopilot by ${Math.abs(diff)}`):'Autopilot starts at 100 too'}</div></div>
+    <div style="text-align:right"><div class="pill">${G.mode==='class'?UI.esc(G.name):'Solo run'}</div><div class="disp" style="font-size:18px;margin-top:4px">${r.q<G.sc.quarters?UI.qLabel(r.q):'Run complete'}</div></div></div>
+    ${UI.skyline(r.index)}`;
+}
+
+function render(){
+  if(!G.run) return;
+  if(G.run.q>=G.sc.quarters && (G.mode==='solo' || (G.game&&G.game.state&&G.game.state.phase==='ended'))) return endScreen();
+  const st=(G.game&&G.game.state)||{};
+  const lobby=G.mode==='class'&&st.phase==='lobby';
+  const locked=G.mode==='class'&&G.readyQ===G.run.q;
+  let h=`<div class="wrap">${header()}`;
+  if(lobby){ h+=`<div class="card" style="margin-top:10px"><h3>You're in, ${UI.esc(G.name)}!</h3><p class="mute">Waiting for your teacher to start the game. Look at the levers below while you wait. They unlock as the game goes on.</p></div>`+tiles()+levers(true); }
+  else if(G.run.q>=G.sc.quarters){ h+=lastCard()+`<div class="card"><h3>That's the last quarter.</h3><p class="mute">Your teacher will reveal which real era you just played…</p></div>`; }
+  else { h+=lastCard()+quarterCards(locked)+tiles()+levers(locked); }
+  h+=`</div>`;
+  // action bar
+  if(!lobby && G.run.q<G.sc.quarters){
+    if(G.mode==='solo') h+=`<div class="bar"><div class="in"><span class="small mute">Set your levers, then</span><span class="spacer"></span><button class="btn" id="runq">Run ${UI.qLabel(G.run.q)} ▶</button></div></div>`;
+    else h+=`<div class="bar"><div class="in"><span class="small mute">${locked?'Locked in. Waiting for your teacher to run the quarter…':'Your teacher runs the quarter. You can change levers until then.'}</span><span class="spacer"></span><button class="btn ${locked?'ghost':''}" id="lock">${locked?'Change':'Lock in ✓'}</button></div></div>`;
+  }
+  app.innerHTML=h; bind(); overlays();
+}
+
+function bind(){
+  app.querySelectorAll('[data-lever]').forEach(b=>b.onclick=()=>{G.policy[b.dataset.lever]=b.dataset.k; store(); render();});
+  app.querySelectorAll('[data-news]').forEach(b=>b.onclick=()=>{G.news[b.dataset.news]=b.dataset.k; render();});
+  const rq=$('#runq'); if(rq) rq.onclick=()=>{ stepOnce(); G.stage='next'; enterQuarter(); store(); render(); window.scrollTo({top:0,behavior:'smooth'}); };
+  const lk=$('#lock'); if(lk) lk.onclick=()=>{ G.readyQ = G.readyQ===G.run.q ? -1 : G.run.q; pushTeam(); render(); };
+}
+
+// ---------- overlays: lessons and predictions ----------
+function overlays(){
+  ov.innerHTML='';
+  if(G.run.q>=G.sc.quarters) return;
+  const info=UI.quarterInfo(G.sc,G.run.q);
+  if(G.mode==='solo'){
+    if(G.stage==='lesson'&&info.unlock) return box(UI.lessonHTML(info.unlock)+`<div class="row" style="margin-top:12px"><button class="btn" id="ok">Got it</button></div>`, ()=>{ $('#ok').onclick=()=>{ G.stage=info.poll?'poll':'plan'; store(); render(); }; });
+    if(G.stage==='poll'&&info.poll) return pollBox(info.poll, G.soloPred, !!G.soloPred, k=>{G.soloPred=k; render();}, ()=>{ G.stage='plan'; store(); render(); });
+    return;
+  }
+  const st=(G.game&&G.game.state)||{};
+  if(st.lesson&&info.unlock&&st.lesson===info.unlock.k) return box(UI.lessonHTML(info.unlock)+`<p class="small mute" style="margin-top:12px">Your teacher will carry on in a moment…</p>`);
+  if(st.poll&&st.poll.q===G.run.q&&info.poll){
+    const mine=G.voted[info.poll.id];
+    return pollBox(info.poll, mine, !!st.poll.reveal, k=>{ G.voted[info.poll.id]=k; store(); G.sync.vote(G.code,info.poll.id,k).catch(console.error); render(); }, null, !st.poll.reveal);
+  }
+}
+function box(html,after){ ov.innerHTML=`<div class="overlay"><div class="box">${html}</div></div>`; if(after) after(); }
+function pollBox(p, mine, reveal, onPick, onDone, waiting){
+  const ev=p.ev;
+  let h=`<div class="lesson"><div class="k">Predict · ${UI.qLabel(G.run.q)}</div><h2>${UI.esc(ev.head)}</h2><p class="mute">${UI.esc(ev.body)}</p><b>What does this shock do to the Harbour Republic?</b></div><div class="opts">`;
+  h+=Object.entries(Scenarios.OPTS).map(([k,t])=>{
+    const cls = reveal ? (k===p.correct?'right':k===mine?'wrong':'') : (k===mine?'sel':'');
+    return `<button class="opt ${cls}" data-pred="${k}" ${reveal?'disabled':''}>${t}${reveal&&k===p.correct?' ✓':''}</button>`; }).join('')+`</div>`;
+  if(reveal){
+    h+=`<div class="fb"><b>${mine===p.correct?'Spot on!':mine?'Not quite.':'Here\'s the answer.'}</b><div class="row" style="margin-top:8px;align-items:flex-start">${UI.diagram(p.correct,200)}<div style="flex:1;min-width:180px" class="small">${UI.EXPLAIN[p.correct]}</div></div></div>`;
+    h+= onDone?`<div class="row" style="margin-top:12px"><button class="btn" id="ok">Set my levers</button></div>`:`<p class="small mute">Your teacher will carry on in a moment…</p>`;
+  } else if(waiting && mine) h+=`<p class="small mute" style="margin-top:10px">Locked in. You can still change it until your teacher reveals the answer.</p>`;
+  else if(onDone && mine) h+=`<div class="row" style="margin-top:12px"><button class="btn" id="reveal">Reveal</button></div>`;
+  box(h, ()=>{
+    ov.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>onPick(b.dataset.pred));
+    const rv=$('#reveal'); if(rv) rv.onclick=()=>{ G.stage='pollreveal'; pollBox(p,mine,true,onPick,onDone); };
+    const ok=$('#ok'); if(ok) ok.onclick=onDone;
+  });
+}
+
+// ---------- end ----------
+function worldMap(pins){
+  const M=window.WORLD_MAP;
+  const dots=pins.map(p=>{const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin" cx="${x}" cy="${y}" r="7"/><text x="${x+10}" y="${y+4}">${UI.esc(p.name)}</text>`;}).join('');
+  return `<div class="endmap"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div>`;
+}
+function endScreen(){
+  ov.innerHTML='';
+  const r=G.run, ap=G.ap, diff=+(r.index-ap.index).toFixed(1), rv=G.sc.reveal;
+  const H=r.hist, A=ap.hist, W=320, Hh=110, n=H.length-1;
+  const y=v=>Hh-8-(v-Math.min(...H.map(h=>h.index),...A.map(h=>h.index))+1)/(Math.max(...H.map(h=>h.index),...A.map(h=>h.index))-Math.min(...H.map(h=>h.index),...A.map(h=>h.index))+2)*(Hh-16);
+  const line=(arr,c,dash)=>`<polyline fill="none" stroke="${c}" stroke-width="2.4" ${dash?'stroke-dasharray="5 4"':''} points="${arr.map((h,i)=>`${10+i/n*(W-20)},${y(h.index)}`).join(' ')}"/>`;
+  app.innerHTML=`<div class="wrap">${header()}
+   <div class="card" style="margin-top:10px"><h2>${diff>0?'You beat the Autopilot!':diff===0?'Exactly level with the Autopilot':'The Autopilot won this time.'}</h2>
+    <p class="mute">Your living standard: <b style="color:var(--ink)">${r.index.toFixed(1)}</b> · Autopilot: <b style="color:var(--ink)">${ap.index.toFixed(1)}</b>. ${diff>0?'Your policies cushioned the shocks better than doing nothing.':diff===0?'Did you leave every lever alone? Doing nothing is exactly what the Autopilot does.':'Remember the lags: policy that arrives late can make things worse. When did you react too much, or too little?'}</p>
+    <svg viewBox="0 0 ${W} ${Hh}" style="width:100%;background:#0c1a30;border-radius:10px">${line(A,'#9db0ca',true)}${line(H,'#2ec4b6')}</svg>
+    <div class="small mute"><span style="color:var(--teal)">━ You</span> &nbsp; ┅ Autopilot</div>
+    ${Object.keys(r.ach).length?`<div style="margin-top:8px">${Object.keys(r.ach).map(k=>`<span class="ach">🏅 ${E.ACHIEVEMENTS[k].t}</span>`).join('')}</div>`:''}</div>
+   <div class="card"><div class="pill hot">Reveal</div><h2 style="margin-top:6px">You just played: ${UI.esc(rv.title)}</h2><p>${UI.esc(rv.story)}</p>${worldMap(rv.pins)}
+    <ul class="tips small">${rv.facts.map(f=>`<li>${UI.esc(f)}</li>`).join('')}</ul></div>
+   ${G.mode==='solo'?`<div class="row"><button class="btn" id="again">Play another mystery era</button></div>`:''}
+   <p class="tiny mute">The Harbour Republic is a teaching model. Shock sizes are made up, but the order of events follows the real era.</p></div>`;
+  const a=$('#again'); if(a) a.onclick=()=>{ try{localStorage.removeItem('speedrun-play');}catch(e){} startSolo(null); };
+}
+
+// ---------- boot ----------
+const saved=restore();
+if(params.get('code')||!saved) joinScreen();
+else joinScreen();
+})();
+</script>
+</body>
+</html>

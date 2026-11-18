@@ -40,3 +40,7 @@ The JC1/JC2 questionnaire is not built by `build.py`; edit the files in `eti/` d
 Sections unlock in order: a student must answer every question in a section before the next opens, and can go back to any finished section to edit before submitting.
 
 Student answers are saved only in the teacher's private Google Sheet, never in this repository.
+
+## Econ Speedrun (`speedrun/`)
+
+A class game for Year 6 H1 macro, hand-written (not built by `build.py`). Open [speedrun/](https://liyun-wang-ri.github.io/field-reports/speedrun/) for the campaign map. The teacher opens an act's Host page on the projector; students join on their phones with the game code and a team nickname (no accounts). Uses the `econ-speedrun` Firebase project; add `#demo` to any page to test in one browser without Firebase. See `speedrun/README.md`.

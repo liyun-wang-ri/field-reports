@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun · Act 2 Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{font-size:16px}
+.wrap{max-width:1280px;margin:0 auto;padding:12px 20px 40px}
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:10px}.hdr h1{font-size:22px}
+.code{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;letter-spacing:.18em}
+.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.big{font-size:clamp(24px,2.6vw,36px);line-height:1.15}
+.lobby{text-align:center;padding:30px 10px}.lobby .code{font-size:clamp(60px,10vw,120px);color:var(--yellow)}
+#qr{display:inline-block;background:#fff;padding:10px;border-radius:12px;margin-top:10px}
+.teams{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+.team{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:6px 14px 6px 6px;animation:bubin .4s both}
+.tag{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
+table.dz{width:100%;border-collapse:collapse;font-size:16px;border-radius:10px;overflow:hidden}
+table.dz th,table.dz td{padding:8px 10px;border-bottom:1px solid #c9d8ea;text-align:left}
+table.dz th{background:#d6e4f5}
+table.dz td.v{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:17px;text-align:center}
+table.dz th.v{text-align:center}
+table.dz tr.grp td{background:#c3d6ee;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#2a4a78;padding:5px 10px}
+.pop{display:inline-block;height:8px;background:#2b6fd6;border-radius:4px;vertical-align:middle;margin-right:6px}
+.split{display:grid;gap:6px;margin-top:6px}
+.sp{display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:center}
+.sp .lab{font-weight:600;font-size:15px}.sp .track{height:12px;background:#0c1a30;border-radius:6px;overflow:hidden;margin-top:3px}
+.sp .track i{display:block;height:100%;background:var(--blue)}.sp.right .track i{background:var(--teal)}.sp.right .lab{color:var(--teal)}
+.sp .n{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:18px;text-align:right}
+.qgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}@media (max-width:1100px){.qgrid{grid-template-columns:1fr}}
+.lb{display:grid;gap:8px}
+.lbr{display:grid;grid-template-columns:28px 1fr 64px;gap:10px;align-items:center}
+.lbr .barw{height:10px;background:#0c1a30;border-radius:5px;overflow:hidden;margin-top:4px}
+.lbr .barw i{display:block;height:100%;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.lbr .sc{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;font-size:20px;text-align:right}
+.rk{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;color:var(--mute)}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.endmap svg{width:100%;height:auto;background:#0c1a30;border-radius:12px}
+.endmap path.land{fill:#1f3a62}.endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:2}.endmap circle.new{fill:var(--yellow)}
+.endmap text{fill:var(--ink);font-size:16px;font-weight:800;paint-order:stroke;stroke:#0b1626;stroke-width:4px}
+.snd{background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;font-size:16px}
+.reveal-card{position:relative}
+.newscard .nh{font-size:19px}.newscard .nb{font-size:15px}
+.ncards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 10px}
+.drum{color:#bcd6ff;font-family:ui-monospace,Menlo,monospace}
+.labstamp{position:static;display:inline-block;transform:rotate(-3deg);font-size:15px;animation:stamp2 .35s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes stamp2{0%{transform:rotate(-3deg) scale(2);opacity:0}100%{transform:rotate(-3deg) scale(1);opacity:.9}}
+</style>
+</head>
+<body class="theme-lab">
+<div class="wrap" id="app"><p class="mute">Connecting…</p></div>
+<script src="firebase-config.js"></script>
+<script src="act2.js"></script>
+<script src="common.js"></script>
+<script src="fx.js"></script>
+<script src="adas.js"></script>
+<script src="sync.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+'use strict';
+const A=Act2, R=A.ROUNDS, $=s=>document.querySelector(s), app=$('#app'), esc=UI.esc;
+const H={sync:null, code:null, game:null, shown:{}, ranksAtRound:{}, lastPhaseKey:null, celebrated:false};
+const KEY='speedrun-act2-host';
+const STRIP='<div class="labstrip">Forecast lab · Economist division</div>';
+const playURL=c=>{ const u=new URL('act2-play.html', location.href); u.search='?code='+c; if(H.sync.kind==='local') u.hash='demo'; return u.toString(); };
+
+async function boot(){
+  try{ H.sync=await Sync.connect(); }catch(e){ app.innerHTML=`<div class="card"><h2>Could not connect</h2><p class="mute">${esc(e.code||e.message||e)}</p><p class="small mute">To try it without the internet, add #demo to the address.</p></div>`; return; }
+  let s=null; try{ s=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(s&&s.code&&await H.sync.exists(s.code)) return attach(s.code);
+  const nc=R.filter(r=>r.type==='call').length, nq=R.filter(r=>r.type==='quick').length;
+  app.innerHTML=`${STRIP}<div class="hdr"><h1>Econ Speedrun · Act 2: The Economist <span class="pill">Host</span></h1><span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo: this browser only</span>':''}</div>
+   <div class="card" style="max-width:860px"><h2>Start the class game</h2>
+    ${FX.griffles('curious','New job, new lab. Today we predict what real shocks do to real economies. I\'ll be predicting loudly and wrongly on the big screen.','pop')}
+    <p class="mute">${R.length} rounds in about 45 minutes, in the order of the AD/AS notes: the parts of AD, why AD slopes down, AD shifts, the three ranges of AS, AS shifts, and the multiplier. Teams make ${nc} calls on real news from 12 economies, dodge ${nq} trap cards, and race two mystery economies for the bigger multiplier. Each Big Call ends with an animated AD/AS diagram on this screen and on their phones.</p>
+    <p class="small mute">The last round is a two-shock forecast for the Harbour Republic, the economy teams will run in Act 4. Sound plays on this screen only; use the 🔊 button to mute it.</p>
+    <div class="ctrl"><button class="btn" id="create">Create game</button></div></div>`;
+  $('#create').onclick=async()=>{ $('#create').disabled=true; attach(await H.sync.createGame({scenario:'act2'})); };
+}
+function attach(code){
+  H.code=code; try{ localStorage.setItem(KEY, JSON.stringify({code})); }catch(e){}
+  H.sync.watchGame(code, g=>{ H.game=g; if(!g){ localStorage.removeItem(KEY); return location.reload(); } render(); });
+}
+const st=()=>(H.game&&H.game.state)||{phase:'lobby'};
+const set=p=>H.sync.setState(H.code, Object.assign({}, st(), p));
+const teams=()=>Object.entries((H.game&&H.game.teams)||{}).map(([uid,t])=>Object.assign({uid},t));
+function hdr(){
+  const s=st();
+  return `${STRIP}<div class="hdr"><h1>Act 2 · The Economist</h1><span class="pill">Code <span class="code">${H.code}</span></span>
+   ${s.phase==='play'||s.phase==='reveal'?`<span class="pill hot">Round ${s.r+1} / ${R.length}</span>`:''}<span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo</span>':''}
+   <button class="snd" id="snd" title="Sound on this screen">${FX.soundOn()?'🔊':'🔇'}</button><button class="btn ghost" id="menu" style="padding:7px 12px">⋯</button></div>`;
+}
+function bindHdr(){
+  const sn=$('#snd'); if(sn) sn.onclick=()=>{ FX.setSound(!FX.soundOn()); sn.textContent=FX.soundOn()?'🔊':'🔇'; if(FX.soundOn()) FX.play('coin'); };
+  const m=$('#menu'); if(!m) return; m.onclick=()=>{ const d=document.createElement('div'); d.className='overlay';
+  d.innerHTML=`<div class="box"><h3>Game menu</h3><div class="ctrl"><button class="btn ghost" id="mc">Close</button><button class="btn ghost" id="ml">Leave (keep data)</button><button class="btn alt" id="md">End and delete all game data</button></div></div>`;
+  document.body.appendChild(d); d.querySelector('#mc').onclick=()=>d.remove();
+  d.querySelector('#ml').onclick=()=>{ localStorage.removeItem(KEY); location.reload(); };
+  d.querySelector('#md').onclick=async()=>{ await H.sync.deleteGame(H.code); localStorage.removeItem(KEY); location.reload(); }; }; }
+
+function render(){
+  const s=st(), key=s.phase+':'+s.r, first=key!==H.lastPhaseKey; H.lastPhaseKey=key;
+  if(s.phase==='lobby') return lobby();
+  if(s.phase==='end') return endView(first);
+  const round=R[s.r], reveal=s.phase==='reveal';
+  const theatre = reveal && first && !H.shown[round.id]; if(theatre){ H.shown[round.id]=true; FX.play('reveal'); }
+  if(!reveal && first){ H.ranksAtRound[s.r]=ranks(); }
+  if(round.type==='mystery') mysteryView(round, reveal, theatre);
+  else if(round.type==='quick') quickView(round, reveal, theatre);
+  else callView(round, reveal, theatre);
+  if(reveal) drawDiagram(round, theatre);
+  if(theatre){ const T=teams(); const allRight=T.filter(t=>{const a=(t.answers||{})[round.id]; const x=A.scoreRound(round,a); return a&&a.locked&&x.right===x.of;}).length; if(allRight && allRight>=Math.ceil(T.length/2)) setTimeout(()=>FX.confetti(70),1400); }
+}
+function lobby(){
+  const T=teams(), url=playURL(H.code);
+  app.innerHTML=hdr()+`<div class="card lobby"><div class="mute">Go to <b style="color:var(--ink)">${esc(url.replace(/\?.*/,'').replace(/^https?:\/\//,''))}</b> and enter</div><div class="code">${H.code}</div><div id="qr"></div>
+   <div class="teams">${T.length?T.map(t=>`<span class="team">${FX.chip(t)}</span>`).join(''):'<span class="mute">Waiting for teams…</span>'}</div>
+   <div class="ctrl" style="justify-content:center;margin-top:22px"><button class="btn" id="start" ${T.length?'':'disabled'}>Start round 1 (${T.length} team${T.length===1?'':'s'})</button></div></div>`;
+  try{ new QRCode($('#qr'),{text:url,width:180,height:180}); }catch(e){ $('#qr').remove(); }
+  bindHdr(); $('#start').onclick=()=>{ FX.play('stamp'); set({phase:'play', r:0}); };
+}
+function lockedCount(round){ const T=teams(); return {n:T.filter(t=>t.answers&&t.answers[round.id]&&t.answers[round.id].locked).length, of:T.length}; }
+function controls(round, reveal){
+  const c=lockedCount(round), s=st();
+  return `<div class="ctrl"><b>${c.n} of ${c.of}</b><span class="mute">teams locked in</span><span class="spacer"></span>
+   ${reveal?`<button class="btn" id="next">${s.r===R.length-1?'Finish Act 2 ▶':'Next round ▶'}</button>`:`<button class="btn alt" id="rev">Reveal</button>`}</div>`;
+}
+function bindControls(){ bindHdr(); const s=st();
+  const rv=$('#rev'); if(rv) rv.onclick=()=>{ rv.disabled=true;
+    const d=document.createElement('div'); d.className='drum'; d.innerHTML='<span>RUNNING THE NUMBERS…</span>'; document.body.appendChild(d);
+    FX.play('drumroll', FX.reduced()?200:1100); setTimeout(()=>{ d.remove(); FX.play('stamp'); set({phase:'reveal'}); }, FX.reduced()?200:1150); };
+  const nx=$('#next'); if(nx) nx.onclick=()=>{ FX.play('tick'); set(s.r===R.length-1?{phase:'end'}:{phase:'play', r:s.r+1}); }; }
+
+// ---------- leaderboard ----------
+function lastRevealed(){ const s=st(); if(s.phase==='end') return R.length-1; if(s.phase==='reveal') return s.r; return (s.r||0)-1; }
+function scored(){ return teams().map(t=>({uid:t.uid, t, sc:A.totalScore(t.answers, lastRevealed())})).sort((a,b)=>b.sc-a.sc); }
+function ranks(){ const o={}; scored().forEach((x,i)=>o[x.uid]=i); return o; }
+function streak(t){ let n=0; for(let i=Math.min(lastRevealed(),R.length-1); i>=0; i--){ if(A.scoreRound(R[i],(t.answers||{})[R[i].id]).pts>0) n++; else break; } return n; }
+function leaderboard(n){
+  const S=scored().slice(0,n||8); if(!S.length) return '';
+  const before=H.ranksAtRound[st().r]||{}, showMove=st().phase==='reveal'||st().phase==='end';
+  const mx=Math.max(1,...S.map(x=>x.sc)), mn=Math.min(0,...S.map(x=>x.sc));
+  return `<div class="card"><h3>Economist leaderboard</h3><div class="lb" style="margin-top:10px">${S.map((x,i)=>{
+    const was=before[x.uid], mv=showMove&&was!==undefined?was-i:0, sk=streak(x.t);
+    return `<div class="lbr"><span class="rk">${i+1}</span><div><div>${FX.chip(x.t)}${mv>0?`<span class="rkmove up">▲${mv}</span>`:mv<0?`<span class="rkmove down">▼${-mv}</span>`:''}${sk>=3?`<span class="streak" title="${sk} rounds in a row">🔥${sk}</span>`:''}</div>
+      <div class="barw"><i style="width:${((x.sc-mn)/(mx-mn||1)*100).toFixed(0)}%;background:${x.t.colour||'var(--teal)'}"></i></div></div><span class="sc">${x.sc}</span></div>`; }).join('')}</div></div>`;
+}
+function splitBars(opts, counts, correct, reveal, theatre){
+  const good=k=>Array.isArray(correct)?correct.includes(k):k===correct;
+  const mx=Math.max(1,...Object.values(counts));
+  return `<div class="split ${theatre?'grow':''}">${opts.map(([k,t])=>`<div class="sp ${reveal&&good(k)?'right':''}"><div><div class="lab">${esc(t)}${reveal&&good(k)?' ✓':''}</div><div class="track"><i style="width:${((counts[k]||0)/mx*100).toFixed(0)}%"></i></div></div><span class="n">${counts[k]||0}</span></div>`).join('')}</div>`;
+}
+function mapCard(r, title){
+  const M=window.WORLD_MAP, all=A.pinsUpTo(r), now=A.namesOf(R[r]);
+  if(!all.length) return '';
+  const dots=all.map(n=>{const p=A.PINS[n]; const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin ${now.includes(n)?'new':''}" cx="${x}" cy="${y}" r="${now.includes(n)?11:8}"/><text x="${p.left?x-13:x+13}" y="${y+5}" text-anchor="${p.left?'end':'start'}">${esc(n)}</text>`;}).join('');
+  return `<div class="card"><h3>${title||'The map so far'}</h3><div class="endmap" style="margin-top:8px"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div></div>`;
+}
+const GRIF_REVEAL={
+  s1:'Government building a city is <b>G</b>, not I. In AD, "investment" means firms buying capital goods. I will now go and sit quietly.',
+  s2:'Three effects. Three! And I said one. In my defence, "cheaper so people buy more" is the short version.',
+  c1:'So when your biggest customer gets sick, you catch the cold too. Mexico had a very rough 2009.',
+  c2:'Costs went up, so AS shifted up. Prices up AND output down at the same time. That one hurts.',
+  r1:'Same push, different results. Spain had idle workers; Japan had none to spare. Economics is not fair like that.',
+  c3:'Capacity up, so AS right. But the oil money moved AD too. Real life never moves just one curve, does it?',
+  m1:'Ireland\'s extra spending leaks straight out through imports. Brazil keeps more of it at home. Money attracts money? Not in the multiplier.',
+  f1:'Prices up for sure. Output? It depends on which shift is bigger. "It depends" is a real answer, as long as you say <i>on what</i>.'
+};
+function hostGrif(round, reveal){
+  if(round.type==='quick') return reveal ? FX.griffles('skeptical', `I said: "${round.gut}" Yeah… don't do what I did.`, 'shake') : FX.griffles('guessing', `<i>My gut says:</i> ${round.gut}`, 'pop');
+  if(reveal) return FX.griffles(GRIF_REVEAL[round.id]&&/not|never|hurts|rough/.test(GRIF_REVEAL[round.id])?'surprised':'pleased', GRIF_REVEAL[round.id]||'Well, that\'s the answer. Who called it?', 'hop');
+  return FX.griffles('guessing', `<i>My gut says:</i> ${round.gut}`, 'pop');
+}
+function cardsHTML(round){ return `<div class="ncards">${(round.cards||[]).map(c=>`<div class="newscard">${c.pin?`<span class="np">📍 ${esc(c.pin)}</span>`:''}<div class="nh">${esc(c.head)}</div><div class="nb">${esc(c.body)}</div></div>`).join('')}</div>`; }
+function counts(round, qid){ const c={}; teams().forEach(t=>{ const a=(t.answers||{})[round.id]; const v=a&&a.locked&&a.a&&a.a[qid]; if(v) c[v]=(c[v]||0)+1; }); return c; }
+function diagramBox(round){
+  if(!round.diagram) return '';
+  if(round.diagram==='ranges') return `<div class="adasbox"><div class="cap">The same rise in AD</div><div class="adas2"><div><div class="cap" style="text-align:center">🇪🇸 Spain 2013: lots of spare capacity</div><div id="dg1"></div></div><div><div class="cap" style="text-align:center">🇯🇵 Japan 2019: almost none</div><div id="dg2"></div></div></div></div>`;
+  return `<div class="adasbox"><div class="cap">${round.diagram==='combo'?'AD right and AS up, together (one possible outcome)':'The shift'}</div><div id="dg1"></div></div>`;
+}
+function drawDiagram(round, theatre){
+  const go=(el,shift,opts)=>{ if(!el) return; if(theatre) ADAS.animate(el,shift,Object.assign({delay:900,ms:1400},opts)); else el.innerHTML=ADAS.svg(shift,opts); };
+  if(round.diagram==='ranges'){ go($('#dg1'),'adR',{start:'flat'}); go($('#dg2'),'adR',{start:'full'}); }
+  else if(round.diagram) go($('#dg1'),round.diagram,{start:'mid'});
+}
+
+function callView(round, reveal, theatre){
+  const T=teams(), n=lockedCount(round);
+  const right=T.filter(t=>{const a=(t.answers||{})[round.id]; const x=A.scoreRound(round,a); return a&&a.locked&&x.right===x.of;}).length;
+  const qs=round.questions.map((q,i)=>`<div><b>${i+1}. ${esc(q.q)}</b>${splitBars(q.opts, counts(round,q.id), [q.correct].concat(q.also||[]), reveal, theatre)}</div>`).join('');
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card folder reveal-card" data-tab="${esc(round.tab)}"><div class="row"><div class="tag">${esc(round.title)}</div><span class="spacer"></span>${reveal&&n.n?`<span class="labstamp ${right>=n.n/2?'':'bad'}">${right} of ${n.n} called it</span>`:''}</div>
+     <p style="font-size:17px;margin:6px 0 4px">${round.intro}</p>${cardsHTML(round)}
+     ${reveal?`<div class="qgrid" style="margin-top:10px">${qs}</div>`:`<div class="qgrid" style="margin-top:10px">${round.questions.map((q,i)=>`<div class="mute" style="font-size:16px">${i+1}. ${esc(q.q)}</div>`).join('')}</div>`}
+     ${controls(round, reveal)}</div>
+     ${reveal?`<div class="card"><p style="font-size:18px;margin:0">${round.reveal.text}</p><p style="color:var(--yellow);margin:10px 0 0;font-size:17px">💡 ${round.reveal.lesson}</p>${diagramBox(round)}${round.reveal.sources?`<p class="small mute" style="margin:10px 0 0">Sources: ${round.reveal.sources}</p>`:''}</div>`:''}</div>
+    <div>${hostGrif(round, reveal)}${reveal?'':`<div class="card"><h3>While they decide…</h3><p class="mute" style="font-size:18px">${round.diagram&&round.diagram!=='ranges'&&round.diagram!=='combo'?'Ask a team to sketch the diagram on paper before they lock in: which curve, which way, and where is the new equilibrium?':'Cold-call a team: talk us through one answer. What made you rule out the others?'}</p></div>`}
+     ${reveal&&A.namesOf(round).length?mapCard(st().r):''}${leaderboard(6)}</div></div>`;
+  bindControls();
+}
+function mysteryView(round, reveal, theatre){
+  const T=teams(), buys={};
+  T.forEach(t=>((t.answers||{})[round.id]||{}).bought?.forEach(k=>buys[k]=(buys[k]||0)+1));
+  const mxb=Math.max(1,...Object.values(buys));
+  let grp='', rows='', i=0;
+  round.clues.forEach(c=>{
+    if(c.group!==grp){ grp=c.group; rows+=`<tr class="grp"><td colspan="4">${esc(grp)}</td></tr>`; }
+    const d=theatre?`style="animation-delay:${(i++*0.12).toFixed(2)}s"`:'', cls=theatre?'flip':'';
+    rows+=`<tr><td>${esc(c.label)} <span class="small" style="opacity:.6">🪙${c.cost}</span></td><td class="v ${cls}" ${d}>${reveal?esc(c.v[0])+(c.unit||''):'<span class="redact"></span>'}</td><td class="v ${cls}" ${d}>${reveal?esc(c.v[1])+(c.unit||''):'<span class="redact"></span>'}</td>
+      <td class="small" style="width:120px;color:#2a4a78"><span class="pop" style="width:${((buys[c.k]||0)/mxb*60).toFixed(0)}px"></span>${buys[c.k]||0}</td></tr>`;
+  });
+  const qs=round.questions.map(q=>`<div><b>${esc(q.q)}</b>${splitBars(q.opts, counts(round,q.id), [q.correct].concat(q.also||[]), reveal, theatre)}</div>`).join('');
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card folder reveal-card" data-tab="${esc(round.tab)}"><div class="tag">${esc(round.title)} · ${round.year}</div>
+     <p class="mute" style="margin:6px 0 10px">${round.intro}</p>
+     <table class="dz sheet"><tr><th>Clue</th><th class="v">Country A${reveal?`<br><span style="color:#1f7a6f">${esc(round.reveal.names[0])}</span>`:''}</th><th class="v">Country B${reveal?`<br><span style="color:#1f7a6f">${esc(round.reveal.names[1])}</span>`:''}</th><th class="small">teams who bought it</th></tr>${rows}</table>
+     ${controls(round, reveal)}</div>
+     ${reveal?`<div class="card"><p style="font-size:18px;margin:0">${round.reveal.text}</p><p style="color:var(--yellow);margin:10px 0 0">💡 ${round.reveal.lesson}</p>${chain(round.reveal.chain)}${round.reveal.sources?`<p class="small mute" style="margin:10px 0 0">Sources: ${round.reveal.sources}</p>`:''}</div>`:''}</div>
+    <div>${hostGrif(round, reveal)}<div class="card"><h3>${reveal?'How the class answered':'Answers so far (hidden until the reveal)'}</h3>${reveal?`<div class="qgrid">${qs}</div>`:`<p class="mute" style="font-size:17px">The bars in the table show which clues are selling, live. Ask: which clues tell you about <b>leakages</b>?</p>`}</div>
+     ${reveal?mapCard(st().r):''}${leaderboard(6)}</div></div>`;
+  bindControls();
+}
+function chain(spec){
+  if(!spec) return '';
+  const maxTot=Math.max(...spec.map(([n,l])=>100/l));
+  return `<div class="adasbox" style="color:#13233b"><div class="cap">Illustration: $100 of new spending, round by round</div><div class="chain">${spec.map(([name,leak])=>{
+    let x=100, bars=''; for(let i=0;i<8;i++){ bars+=`<i style="flex:0 0 calc(${(x/maxTot*100).toFixed(2)}% - 2px);animation-delay:${i*.15}s;background:${name==='Brazil'?'#2ec4b6':'#6aa8ff'}"></i>`; x*=1-leak; }
+    return `<div class="row2" style="grid-template-columns:90px 1fr 70px;font-size:15px"><b>${esc(name)}</b><div class="bars" style="height:22px">${bars}</div><span class="tot">≈ $${(100/leak).toFixed(0)}</span></div><div class="small" style="margin:-2px 0 6px 98px;color:#33465f">if ${Math.round(leak*100)}% of each extra dollar leaks out</div>`;
+  }).join('')}</div></div>`;
+}
+function quickView(round, reveal, theatre){
+  const T=teams(), c={}, bets={1:0,2:0,3:0};
+  T.forEach(t=>{ const a=(t.answers||{})[round.id]; if(a&&a.locked){ c[a.a]=(c[a.a]||0)+1; bets[a.bet||1]++; } });
+  const right=c[round.correct]||0, n=Object.values(c).reduce((a,b)=>a+b,0);
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card folder reveal-card" data-tab="Trap card"><div class="row"><div class="tag">${esc(round.title)}</div><span class="spacer"></span>${reveal&&n?`<span class="labstamp ${right>=n/2?'':'bad'}">${right>=n/2?'Trap avoided':'Class caught!'}</span>`:''}</div><h2 class="big" style="margin-top:8px">${esc(round.q)}</h2>
+     ${splitBars(round.opts, reveal?c:{}, round.correct, reveal, theatre)}
+     ${reveal?`<p style="font-size:18px;margin:14px 0 0">${round.explain}</p>`:''}
+     ${controls(round, reveal)}</div></div>
+    <div>${hostGrif(round, reveal)}${reveal?`<div class="card"><h3>How confident were they?</h3><p class="mute" style="font-size:18px">🎲 All in: <b>${bets[3]}</b> · Fairly sure: <b>${bets[2]}</b> · Hunch: <b>${bets[1]}</b></p></div>`:`<div class="card"><h3>While they decide…</h3><p class="mute" style="font-size:18px">Is Griffles right? Which word in the question is the trap?</p></div>`}
+     ${leaderboard(6)}</div></div>`;
+  bindControls();
+}
+function endView(first){
+  const S=scored(), top=[S[1],S[0],S[2]];
+  if(first&&!H.celebrated){ H.celebrated=true; FX.play('drumroll',900); setTimeout(()=>{ FX.play('fanfare'); FX.confetti(160); },1700); }
+  const pod=(x,cls,place)=>x?`<div class="pod ${cls}"><div class="who">${FX.chip(x.t)}<div class="mute small">${x.sc} pts</div></div><div class="blk">${place}</div></div>`:'';
+  app.innerHTML=hdr()+`<div class="grid"><div><div class="card" style="text-align:center"><div class="tag">Act 2 complete</div><h2 class="big" style="margin-top:6px">Top economists</h2>
+     <div class="podium">${pod(top[0],'p2','2')}${pod(top[1],'p1','1')}${pod(top[2],'p3','3')}</div>
+     <p class="mute" style="font-size:18px;margin-top:14px">Every team is promoted to <b style="color:var(--yellow)">Crisis Doctor</b>. Next act: macroeconomic aims and what goes wrong (inflation, unemployment, slow growth).</p></div>
+     ${FX.griffles('pleased','Twelve economies in one lesson. My passport is exhausted. And I finally know which way the curves go. Mostly.','hop')}
+     ${mapCard(R.length-1,'Economies visited in Act 2')}</div>
+    <div>${leaderboard(12)}
+     <div class="card"><p class="small mute">When you're done, clear this game's team names and scores from the database:</p><div class="ctrl"><button class="btn alt" id="del">End and delete all game data</button></div></div></div></div>`;
+  bindHdr(); $('#del').onclick=async()=>{ await H.sync.deleteGame(H.code); localStorage.removeItem(KEY); location.reload(); };
+}
+boot();
+})();
+</script>
+</body>
+</html>

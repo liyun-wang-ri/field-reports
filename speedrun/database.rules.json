@@ -1,0 +1,37 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "games": {
+      "$code": {
+        ".validate": "$code.matches(/^[A-Z0-9]{5}$/)",
+        ".read": "auth != null",
+        ".write": "auth != null && data.child('host').val() === auth.uid && !newData.exists()",
+        "host": {
+          ".write": "auth != null && !data.exists() && newData.val() === auth.uid"
+        },
+        "meta": {
+          ".write": "auth != null && newData.parent().child('host').val() === auth.uid",
+          ".validate": "newData.hasChildren(['scenario', 'created'])"
+        },
+        "state": {
+          ".write": "auth != null && newData.parent().child('host').val() === auth.uid"
+        },
+        "teams": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('games').child($code).child('host').exists()",
+            ".validate": "newData.hasChildren(['name']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 24"
+          }
+        },
+        "polls": {
+          "$pollId": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && root.child('games').child($code).child('host').exists()",
+              ".validate": "newData.isString() && newData.val().length <= 12"
+            }
+          }
+        }
+      }
+    }
+  }
+}
