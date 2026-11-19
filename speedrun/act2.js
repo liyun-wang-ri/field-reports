@@ -161,13 +161,15 @@
       questions: [
         { id: 'big', q: 'Which country has the bigger multiplier?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'B' },
         { id: 'leak', q: 'What is Country A\'s biggest leakage?', opts: [['s', 'Savings'], ['t', 'Taxes'], ['m', 'Imports']], correct: 'm' },
-        { id: 'whoA', q: 'Country A is…', opts: [['nl', 'Netherlands'], ['dk', 'Denmark'], ['ire', 'Ireland'], ['be', 'Belgium']], correct: 'ire' },
-        { id: 'whoB', q: 'Country B is…', opts: [['ar', 'Argentina'], ['br', 'Brazil'], ['co', 'Colombia'], ['pe', 'Peru']], correct: 'br' }
+        { id: 'whoA', q: 'Country A is…', opts: [['nl', 'Netherlands'], ['dk', 'Denmark'], ['ire', 'Ireland'], ['be', 'Belgium']], correct: 'ire',
+          desc: { nl: 'Home to Rotterdam, Europe\'s busiest port, and about 18 million people.', dk: 'A Nordic country best known for wind turbines and LEGO, with about as many people as Singapore.', ire: 'Hosts the European headquarters of many big US tech and drug companies.', be: 'Home to the EU\'s main institutions in Brussels, and about 12 million people.' } },
+        { id: 'whoB', q: 'Country B is…', opts: [['ar', 'Argentina'], ['br', 'Brazil'], ['co', 'Colombia'], ['pe', 'Peru']], correct: 'br',
+          desc: { ar: 'South America\'s second-largest country by area, with about 46 million people.', br: 'Latin America\'s most populous country, and the world\'s biggest soybean exporter.', co: 'About 52 million people; famous for coffee and flowers.', pe: 'About 34 million people; one of the world\'s top copper producers.' } }
       ],
       reveal: { names: ['Ireland', 'Brazil'], chain: [[ 'Ireland', 0.75 ], [ 'Brazil', 0.45 ]],
         text: 'A is <b>Ireland</b>, B is <b>Brazil</b>. Each round of the multiplier, part of the new income leaks out as savings, taxes and imports. Ireland\'s imports are worth about as much as its whole GDP, so much of every extra euro is spent on foreign goods and leaks abroad straight away. Brazil buys far less from abroad and saves less, so more of each extra real stays at home and is spent again.',
         lesson: 'The <b>smaller the leakages</b> (savings, taxes, imports), the more rounds of spending, and the <b>bigger the multiplier</b>. A small, very open economy has a small multiplier. The chain below is an illustration, not a measured figure.',
-        sources: 'World Bank WITS and World Development Indicators (imports % of GDP and gross savings % of GNI, 2023; population); OECD (Ireland trade); main exports from WITS trade summaries.' } },
+        sources: 'World Bank WITS and World Development Indicators (imports % of GDP and gross savings % of GNI, 2023; population); OECD (Ireland trade); main exports from WITS trade summaries. Country descriptions: World Bank population estimates; USDA (Brazil the largest soybean exporter); USGS (Peru among the top copper producers).' } },
 
     { id: 'q3', type: 'quick', tab: 'Trap card', title: 'Trap card 3 · The leaky bucket',
       gut: 'The government spends $1 billion, and the multiplier makes it… way more than $1 billion. Like, $5 billion. Multipliers are great.',

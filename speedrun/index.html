@@ -38,20 +38,22 @@ h1{font-size:clamp(32px,5vw,50px);line-height:1.05}
   <div class="mapbox" id="map"></div>
   <div class="acts" id="acts"></div>
   <p class="small mute" id="demo" style="margin-top:18px"></p>
+<p class="small"><a href="compare.html" style="color:var(--yellow)">New: try the phone layout before and after (Act 3, Argentina round) ▶</a></p>
   <p class="tiny mute">Prototype. Model numbers are a teaching model; real-world figures are sourced in each act.</p>
 </div>
 <script src="fx.js"></script>
 <script src="act1.js"></script>
 <script src="act2.js"></script>
+<script src="act3.js"></script>
 <script src="worldmap.js"></script>
 <script>
 (function(){
 const demo=!/github\.io$/.test(location.hostname), suf=demo?'#demo':'';
-const PINS=Object.assign({},Act1.PINS,Act2.PINS), STK=Object.assign({},Act1.STICKERS,Act2.STICKERS);
+const PINS=Object.assign({},Act1.PINS,Act2.PINS,Act3.PINS), STK=Object.assign({},Act1.STICKERS,Act2.STICKERS,Act3.STICKERS);
 const p=FX.profile(), explored=(p.explored||[]).filter(n=>PINS[n]);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // career card
-if(p.name) document.getElementById('me').innerHTML=`<div style="max-width:520px;margin-top:16px">${FX.careerCard(p,{act:p.act2&&p.act2.done?3:p.act1&&p.act1.done?2:1,stickerDefs:STK})}</div>`;
+if(p.name) document.getElementById('me').innerHTML=`<div style="max-width:520px;margin-top:16px">${FX.careerCard(p,{act:p.act3&&p.act3.done?4:p.act2&&p.act2.done?3:p.act1&&p.act1.done?2:1,stickerDefs:STK})}</div>`;
 // fogged map: land drawn under a hatched fog, with clear "holes" around explored countries
 const M=window.WORLD_MAP;
 const holes=explored.map(n=>{const q=PINS[n]; const [x,y]=M.project(q.lon,q.lat); return `<circle cx="${x}" cy="${y}" r="70" fill="black"/>`;}).join('');
@@ -63,11 +65,11 @@ document.getElementById('map').innerHTML=`<svg viewBox="0 0 ${M.w} ${M.h}">
   <path class="land" d="${M.d}"/><rect class="fog" width="${M.w}" height="${M.h}" mask="url(#fogmask)" opacity=".86"/>${pins}</svg>
   <div class="overlay-txt">${explored.length?`${explored.length} countr${explored.length===1?'y':'ies'} explored`:'Unexplored territory · finish a case to lift the fog'}</div>`;
 // acts
-const done1=!!(p.act1&&p.act1.done), done2=!!(p.act2&&p.act2.done);
+const done1=!!(p.act1&&p.act1.done), done2=!!(p.act2&&p.act2.done), done3=!!(p.act3&&p.act3.done);
 const ACTS=[
   {n:1, t:'The Analyst', s:'Standard of living & key economic indicators', st:done1?'done':'open', host:'act1-host.html', play:'act1-play.html', note:done1?`Completed · ${p.act1.score} points`:'Mystery economies, trap cards and your own Living Standard formula.'},
   {n:2, t:'The Economist', s:'AD/AS and the multiplier', st:done2?'done':'open', host:'act2-host.html', play:'act2-play.html', note:done2?`Completed · ${p.act2.score} points`:'Real shocks from 12 economies, animated AD/AS diagrams and the multiplier race.'},
-  {n:3, t:'The Crisis Doctor', s:'Macroeconomic aims & issues', st:'locked', note:'Planned: Economy ER and a cast of citizens.'},
+  {n:3, t:'The Crisis Doctor', s:'Macroeconomic aims & issues', st:done3?'done':'open', host:'act3-host.html', play:'act3-play.html', note:done3?`Completed · ${p.act3.score} points`:'Diagnose six real patient economies, then add jobs & prices to your formula.'},
   {n:4, t:'The Minister', s:'Macroeconomic policies', st:'open', host:'host.html', play:'play.html', note:'Steer the Harbour Republic through a hidden real era and beat the Autopilot.'}
 ];
 document.getElementById('acts').innerHTML=ACTS.map(a=>`<div class="act ${a.st}"><div class="n">${a.st==='done'?'✓':a.st==='locked'?'🔒':a.n}</div>

@@ -1,0 +1,66 @@
+/* Act 3 short versions for phone story mode. The full text stays in act3.js for the projector and for "Read more". */
+Story.apply(Act3.ROUNDS, {
+  g1: { line: 'Four stories. Actual growth, potential growth, or just higher prices?', gut: 'More stuff is more stuff. Why does growth need three names?',
+    cards: [{ emo: '⚓', short: 'A new port and a training scheme let the economy produce more.' },
+            { emo: '🛍️', short: 'In a slump, shoppers come back and factories rehire idle workers.' },
+            { emo: '🔥', short: 'Everyone is already working. The government keeps spending more anyway.' },
+            { emo: '🛢️', short: 'Oil gets cheaper, so firms\' costs fall.' }],
+    q: { a: { short: 'What kind of growth?', why: 'More and better resources raise capacity: AS shifts right and Yf rises.' },
+         b: { short: 'What kind of growth?', why: 'Idle workers and machines get used again: real output rises.' },
+         c: { short: 'What kind of growth?', why: 'With no spare capacity, extra spending only pushes up prices. The economy overheats.' },
+         d: { short: 'What kind of growth?', why: 'Lower costs shift AS down, so firms produce more: real output rises.' } },
+    take: 'Sustained growth needs both: output rising now and capacity rising for later.' },
+
+  t1: { qs: 'Growth slows from 5% to 2%. Is it a recession?', gut: 'Growth fell! That\'s a recession. Sound the alarm.',
+    take: 'No. A recession is real GDP falling for two quarters. This is just a slowdown.' },
+
+  u1: { line: 'Four people out of work. Name the kind of unemployment.', gut: 'No job is no job. Next patient, please.',
+    cards: [{ emo: '⛏️', short: 'Germany\'s last coal mine shuts. Its miners\' jobs are gone for good.' },
+            { emo: '🎓', short: 'Mira spends two months choosing between job offers.' },
+            { emo: '🛋️', short: 'In a recession, a sofa maker lays off half its staff.' },
+            { emo: '⏳', short: 'Out of work for three years, their skills are now out of date.' }],
+    q: { a: { short: 'Which kind?', why: 'Demand for their skills has gone for good, and they don\'t fit the jobs on offer: structural.' },
+         b: { short: 'Which kind?', why: 'A short, voluntary search between jobs: frictional.' },
+         c: { short: 'Which kind?', why: 'The jobs went because AD fell: cyclical.' },
+         d: { short: 'Which kind?', why: 'Long unemployment wears skills down, so cyclical turns structural. That\'s hysteresis.' } },
+    take: 'Different causes, different cures: more spending only fixes cyclical unemployment.' },
+
+  t2: { qs: 'Unemployment is 2%, all job-switchers and people retraining. Is that full employment?', gut: 'Full employment means zero unemployment. It\'s in the name.',
+    take: 'Yes. Full employment means no cyclical unemployment, not zero unemployment.' },
+
+  p1: { line: 'Patient 1 has a jobs crisis that never goes away.', tiles: [['🇿🇦', '32%', 'unemployed, 2023'], ['🧑‍🎓', '58%', 'of 15 to 24-year-olds jobless']],
+    gut: 'Lots of unemployment? Easy: boost spending and everyone gets a job.',
+    cards: [{ emo: '📉', short: 'Unemployment above 20% every year since 2000, in booms and slumps.' },
+            { emo: '⚖️', short: 'Grew 0.6% in 2023. Gini about 0.62, among the world\'s highest.' }],
+    q: { type: { short: 'Main type of unemployment?', why: 'It stays high in good years and bad, so it isn\'t mainly cyclical. Skills and jobs don\'t match.' },
+         incl: { short: 'Is the growth inclusive?', why: 'With so many shut out of work and a Gini near 0.62, the gains aren\'t widely shared.' },
+         cure: { short: 'Best treatment?', why: 'A skills mismatch needs education and training. More spending mostly helps people who already have the skills.' },
+         hys: { short: 'Long-run risk?', why: 'Years out of work wear skills down, so capacity falls: AS shifts left.' } },
+    take: 'Structural unemployment needs skills, not just more spending. Growth here isn\'t inclusive yet.' },
+
+  m1: { line: 'Two patients, same fever: high inflation in 2022. Different causes?', tiles: [['🪙', '6', 'coins for clues'], ['🌡️', '2', 'patients']],
+    gut: 'Prices up is prices up. Same disease, same medicine.',
+    clues: { pi: 'Peak inflation, 2022', y: 'Output and jobs', dem: 'Spending', sup: 'Costs' },
+    q: { a: { short: 'A\'s inflation is mainly…', why: 'A collapsing currency and shortages pushed costs up: cost-push.' },
+         b: { short: 'B\'s inflation is mainly…', why: 'Relief cheques pushed AD up, while supply snags pushed costs up: both.' },
+         stag: { short: 'Who has stagflation?', why: 'A\'s output fell 7.8% while prices soared.' },
+         whoA: { short: 'Country A is…', why: 'Sri Lanka: rupee collapse, fuel queues, power cuts.' },
+         whoB: { short: 'Country B is…', why: 'The United States: stimulus cheques and $5 petrol.' } },
+    take: 'Sri Lanka had cost-push stagflation. The US had demand-pull and cost-push together.' },
+
+  t3: { qs: 'Inflation falls from 6% to 2%. What happened to prices?', gut: 'Inflation fell, so prices fell. Hooray!',
+    take: 'They still rose, just more slowly. That\'s disinflation, not deflation.' },
+
+  p2: { line: 'Patient 5: prices fell for five years. Good news?', tiles: [['🇭🇰', '68', 'months of falling prices'], ['🏠', '−60%', 'property prices']],
+    gut: 'Falling prices for five years? Shopper\'s paradise!',
+    cards: [{ emo: '💥', short: 'Property crash after 1997. The economy shrank 5.1% in 1998.' },
+            { emo: '📉', short: 'Prices fell 68 months in a row. Unemployment hit 8.6%.' }],
+    q: { cause: { short: 'What started it?', why: 'The crash wiped out wealth, so households and firms cut spending.' },
+         shift: { short: 'On the AD/AS diagram?', why: 'Falling spending: AD shifts left.' },
+         why: { short: 'Why is it harmful?', why: 'People wait for lower prices, so spending falls again: a deflationary spiral.' },
+         debt: { short: 'A big mortgage becomes…', why: 'Incomes fall but the debt stays the same, so it\'s heavier in real terms.' } },
+    take: 'Deflation from falling AD means lost jobs and a spiral of waiting to spend.' },
+
+  t4: { qs: 'Better technology keeps making TVs and phones cheaper, and sales boom. Are falling prices like this a worry?', gut: 'Deflation is a disaster. All of it. Panic!',
+    take: 'Not really. When AS rises, prices fall and output rises too.' }
+});

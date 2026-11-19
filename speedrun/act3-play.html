@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Econ Speedrun · Act 3: The Crisis Doctor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.wrap{max-width:620px;margin:0 auto;padding:12px 12px 96px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:8px}
+.score{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:32px;font-weight:700;line-height:1}
+.lbl{font-size:11px;color:var(--mute);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.join{max-width:440px;margin:6vh auto 40px;padding:0 14px}
+.join h1{font-size:32px;line-height:1.1}
+.join input{width:100%;background:#0c1a30;border:1.5px solid var(--line);border-radius:11px;color:var(--ink);padding:12px;font-size:17px;margin-top:6px}
+.join input.code{text-transform:uppercase;letter-spacing:.3em;font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:24px;text-align:center}
+.join label{display:block;margin-top:14px;font-weight:600;font-size:13px;color:var(--mute)}
+.coins{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-weight:700;color:var(--yellow);font-size:20px;display:inline-block}
+.dossier{display:grid;grid-template-columns:1fr 92px 92px;gap:0;border-radius:10px;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.dossier .h{padding:8px 10px;font-weight:800;font-size:12px;text-align:center}
+.dossier .h:first-child{text-align:left}
+.dossier .g{grid-column:1/4;padding:5px 10px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.dossier .c{padding:8px 10px;border-top:1px solid;font-size:13px;display:flex;align-items:center}
+.dossier .v{justify-content:center;text-align:center}
+.buy{margin-left:auto;border:1px solid;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800;white-space:nowrap}
+.buy:disabled{opacity:.3}
+.qs{display:grid;gap:12px}
+.q b{display:block;margin-bottom:6px}
+.choices button.right,.opt.right{border-color:var(--teal);background:rgba(46,196,182,.15)}
+.choices button.wrong,.opt.wrong{border-color:var(--red);background:rgba(255,107,107,.12)}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(9,22,40,.96);border-top:1px solid #2b4f80;padding:10px 12px;z-index:10}
+.bar .in{max-width:620px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.res{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:26px;font-weight:700}
+.endmap svg{width:100%;height:auto;background:#0c1a30;border-radius:10px}
+.endmap path.land{fill:#1f3a62}.endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:1.5}
+.endmap text{fill:var(--ink);font-size:14px;font-weight:700;paint-order:stroke;stroke:#0b1626;stroke-width:3px}
+.reveal-card{position:relative}
+.choices.tight button{min-width:48px;font-weight:800;font-size:16px}
+.sl{margin:10px 0}.sl .nm{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px}.sl input{width:100%;accent-color:var(--yellow)}
+.newdim{background:rgba(255,209,102,.08);border:1.5px dashed var(--yellow);border-radius:12px;padding:8px 10px}
+.vs{display:grid;gap:8px;margin-top:8px}.vsr{display:grid;grid-template-columns:90px 1fr 54px;gap:8px;align-items:center;font-weight:700}
+.vsr .t{height:14px;background:#0c1a30;border-radius:7px;overflow:hidden}.vsr .t i{display:block;height:100%;transition:width .3s}
+.codecard{margin-top:12px;background:#0c1a30;border:1.5px dashed var(--yellow);border-radius:12px;padding:12px;text-align:center}
+.fcode{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:30px;font-weight:700;letter-spacing:.1em;color:var(--yellow);margin:4px 0 6px}
+.fcin{width:100%;background:#0c1a30;border:1.5px solid var(--line);border-radius:10px;color:var(--ink);padding:10px;font:700 20px "Space Grotesk",Inter,sans-serif;letter-spacing:.15em;text-align:center}
+.dots{letter-spacing:.1em;color:var(--yellow)}
+.dossier.stack{grid-template-columns:1fr 1fr}.dossier.stack .g{grid-column:1/3}.dossier.stack .h{text-align:center!important}
+.dossier.stack .c.lab{grid-column:1/3;font-weight:700;background:rgba(42,92,170,.07)}
+.sheet .v.txt{font-family:Inter,system-ui,sans-serif!important;font-size:13.5px!important;font-weight:600;line-height:1.35;justify-content:flex-start;text-align:left}
+.dossier.stack .v.txt:nth-child(odd){border-left:1px solid #c9d8ea}
+.qnum{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#1b3d6b;color:#bcd6ff;font-size:11px;font-weight:800;margin-right:6px;vertical-align:1px}
+</style>
+</head>
+<body class="theme-lab theme-er">
+<div id="app"></div>
+<script src="firebase-config.js"></script>
+<script src="act3.js"></script>
+<script src="story.js"></script>
+<script src="act3-story.js"></script>
+<script src="common.js"></script>
+<script src="fx.js"></script>
+<script src="adas.js"></script>
+<script src="sync.js"></script>
+<script src="worldmap.js"></script>
+<script>
+(function(){
+'use strict';
+const A=Act3, R=A.ROUNDS, $=s=>document.querySelector(s), app=$('#app'), esc=UI.esc;
+const params=new URLSearchParams(location.search);
+const G={formula:null, codeMsg:'', mode:null, sync:null, code:null, name:'', colour:null, emblem:null, game:null, answers:{}, r:0, soloReveal:false,
+  shownTotal:0, gline:null, seenReveal:{}, stickers:{}, animated:{}};
+// Phones use story mode (one screen at a time, story.js) unless the address has ?ui=classic.
+const KEY='speedrun-act3'+(Story.on()?'':'-classic');
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({mode:G.mode, code:G.code, name:G.name, colour:G.colour, emblem:G.emblem, answers:G.answers, r:G.r, soloReveal:G.soloReveal, seenReveal:G.seenReveal, formula:G.formula})); }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
+const lastRevealed=()=>{ const s=cur(); if(s.phase==='end') return R.length-1; if(s.phase==='reveal') return s.r; return (s.r||0)-1; };
+const total=()=>A.totalScore(G.answers, lastRevealed());
+const ans=id=>(G.answers[id]=G.answers[id]||{});
+const say=(mood,text,anim)=>{ G.gline={mood,text,anim}; };
+// Context handed to story.js; extra() adds the diagram or chart to the reveal
+const SX={A, G, esc, FX, ans:id=>ans(id), locked:r=>locked(r), save:()=>save(), push:()=>push(), render:()=>render(), extra:r=>(r.reveal&&r.reveal.diagrams?multiDiagrams(r):diagramBox(r))};
+const STRIP='<div class="labstrip erstrip">Economy ER · Crisis Doctor on call</div>';
+
+// ---------- join ----------
+function joinScreen(msg){
+  const s=load(), p=FX.profile();
+  const id={colour:(s&&s.colour)||p.colour||FX.COLOURS[0], emblem:(s&&s.emblem)||p.emblem||FX.EMBLEMS[0]};
+  app.innerHTML=`<div class="join">${STRIP}
+   <span class="pill hot">Econ Speedrun · Act 3</span>
+   <h1 style="margin-top:10px">The Crisis Doctor</h1>
+   ${FX.griffles('curious', p.act2&&p.act2.done?'Doctor! You\'re needed in the Economy ER. Sick economies are arriving: slow growth, joblessness, runaway prices. I brought a stethoscope.':'Welcome to the Economy ER. Patients are economies, and the symptoms are slow growth, unemployment and inflation. We diagnose first, then think about cures.','pop')}
+   <div class="card"><h3>Join your class</h3>
+    <label>Game code</label><input id="code" class="code" maxlength="5" autocomplete="off" value="${esc(params.get('code')||(s&&s.mode==='class'&&s.code)||'')}">
+    <label>Team name (no real names, please)</label><input id="name" maxlength="24" autocomplete="off" value="${esc((s&&s.name)||p.name||'')}" placeholder="e.g. Dr Disinflation">
+    ${FX.identityPicker(id)}
+    <div class="row" style="margin-top:14px"><button class="btn" id="go">Join game</button><span class="small" id="msg" style="color:var(--red)">${esc(msg||'')}</span></div></div>
+   <div class="card"><h3>Or play solo</h3><p class="small mute" style="margin:6px 0 10px">All ${R.length} rounds at your own pace.</p>
+    <div class="row"><button class="btn ghost" id="solo">Play solo</button>${s&&s.mode==='solo'?'<button class="btn ghost" id="resume">Resume</button>':''}</div></div></div>`;
+  FX.bindPicker(id);
+  const keep=()=>{ G.colour=id.colour; G.emblem=id.emblem; };
+  $('#go').onclick=()=>{ keep(); join(); };
+  $('#solo').onclick=()=>{ keep(); G.name=$('#name').value.trim()||'Solo doctor'; startSolo(null); };
+  if($('#resume')) $('#resume').onclick=()=>startSolo(load());
+}
+async function join(){
+  const code=$('#code').value.trim().toUpperCase(), name=$('#name').value.trim();
+  if(!/^[A-Z0-9]{5}$/.test(code)) return joinScreen('Codes have 5 letters or numbers.');
+  if(!name) return joinScreen('Give your team a name.');
+  $('#go').disabled=true;
+  try{
+    G.sync=await Sync.connect();
+    if(!(await G.sync.exists(code))) return joinScreen('No game with that code.');
+    const s=load(); G.mode='class'; G.code=code; G.name=name;
+    if(s&&s.mode==='class'&&s.code===code){ G.answers=s.answers||{}; G.seenReveal=s.seenReveal||{}; G.formula=s.formula||null; } else { G.answers={}; G.seenReveal={}; G.formula=null; }
+    FX.updateProfile({name, colour:G.colour, emblem:G.emblem});
+    G.shownTotal=total(); push(); let last=null;
+    G.sync.watchGame(code, g=>{ G.game=g; const k=g?JSON.stringify(g.state||{}):'gone'; if(k!==last){ last=k; G.gline=null; render(); } });
+  }catch(e){ console.error(e); joinScreen('Could not connect ('+(e.code||e.message||e)+').'); }
+}
+function push(){ if(G.mode!=='class') return; save(); G.sync.setTeam(G.code,{name:G.name, colour:G.colour, emblem:G.emblem, score:total(), answers:G.answers, formula:G.formula||null, at:Date.now()}).catch(console.error); }
+function startSolo(s){
+  G.mode='solo'; if(s){ G.name=s.name||G.name; G.colour=s.colour||G.colour; G.emblem=s.emblem||G.emblem; }
+  G.answers=(s&&s.answers)||{}; G.r=(s&&s.r)||0; G.soloReveal=!!(s&&s.soloReveal); G.seenReveal=(s&&s.seenReveal)||{}; G.formula=(s&&s.formula)||null;
+  FX.updateProfile({name:G.name, colour:G.colour, emblem:G.emblem}); G.shownTotal=total(); save(); render();
+}
+
+// ---------- state ----------
+function cur(){
+  if(G.mode==='solo') return {phase: G.r>=R.length?'end':(G.soloReveal?'reveal':'play'), r:G.r};
+  if(!G.game) return {phase:'gone'};
+  return G.game.state||{phase:'lobby'};
+}
+
+// ---------- render ----------
+function header(){
+  const st=cur();
+  return `${STRIP}<div class="top"><div><div class="lbl">Doctor score</div><div class="score" id="score">${G.shownTotal}</div></div>
+    <div style="text-align:right">${FX.chip({name:G.name,colour:G.colour,emblem:G.emblem})}<div class="small mute" style="margin-top:4px">${st.r!==undefined&&st.r<R.length?`Round ${st.r+1} of ${R.length}`:''}</div></div></div>`;
+}
+function render(){
+  const st=cur();
+  if(st.phase==='gone'){ app.innerHTML=`<div class="join"><h1>ER closed</h1><p class="mute">Your teacher has closed this game. Thanks for playing!</p></div>`; return; }
+  if(st.phase==='lobby'){ app.innerHTML=`<div class="wrap">${header()}<div class="card folder" data-tab="Briefing"><h3>You're in, ${esc(G.name)}!</h3><p class="mute">Waiting for your teacher to open the ER.</p>${FX.griffles('guessing','Tip: diagnose before you treat. What is the symptom, and what is causing it: demand or supply?','hop')}</div></div>`; return; }
+  if(st.phase==='end') return endScreen();
+  const round=R[st.r], reveal=st.phase==='reveal';
+  if(reveal && !G.seenReveal[round.id]) onFirstReveal(round);
+  if(Story.on() && Story.handles(round)){
+    app.innerHTML=`<div class="wrap">${header()}${Story.view(round, reveal, SX)}${G.gline&&!reveal?FX.griffles(G.gline.mood,G.gline.text,G.gline.anim):''}</div>`+(reveal?bar(round, reveal):'');
+    Story.bind(round, reveal, SX); bind(round, reveal); if(reveal) drawDiagram(round);
+    const sc=$('#score'), t=total(); if(t!==G.shownTotal){ FX.countUp(sc,G.shownTotal,t); G.shownTotal=t; }
+    return;
+  }
+  const body = round.type==='mystery' ? mystery(round, reveal) : round.type==='quick' ? quick(round, reveal) : round.type==='formula' ? formula(round, reveal) : call(round, reveal);
+  app.innerHTML=`<div class="wrap">${header()}<div class="card folder reveal-card" data-tab="${esc(round.tab)}"><div class="tag small" style="color:var(--orange);font-weight:800;letter-spacing:.06em;text-transform:uppercase">${esc(round.title)}</div>${body}</div>${G.gline?FX.griffles(G.gline.mood,G.gline.text,G.gline.anim):defaultLine(round,reveal)}</div>`+bar(round, reveal);
+  bind(round, reveal);
+  if(reveal) drawDiagram(round);
+  const sc=$('#score'), t=total(); if(t!==G.shownTotal){ FX.countUp(sc,G.shownTotal,t); G.shownTotal=t; }
+}
+function defaultLine(round, reveal){
+  if(reveal) return '';
+  return FX.griffles('guessing', `<i>My gut says:</i> ${round.gut}`);
+}
+function drawDiagram(round){
+  // animate once per round per phone; afterwards draw the finished diagram
+  const anim=!G.animated[round.id]; G.animated[round.id]=true;
+  const go=(el,shift,opts)=>{ if(!el) return; if(anim) ADAS.animate(el,shift,opts); else el.innerHTML=ADAS.svg(shift,opts); };
+  if(round.reveal&&round.reveal.diagrams){ round.reveal.diagrams.forEach(([t,sh],i)=>go($('#dm'+i),sh,{start:'mid'})); return; }
+  if(round.diagram==='ranges'){ go($('#dg1'),'adR',{start:'flat'}); go($('#dg2'),'adR',{start:'full'}); }
+  else if(round.diagram) go($('#dg1'),round.diagram,{start:'mid'});
+}
+function multiDiagrams(round){
+  const d=round.reveal&&round.reveal.diagrams; if(!d) return '';
+  return `<div class="adasbox"><div class="adas2">${d.map(([t],i)=>`<div><div class="cap" style="text-align:center">${esc(t)}</div><div id="dm${i}"></div></div>`).join('')}</div></div>`;
+}
+function diagramBox(round){
+  if(!round.diagram) return '';
+  if(round.diagram==='ranges') return `<div class="adasbox"><div class="cap">Same rise in AD</div><div class="adas2"><div><div class="cap" style="text-align:center">🇪🇸 Spain 2013</div><div id="dg1"></div></div><div><div class="cap" style="text-align:center">🇯🇵 Japan 2019</div><div id="dg2"></div></div></div></div>`;
+  return `<div class="adasbox"><div class="cap">${round.diagram==='combo'?'AD right and AS up, together':'The shift'}</div><div id="dg1"></div></div>`;
+}
+
+function onFirstReveal(round){
+  G.seenReveal[round.id]=true; save();
+  FX.addExplored(A.namesOf(round).filter(n=>A.PINS[n]));
+  const a=G.answers[round.id]||{}, s=A.scoreRound(round,a);
+  const before=G.stickers, now=A.stickersFrom(G.answers); G.stickers=now; FX.addStickers(now);
+  const fresh=Object.keys(now).filter(k=>!before[k]);
+  if(!a.locked){ say('surprised','We didn\'t lock in! Next time, make the call before the reveal.','shake'); }
+  else if(s.right===s.of){ say('pleased', (a.bet||1)===3?'ALL IN and all right. Somebody frame this forecast.':'Every call right. I would like it noted that I was also right. (I was not.)','hop'); if((a.bet||1)>=2) setTimeout(()=>FX.confetti(), 150); }
+  else if(s.pts<0){ say('surprised', round.type==='quick'?'That trap got me too. It\'s a very well-built trap.':'Misdiagnosis. Read the chart again: what was the cause?','shake'); setTimeout(()=>FX.shake($('.reveal-card')), 50); }
+  else say('skeptical','Some right, some not. Check the cause behind each symptom.','pop');
+  if(fresh.length) setTimeout(()=>toast('Sticker earned: '+fresh.map(k=>A.STICKERS[k].i+' '+A.STICKERS[k].t).join(', ')), 600);
+}
+function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2800); }
+
+function locked(round){ return !!(G.answers[round.id]&&G.answers[round.id].locked); }
+function betRow(round, dis){
+  const a=ans(round.id);
+  return `<div class="q"><b>How sure are you?</b><div class="choices">${A.BETS.map(b=>`<button data-bet="${b.k}" class="${(a.bet||1)===b.k?'sel':''}" ${dis?'disabled':''}>${b.t}<br><small class="mute">${b.s}</small></button>`).join('')}</div></div>`;
+}
+function questions(round, reveal, lk, only){
+  const a=ans(round.id);
+  return round.questions.map((q,i)=>{
+    if(only!==undefined && i!==only) return '';
+    const mine=(a.a||{})[q.id];
+    const tight=q.opts.every(([k,t])=>t.length<=3);
+    return `<div class="q"><b><span class="qnum">${i+1}</span>${esc(q.q)}</b><div class="choices ${tight?'tight':''}">${q.opts.map(([k,t])=>{
+      const ok=A.isRight(q,k), cls = reveal ? (ok?'right':k===mine?'wrong':'') : (k===mine?'sel':'');
+      return `<button data-q="${q.id}" data-k="${k}" class="${cls} ${q.desc?'hasdesc':''}" ${lk?'disabled':''}>${esc(t)}${reveal&&ok?' ✓':''}${q.desc&&q.desc[k]?`<span class="optdesc">${esc(q.desc[k])}</span>`:''}</button>`; }).join('')}</div></div>`;
+  }).join('');
+}
+function card(c){ return `<div class="newscard">${c.pin?`<span class="np">📍 ${esc(c.pin)}</span>`:''}<div class="nh">${esc(c.head)}</div><div class="nb">${esc(c.body)}</div></div>`; }
+function cards(round){ return (round.cards||[]).map(card).join(''); }
+function call(round, reveal){
+  const a=ans(round.id), lk=locked(round)||reveal, s=A.scoreRound(round,a);
+  let h=`${reveal&&a.locked?`<div class="labstamp ${s.pts<0?'bad':''}">${s.right===s.of?'Called it':s.pts<0?'Missed':'Partly right'}</div>`:''}
+    <p class="small" style="margin:6px 0 4px;padding-right:${reveal?'110px':'0'}">${round.intro}</p>
+    ${round.pair ? `<div class="qs">${round.cards.map((c,i)=>`<div>${card(c)}${questions(round, reveal, lk, i)}</div>`).join('')}${betRow(round, lk)}</div>`
+      : `${cards(round)}<div class="qs" style="margin-top:12px">${questions(round, reveal, lk)}${betRow(round, lk)}</div>`}`;
+  if(reveal) h+=revealBox(s, round.reveal.text, round.reveal.lesson)+diagramBox(round)+(round.reveal.sources?`<p class="tiny mute" style="margin:8px 0 0">Sources: ${round.reveal.sources}</p>`:'');
+  return h;
+}
+// Question preview for mystery rounds: shown before the clue table so teams can choose clues that help.
+function qPreview(round){
+  return `<details class="qprev" open><summary><b>Read the questions before you buy clues</b></summary><ul>${round.questions.map(q=>`<li>${esc(q.q)}${q.desc?`<ul>${q.opts.map(([k,t])=>`<li><b>${esc(t)}</b>: ${esc(q.desc[k]||'')}</li>`).join('')}</ul>`:''}</li>`).join('')}</ul></details>`;
+}
+function mystery(round, reveal){
+  const a=ans(round.id), bought=a.bought||[], lk=locked(round)||reveal;
+  const spent=bought.reduce((s,k)=>s+round.clues.find(c=>c.k===k).cost,0), left=round.budget-spent;
+  let h=`<p class="small mute" style="margin:6px 0 10px">${round.intro}</p>${reveal?'':qPreview(round)}
+    <div class="row" style="margin-bottom:8px"><span class="lbl">Coins left</span><span class="coins" id="coins">🪙 ${left}</span><span class="spacer"></span><span class="small mute">${round.year}</span></div>
+    <div class="dossier sheet stack"><div class="h">Country A${reveal?`<br><small style="color:#1f7a6f">${esc(round.reveal.names[0])}</small>`:''}</div><div class="h">Country B${reveal?`<br><small style="color:#1f7a6f">${esc(round.reveal.names[1])}</small>`:''}</div>`;
+  // Stacked layout: each clue's label runs across the card, with A and B side by side underneath, so longer text clues stay readable on a phone.
+  let grp='';
+  round.clues.forEach(c=>{
+    if(c.group!==grp){ grp=c.group; h+=`<div class="g">${esc(grp)}</div>`; }
+    const open=bought.includes(c.k)||reveal, fresh=G.justBought===c.k?'declass':'';
+    h+=`<div class="c lab">${esc(c.label)}${open?'':`<button class="buy" data-buy="${c.k}" ${lk||c.cost>left?'disabled':''}>🪙 ${c.cost}</button>`}</div>
+      <div class="c v txt ${fresh}">${open?esc(c.v[0])+(c.unit||''):'<span class="redact"></span>'}</div><div class="c v txt ${fresh}">${open?esc(c.v[1])+(c.unit||''):'<span class="redact"></span>'}</div>`;
+  });
+  G.justBought=null;
+  h+=`</div><div class="qs" style="margin-top:14px">${questions(round, reveal, lk)}${betRow(round, lk)}</div>`;
+  if(reveal) h+=revealBox(A.scoreRound(round,a), round.reveal.text, round.reveal.lesson)+multiDiagrams(round)+(round.reveal.sources?`<p class="tiny mute" style="margin:8px 0 0">Sources: ${round.reveal.sources}</p>`:'');
+  return h;
+}
+// The multiplier as a chain of spending rounds: each bar is what is re-spent at home in that round.
+function chain(spec){
+  if(!spec) return '';
+  const maxTot=Math.max(...spec.map(([n,l])=>100/l));
+  return `<div class="adasbox" style="color:#13233b"><div class="cap">Illustration: $100 of new spending, round by round</div><div class="chain">${spec.map(([name,leak])=>{
+    let x=100, bars='', tot=0; for(let i=0;i<8;i++){ tot+=x; bars+=`<i style="flex:0 0 calc(${(x/maxTot*100).toFixed(2)}% - 2px);animation-delay:${i*.12}s;background:${name==='Brazil'?'#2ec4b6':'#6aa8ff'}" title="Round ${i+1}: $${x.toFixed(0)}"></i>`; x*=1-leak; }
+    const k=1/leak;
+    return `<div class="row2"><b>${esc(name)}</b><div class="bars">${bars}</div><span class="tot">≈ $${(100*k).toFixed(0)}</span></div><div class="tiny" style="margin:-2px 0 4px 86px;color:#33465f">If ${Math.round(leak*100)}% of each extra dollar of income leaks out</div>`;
+  }).join('')}</div></div>`;
+}
+function quick(round, reveal){
+  const a=ans(round.id), lk=locked(round)||reveal, ok=a.a===round.correct;
+  let h=`${reveal&&a.locked?`<div class="labstamp ${ok?'':'bad'}">${ok?'Trap avoided':'Caught!'}</div>`:''}<h2 style="font-size:19px;margin:8px 0 10px;padding-right:${reveal?'110px':'0'}">${esc(round.q)}</h2><div class="opts">${round.opts.map(([k,t])=>{
+    const cls = reveal ? (k===round.correct?'right':k===a.a?'wrong':'') : (k===a.a?'sel':'');
+    return `<button class="opt ${cls}" data-pick="${k}" ${lk?'disabled':''}>${esc(t)}${reveal&&k===round.correct?' ✓':''}</button>`; }).join('')}</div>
+    <div style="margin-top:12px">${betRow(round, lk)}</div>`;
+  if(reveal) h+=revealBox(A.scoreRound(round,a), round.explain);
+  return h;
+}
+// ---------- final chart: add jobs & prices to the Act 1 formula ----------
+function hasBase(){ return !!(G.formula && A.BASE_DIMS.every(d=>G.formula[d.k]!==undefined)); }
+function ensureFormula(){
+  if(!G.formula){ const p=FX.profile(); if(p.formula&&A.BASE_DIMS.every(d=>p.formula[d.k]!==undefined)) G.formula=Object.assign({},p.formula); }
+  if(hasBase() && G.formula.jobs===undefined) G.formula.jobs=3;
+}
+function dots(n){ return '●'.repeat(n)+'○'.repeat(5-n); }
+function verdict(s1,s2){ const [C1,C2]=A.FORMULA_COUNTRIES; return Math.abs(s1-s2)<0.005?'Dead heat!':`<b>${s1>s2?C1.name:C2.name}</b> has the higher standard of living under your formula.`; }
+function formula(round, reveal){
+  ensureFormula();
+  const lk=locked(round)||reveal, [C1,C2]=A.FORMULA_COUNTRIES;
+  let h=`<p class="small" style="margin:6px 0 6px">${round.intro}</p>
+    <ol class="small" style="margin:0 0 8px;padding-left:18px">${round.steps.map(t=>`<li style="margin:3px 0">${t}</li>`).join('')}</ol>`;
+  if(!hasBase()){
+    return h+`<div class="codecard" style="text-align:left"><b>We can't find your Act 1 formula on this phone.</b>
+      <p class="small" style="margin:6px 0">Type your Act 1 formula code (five digits, like 3-4-2-3-5). Your teacher also has a copy of every team's code.</p>
+      <input id="fcin" class="fcin" maxlength="11" autocomplete="off" placeholder="3-4-2-3-5">
+      <div class="row" style="margin-top:8px"><button class="btn" id="fcgo">Restore</button><button class="btn ghost" id="fceq">Start from equal weights</button></div>
+      <div class="small" style="color:var(--red);margin-top:6px">${esc(G.codeMsg||'')}</div></div>`;
+  }
+  const w=G.formula, s1=A.indexFor(w,C1), s2=A.indexFor(w,C2);
+  h+=`<div class="card" style="background:var(--card2);margin:4px 0 8px"><div class="row"><b>Your Act 1 formula</b><span class="spacer"></span><span class="tiny mute">You can revise these at the start of Act 4</span></div>
+      ${A.BASE_DIMS.map(d=>`<div class="row small" style="padding:2px 0"><span style="width:110px">${d.t}</span><span class="spacer"></span><b class="dots">${dots(w[d.k])}</b></div>`).join('')}</div>
+    <div class="sl newdim"><div class="nm"><span>➕ ${A.DIM_JOBS.t} <span class="mute small" style="font-weight:500">${A.DIM_JOBS.s}</span></span><span id="wv-jobs">${w.jobs}</span></div>
+      <input type="range" min="0" max="5" step="1" value="${w.jobs}" data-w="jobs" ${lk?'disabled':''}></div>
+    <div class="card" style="background:var(--card2);margin-top:6px"><b>Score out of 100 under your six-part formula</b><div class="vs">
+      <div class="vsr"><span>${C1.name}</span><span class="t"><i id="b-1" style="width:${(s1*100).toFixed(0)}%;background:var(--teal)"></i></span><span id="v-1">${(s1*100).toFixed(1)}</span></div>
+      <div class="vsr"><span>${C2.name}</span><span class="t"><i id="b-2" style="width:${(s2*100).toFixed(0)}%;background:var(--orange)"></i></span><span id="v-2">${(s2*100).toFixed(1)}</span></div></div>
+      <p class="small" id="verdict" style="margin:8px 0 0">${verdict(s1,s2)}</p>
+      <p class="tiny mute" style="margin:6px 0 0">Jobs &amp; prices score: ${C1.name} ${(A.dimScore('jobs',C1)*100).toFixed(0)}, ${C2.name} ${(A.dimScore('jobs',C2)*100).toFixed(0)}. Estonia had higher inflation; Albania had higher unemployment.</p></div>
+    <div class="dossier sheet" style="margin-top:10px"><div class="h">The real data</div><div class="h">${C1.name}</div><div class="h">${C2.name}</div>
+      ${A.FORMULA_TABLE.map(([lab,k,fmt])=>`<div class="c">${lab}</div><div class="c v">${fmt?fmt(C1[k]):C1[k]}</div><div class="c v">${fmt?fmt(C2[k]):C2[k]}</div>`).join('')}</div>
+    <p class="tiny mute" style="margin:6px 0 0">Sources: ${round.sources}</p>`;
+  if(reveal) h+=`<div class="fb"><b>Formula saved: +15</b><p class="small" style="margin:6px 0 0">Unemployment and inflation now count towards your country's living standard. In Act 4 you run the Harbour Republic, and this formula is your scorecard.</p>${codeCard(w)}</div>`;
+  return h;
+}
+function codeCard(w){
+  return `<div class="codecard"><div class="lbl">Your new formula code</div><div class="fcode">${A.formulaCode(w)}</div>
+    <div class="small">📸 <b>Screenshot this or write it down.</b> You'll need it if your phone loses its data before Act 4.</div>
+    <div class="tiny mute" style="margin-top:4px">${A.DIMS.map(d=>d.t).join(' · ')}</div></div>`;
+}
+function bindFormula(round){
+  if(round.type!=='formula') return;
+  const go=$('#fcgo'); if(go) go.onclick=()=>{ const w=A.parseFormulaCode($('#fcin').value); if(!w){ G.codeMsg='That code doesn\'t look right: it needs five digits from 0 to 5.'; return render(); } G.codeMsg=''; G.formula=w; if(w.jobs===undefined) w.jobs=3; say('pleased','Formula restored. Welcome back, doctor.','pop'); save(); render(); };
+  const eq=$('#fceq'); if(eq) eq.onclick=()=>{ G.codeMsg=''; G.formula=Object.fromEntries(A.DIMS.map(d=>[d.k,3])); save(); render(); };
+  app.querySelectorAll('[data-w]').forEach(sl=>sl.oninput=()=>{
+    G.formula[sl.dataset.w]=+sl.value; save();
+    const [C1,C2]=A.FORMULA_COUNTRIES, s1=A.indexFor(G.formula,C1), s2=A.indexFor(G.formula,C2);
+    $('#wv-'+sl.dataset.w).textContent=sl.value; $('#b-1').style.width=(s1*100).toFixed(0)+'%'; $('#b-2').style.width=(s2*100).toFixed(0)+'%';
+    $('#v-1').textContent=(s1*100).toFixed(1); $('#v-2').textContent=(s2*100).toFixed(1); $('#verdict').innerHTML=verdict(s1,s2); });
+}
+function revealBox(s, text, lesson){
+  return `<div class="fb"><div class="row"><b>${s.right} of ${s.of} right</b><span class="spacer"></span><span class="res" style="color:${s.pts>=0?'var(--teal)':'var(--red)'}">${s.pts>=0?'+':''}${s.pts}</span></div>
+    ${s.coins!==undefined?`<div class="small mute">including ${s.coins} unspent coins × 2</div>`:''}
+    <p style="margin:8px 0 0">${text}</p>${lesson?`<p class="small" style="margin:8px 0 0;color:var(--yellow)">💡 ${lesson}</p>`:''}</div>`;
+}
+function ready(round){
+  const a=ans(round.id);
+  return round.type==='quick' ? !!a.a : round.type==='formula' ? !!(G.formula&&G.formula.jobs!==undefined&&hasBase()) : round.questions.every(q=>(a.a||{})[q.id]);
+}
+function bar(round, reveal){
+  if(reveal){
+    if(G.mode==='solo') return `<div class="bar"><div class="in"><span class="small mute">Total ${total()}</span><span class="spacer"></span><button class="btn" id="next">${G.r===R.length-1?'Finish':'Next round ▶'}</button></div></div>`;
+    return `<div class="bar"><div class="in"><span class="small mute">Waiting for your teacher…</span></div></div>`;
+  }
+  const lk=locked(round), rd=ready(round);
+  const n=round.questions?round.questions.filter(q=>(ans(round.id).a||{})[q.id]).length:0;
+  return `<div class="bar"><div class="in"><span class="small mute">${lk?(G.mode==='solo'?'Locked in.':'Locked in. Waiting for the reveal…'):rd?'Ready when you are.':round.type==='formula'?'Restore your Act 1 formula first.':round.questions?`${n} of ${round.questions.length} answered`:'Pick an answer first.'}</span><span class="spacer"></span>
+    ${lk?(G.mode==='solo'?`<button class="btn alt" id="reveal">Reveal</button>`:`<button class="btn ghost" id="unlock">Change</button>`):`<button class="btn" id="lock" ${rd?'':'disabled'}>${round.type==='formula'?'Save my formula':'Lock in ✓'}</button>`}</div></div>`;
+}
+function bind(round, reveal){
+  const a=ans(round.id);
+  app.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{
+    const c=round.clues.find(x=>x.k===b.dataset.buy), coinsEl=$('#coins');
+    FX.coinFly(b, coinsEl, c.cost);
+    a.bought=(a.bought||[]).concat(c.k); G.justBought=c.k;
+    const left=round.budget-a.bought.reduce((s,k)=>s+round.clues.find(x=>x.k===k).cost,0);
+    if(c.k==='sup') say('pleased','The cost side! If costs are rising, that\'s the AS curve shifting up.','pop');
+    else if(c.k==='dem') say('curious','Spending clues. If AD keeps rising near full capacity, that\'s demand-pull.','pop');
+    else if(c.k==='y') say('skeptical','Output falling while prices rise? There\'s a word for that…','pop');
+    else if(left===0) say('skeptical','We\'re out of coins. Hope we bought the leaks.','pop');
+    else G.gline=null;
+    save(); push(); render();
+  });
+  app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ (a.a=a.a||{})[b.dataset.q]=b.dataset.k; G.gline=null; save(); render(); });
+  app.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ a.a=b.dataset.pick; save(); render(); });
+  app.querySelectorAll('[data-bet]').forEach(b=>b.onclick=()=>{ a.bet=+b.dataset.bet; if(a.bet===3) say('surprised','All in?! Doctors are supposed to say "let\'s run more tests". Well. Your call.','shake'); else G.gline=null; save(); render(); });
+  bindFormula(round);
+  const lk=$('#lock'); if(lk) lk.onclick=()=>{ if(round.type==='formula') FX.updateProfile({formula:G.formula, formulaCode:A.formulaCode(G.formula)}); a.locked=true; a.bet=a.bet||1; say('guessing', G.mode==='solo'?'Locked. Shall we see the numbers?':'Diagnosis filed. Now we wait for the test results.','pop'); save(); push(); render(); };
+  const ul=$('#unlock'); if(ul) ul.onclick=()=>{ a.locked=false; G.gline=null; save(); push(); render(); };
+  const rv=$('#reveal'); if(rv) rv.onclick=()=>{ G.soloReveal=true; G.gline=null; save(); render(); window.scrollTo({top:0,behavior:'smooth'}); };
+  const nx=$('#next'); if(nx) nx.onclick=()=>{ G.r++; G.soloReveal=false; G.gline=null; save(); render(); window.scrollTo({top:0}); };
+}
+
+function worldMap(names){
+  const M=window.WORLD_MAP;
+  const dots=names.map(n=>{const p=A.PINS[n]; const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin" cx="${x}" cy="${y}" r="7"/><text x="${p.left?x-10:x+10}" y="${y+5}" text-anchor="${p.left?'end':'start'}">${esc(n)}</text>`;}).join('');
+  return `<div class="endmap"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div>`;
+}
+function endScreen(){
+  const per=R.map(r=>({r, s:A.scoreRound(r,G.answers[r.id])}));
+  G.stickers=A.stickersFrom(G.answers); FX.addStickers(G.stickers);
+  ensureFormula(); const w=hasBase()?G.formula:null;
+  FX.updateProfile(Object.assign({name:G.name, colour:G.colour, emblem:G.emblem, act3:{score:total(), done:true}}, w?{formula:w, formulaCode:A.formulaCode(w)}:{}));
+  FX.addExplored(A.pinsUpTo(R.length-1));
+  app.innerHTML=`<div class="wrap">${header()}
+   <div class="card" style="text-align:center"><div class="lbl">Act 3 complete · ${total()} points</div><h2 style="margin:6px 0 12px">You've been promoted!</h2>
+    ${FX.careerCard(FX.profile(),{act:3,promoted:true,stickerDefs:A.STICKERS})}
+    <p class="small mute" style="margin-top:10px">Stickers you haven't earned yet are greyed out. You can chase them in a replay.</p></div>
+   ${FX.griffles('pleased','Minister! Next act, you don\'t just diagnose the Harbour Republic. You treat it, with real policy levers. No pressure. (Some pressure.)','hop')}
+   ${w?`<div class="card"><h3>Your six-part Living Standard formula</h3><p class="small mute">This is how your country is scored in Act 4.</p>${A.DIMS.map(d=>`<div class="row small"><span style="width:130px">${d.t}</span><span class="spacer"></span><b>${dots(w[d.k])}</b></div>`).join('')}${codeCard(w)}</div>`:''}
+   <div class="card"><h3>Patients you treated in Act 3</h3>${worldMap(A.pinsUpTo(R.length-1))}<p class="small mute" style="margin:8px 0 0">They're now unlocked on your campaign map.</p></div>
+   <div class="card"><h3>Your rounds</h3>${per.map(({r,s})=>`<div class="row small" style="padding:5px 0;border-bottom:1px solid var(--line)"><span>${esc(r.title)}</span><span class="spacer"></span><b style="color:${s.pts>=0?'var(--teal)':'var(--red)'}">${s.pts>=0?'+':''}${s.pts}</b></div>`).join('')}</div>
+   <div class="row">${G.mode==='solo'?`<button class="btn ghost" id="again">Play again</button>`:''}<a class="btn ghost" href="index.html${location.hash}" style="text-decoration:none">Campaign map</a></div>
+   <p class="tiny mute">Real-world figures come from central banks, national statistics offices, the OECD and news reports named in each round. The Harbour Republic is a made-up teaching economy.</p></div>`;
+  if(!G.endCelebrated){ G.endCelebrated=true; setTimeout(()=>FX.confetti(140),300); }
+  const ag=$('#again'); if(ag) ag.onclick=()=>{ localStorage.removeItem(KEY); G.endCelebrated=false; G.animated={}; startSolo(null); };
+}
+
+// Preview shortcut: ?jump=<round id> starts a fresh solo game at that round (used by the comparison page).
+if(params.get('jump')){ const i=R.findIndex(r=>r.id===params.get('jump')); try{ localStorage.removeItem(KEY); }catch(e){} G.name='Preview'; G.colour=FX.COLOURS[1]; G.emblem=FX.EMBLEMS[3]; startSolo({r:Math.max(0,i), name:'Preview'}); }
+else joinScreen();
+})();
+</script>
+</body>
+</html>
