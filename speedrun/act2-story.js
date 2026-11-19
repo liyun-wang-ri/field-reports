@@ -68,11 +68,11 @@ Story.apply(Act2.ROUNDS, {
 
   m1: { line: 'Two governments each spend an extra $1 billion. Where does it grow into more income?', tiles: [['🪙', '6', 'coins for clues'], ['💧', '?', 'leakages to find']],
     gut: 'The richer, more open one gets the bigger boost. Money attracts money!',
-    clues: { pop: 'Population', exp: 'Famous exports', imp: 'Imports (% of GDP)', sav: 'Savings (% of income)' },
+    clues: { tax: 'Tax on company profits', pi: 'Inflation', exp: 'Famous exports', imp: 'Imports (% of GDP)', sav: 'Savings (% of income)' },
     q: { big: { short: 'Bigger multiplier?', why: 'B imports and saves far less of each extra dollar, so more is spent again at home.' },
          leak: { short: 'A\'s biggest leakage?', why: 'A\'s imports are worth about as much as its whole GDP.' },
-         whoA: { short: 'Country A is…', why: 'Ireland: about 5 million people; medicines and software.' },
-         whoB: { short: 'Country B is…', why: 'Brazil: about 211 million people; soybeans and iron ore.' } },
+         whoA: { short: 'Country A is…', why: 'Ireland: a 12.5% tax on company profits attracts big US firms. The Netherlands (imports about 77% of GDP), Denmark (22% profit tax) and Belgium (saves about 25%) don\'t fit A\'s clues.' },
+         whoB: { short: 'Country B is…', why: 'Brazil: soybeans and iron ore. Argentina\'s inflation passed 200%, Colombia exports oil and coal, Peru exports copper.' } },
     take: 'Smaller leakages mean a bigger multiplier: Brazil keeps more of the spending at home than Ireland.' },
 
   q3: { qs: 'The Harbour Republic imports most things and saves a lot. A $1bn hospital raises income by…', gut: 'The multiplier makes it way more. Like $5 billion.',

@@ -19,13 +19,13 @@
   const ROUNDS = [
     { id: 'm1', type: 'mystery', title: 'Mission 1 · Two mystery economies', year: '2023',
       per: 6,
-      intro: 'Two real economies, names hidden. One is small, one is large. You have 8 coins to buy clues. Coins you don\'t spend are worth 2 points each, so information has a price.',
+      intro: 'Two real economies, names hidden. You have 8 coins to buy clues. Read the questions first: each country description points to a clue that can rule it in or out. Coins you don\'t spend are worth 2 points each, so information has a price.',
       budget: 8,
       clues: [
         { k: 'g', group: 'Economic performance', label: 'Real GDP growth', unit: '%', cost: 1, v: [-2.7, 6.0] },
         { k: 'pi', group: 'Economic performance', label: 'Inflation rate', unit: '%', cost: 1, v: [9.2, 10.0] },
         { k: 'u', group: 'Economic performance', label: 'Unemployment rate', unit: '%', cost: 1, v: [6.4, 8.1] },
-        { k: 'pop', group: 'Material SOL', label: 'Population', unit: '', cost: 1, v: ['1.4 million', '36.2 million'] },
+        { k: 'rem', group: 'Income from abroad', label: 'Money sent home by workers abroad (% of GDP)', unit: '', cost: 1, v: ['1.2%', 'about 18%'] },
         { k: 'gni', group: 'Material SOL', label: 'GNI per capita (PPP, 2021 int. $)', unit: '', cost: 3, v: ['40,881', '8,826'] },
         { k: 'le', group: 'Non-material SOL', label: 'Life expectancy', unit: ' yrs', cost: 2, v: [79.2, 72.4] },
         { k: 'sch', group: 'Non-material SOL', label: 'Mean years of schooling', unit: ' yrs', cost: 1, v: [13.6, 11.9] },
@@ -38,14 +38,14 @@
         { id: 'mat', q: 'Which has the higher material standard of living?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'A' },
         { id: 'air', q: 'Which has cleaner air?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'A' },
         { id: 'whoA', q: 'Country A is…', opts: [['nz', 'New Zealand'], ['ire', 'Ireland'], ['est', 'Estonia'], ['sg', 'Singapore']], correct: 'est',
-          desc: { nz: 'South Pacific islands famous for dairy and farming. Its population is a little smaller than Singapore\'s.', ire: 'EU member where many US tech and drug firms have their European offices. Its population is a little smaller than Singapore\'s.', est: 'Baltic EU member famous for its digital government. It has about a quarter of Singapore\'s population.', sg: 'A city-state with one of the highest incomes per person in the world.' } },
+          desc: { nz: 'People here live longer than almost anywhere: life expectancy is over 82 years.', ire: 'Profits of big foreign firms push its income per person (GNI per capita, PPP) to about 90,000 a year, among the highest in the world.', est: 'Burns oil shale, a very carbon-heavy rock, to make much of its electricity.', sg: 'Almost everyone who wants a job has one: unemployment was about 2% in 2023.' } },
         { id: 'whoB', q: 'Country B is…', opts: [['vn', 'Vietnam'], ['uz', 'Uzbekistan'], ['eth', 'Ethiopia'], ['bd', 'Bangladesh']], correct: 'uz',
-          desc: { vn: 'A big electronics exporter with about 100 million people.', uz: 'A Central Asian country with no coastline, and about six times Singapore\'s population.', eth: 'Africa\'s second most populous country, with over 120 million people.', bd: 'About 170 million people live in an area smaller than Malaysia\'s.' } }
+          desc: { vn: 'Kept prices fairly steady in 2023: inflation was only about 3%.', uz: 'Millions of its people work abroad, mostly in Russia, and send part of their wages home.', eth: 'Adults have spent only about 2 to 3 years in school, on average.', bd: 'Its air is among the most polluted in the world.' } }
       ],
       reveal: { names: ['Estonia', 'Uzbekistan'],
-        text: 'A is <b>Estonia</b>, a small EU economy of 1.4 million people. B is <b>Uzbekistan</b>, a fast-growing Central Asian economy of 36 million. In 2023 Uzbekistan grew 6% while Estonia <b>shrank</b>, yet Estonia\'s income per person is more than four times higher, people live about 7 years longer and the air is far cleaner. Estonia does emit more CO₂ per person, though. Clean air and low CO₂ are different indicators.',
-        lesson: 'Growth, inflation and unemployment measure <b>economic performance this year</b>. Living standards depend on the <b>level</b> of income and well-being. A fast-growing economy can still be much poorer. Did population help you? None of the other options has just 1.4 million or 36 million people.',
-        sources: 'UNDP Human Development Report 2025 (HDI, life expectancy, schooling, GNI per capita, 2023); World Bank (growth, inflation, unemployment, population; PM2.5 for 2017); EDGAR/JRC (CO₂, 2023). Country descriptions: UN and World Bank population estimates.' } },
+        text: 'A is <b>Estonia</b>, a small EU economy. B is <b>Uzbekistan</b>, a fast-growing Central Asian economy where money sent home by workers abroad is worth about 18% of GDP. In 2023 Uzbekistan grew 6% while Estonia <b>shrank</b>, yet Estonia\'s income per person is more than four times higher, people live about 7 years longer and the air is far cleaner. Estonia does emit more CO₂ per person, though, because it burns oil shale for power. Clean air and low CO₂ are different indicators.',
+        lesson: 'Growth, inflation and unemployment measure <b>economic performance this year</b>. Living standards depend on the <b>level</b> of income and well-being. A fast-growing economy can still be much poorer. Each wrong option was ruled out by a <b>different</b> clue: New Zealand by life expectancy, Ireland by income per person, Singapore by unemployment; Vietnam by inflation, Ethiopia by schooling, Bangladesh by air pollution.',
+        sources: 'UNDP Human Development Report 2025 (HDI, life expectancy, schooling, GNI per capita, 2023, also for New Zealand, Ireland and Ethiopia); World Bank (growth, inflation, unemployment; PM2.5 for 2017, also for Bangladesh; remittances: Uzbekistan about 18% of GDP in 2023, World Bank estimate, Estonia 1.2%); EDGAR/JRC (CO₂, 2023). Descriptions: OECD and EEA on Estonia\'s oil shale power; Singapore Ministry of Manpower (unemployment 1.9% in 2023); Vietnam General Statistics Office (CPI +3.25% in 2023); World Bank on Uzbek migrant workers in Russia.' } },
 
     { id: 'q1', type: 'quick', gut: 'Easy. GDP went up 10%, so the economy grew 10%. Right? …Right?', title: 'Trap card 1 · Nominal vs real',
       q: 'The Harbour Republic\'s nominal GDP rose by 10% this year. Prices rose by 12%. Did the economy produce more?',
@@ -72,27 +72,33 @@
       opts: [['yes', 'Yes, fewer people are unemployed'], ['no', 'No: they simply left the labour force'], ['more', 'Yes, and output must have risen']], correct: 'no',
       explain: 'People who stop looking leave the labour force, so both the top and bottom of the fraction shrink. <b>The rate falls, but no extra labour is being used.</b> Always check what happened to the labour force.' },
 
-    { id: 'm2', type: 'mystery', title: 'Mission 2 · How much richer, really?', year: 'recent',
+    { id: 'm2', type: 'mystery', title: 'Mission 2 · How much richer, really?', year: '2023',
       per: 8,
-      intro: 'Two very different economies. Buy clues to work out who they are and how big the gap in living standards really is. You have 6 coins, so you can\'t buy everything.',
-      budget: 6,
+      intro: 'Two very different economies. Buy clues to name them, then decide whether the usual way of comparing incomes makes the gap look too big or too small. You have 7 coins, so you can\'t buy everything.',
+      budget: 7,
       clues: [
-        { k: 'pop', group: 'Basics', label: 'Population', unit: '', cost: 1, v: ['about 5.5 million', 'about 1.4 billion'] },
-        { k: 'mkt', group: 'Material SOL', label: 'GDP per capita at market exchange rates (US$)', unit: '', cost: 2, v: ['98,102', '1,489'] },
-        { k: 'ppp', group: 'Material SOL', label: 'Gap after adjusting for cost of living (PPP)', unit: '', cost: 4, v: ['about 17 times B', '—'] }
+        { k: 'exp', group: 'Economy', label: 'Main exports', unit: '', cost: 2, v: ['crude oil and natural gas', 'refined petroleum, medicines, diamonds, IT services'] },
+        { k: 'g', group: 'Economic performance', label: 'Real GDP growth', unit: '%', cost: 1, v: [0.1, 9.2] },
+        { k: 'pi', group: 'Economic performance', label: 'Inflation rate', unit: '%', cost: 1, v: [5.5, 5.7] },
+        { k: 'mkt', group: 'Material SOL', label: 'GDP per capita at market exchange rates (US$)', unit: '', cost: 2, v: ['87,497', '2,530'] },
+        { k: 'ppp', group: 'Material SOL', label: 'GDP per capita at PPP (international $)', unit: '', cost: 3, v: ['100,437', '10,323'] },
+        { k: 'mac', group: 'Prices', label: 'Price of a Big Mac in US$ (Jan 2024)', unit: '', cost: 1, v: ['$7.14', '$2.59'] },
+        { k: 'temp', group: 'Climate', label: 'Average January temperature in the capital', unit: '', cost: 1, v: ['about −2°C', 'about 15°C'] }
       ],
       questions: [
+        { id: 'under', q: 'At market exchange rates, does Country B\'s GDP per capita overstate or understate how much people in B can actually buy?', opts: [['over', 'Overstates'], ['under', 'Understates'], ['exact', 'Gets it about right']], correct: 'under' },
+        { id: 'why', q: 'Which clue best shows why?', opts: [['mac', 'The price of a Big Mac'], ['g', 'Real GDP growth'], ['exp', 'Main exports']], correct: 'mac' },
+        { id: 'gap', q: 'After adjusting for cost of living (PPP), the gap in GDP per capita between A and B…', opts: [['shrink', 'Shrinks'], ['widen', 'Widens'], ['same', 'Stays about the same']], correct: 'shrink' },
+        { id: 'heat', q: 'People in A must spend far more than people in B on heating and winter clothing just to stay comfortable. Does this make A\'s GDP per capita, even after PPP, overstate or understate how well off people in A are compared with people in B?', opts: [['over', 'Overstate'], ['under', 'Understate']], correct: 'over' },
         { id: 'whoA', q: 'Country A is…', opts: [['swi', 'Switzerland'], ['lux', 'Luxembourg'], ['nor', 'Norway'], ['den', 'Denmark']], correct: 'nor',
-          desc: { swi: 'Alpine banking hub with about one and a half times Singapore\'s population.', lux: 'A tiny EU state with about a tenth of Singapore\'s population.', nor: 'A Nordic oil and gas exporter with a population a little smaller than Singapore\'s.', den: 'A Nordic country famous for wind turbines and LEGO, with about as many people as Singapore.' } },
+          desc: { swi: 'Its biggest exports are gold, medicines and luxury watches.', lux: 'Has the highest GDP per person in the world, partly because many of its workers live in neighbouring countries and commute in.', nor: 'Earns much of its export income from selling oil and gas, and saves the government\'s share in a national savings fund, the largest in the world.', den: 'Its biggest exports include medicines (such as weight-loss drugs) and wind turbines.' } },
         { id: 'whoB', q: 'Country B is…', opts: [['idn', 'Indonesia'], ['pak', 'Pakistan'], ['ind', 'India'], ['nga', 'Nigeria']], correct: 'ind',
-          desc: { idn: 'The world\'s biggest archipelago, with the fourth-largest population.', pak: 'The world\'s fifth most populous country.', ind: 'Became the world\'s most populous country in 2023.', nga: 'Africa\'s most populous country.' } },
-        { id: 'mkt', q: 'At market exchange rates, A\'s GDP per person is about how many times B\'s?', opts: [['3', '3×'], ['17', '17×'], ['65', '65×'], ['200', '200×']], correct: '65' },
-        { id: 'ppp', q: 'Once you adjust for cost of living (PPP), the gap is about…', opts: [['3', '3×'], ['17', '17×'], ['65', '65×'], ['200', '200×']], correct: '17' }
+          desc: { idn: 'Its GDP per person is close to US$5,000 a year.', pak: 'Its prices rose more than 30% in a year in 2023, and it needed an emergency loan from the IMF.', ind: 'Its real GDP grew faster than any other large economy\'s in 2023.', nga: 'Crude oil makes up most of what it sells to other countries.' } }
       ],
       reveal: { names: ['Norway', 'India'],
-        text: 'A is <b>Norway</b>, B is <b>India</b>. At market exchange rates Norway looks about <b>65 times</b> richer. But haircuts, meals and rent cost far less in India, so each dollar buys much more there. Adjusting for cost of living (<b>purchasing power parity</b>), the gap shrinks to about <b>17 times</b>. That\'s still huge, but much more realistic.',
-        lesson: 'That\'s why cross-country SOL comparisons use <b>PPP-adjusted real GDP per capita</b>. The Big Mac Index is a quick version of the same idea.',
-        sources: 'Figures as quoted in the SOL and KEI notes (World Bank). Country descriptions: UN and World Bank population estimates (India became the most populous country in 2023, UN).' } },
+        text: 'A is <b>Norway</b>, B is <b>India</b>. At market exchange rates Norway\'s GDP per person is about <b>35 times</b> India\'s. But a Big Mac costs about $2.59 in India (there it is a chicken burger) against $7.14 in Norway: most things cost far less in India, so each dollar goes further. Adjusted for cost of living (<b>purchasing power parity</b>), the gap shrinks to about <b>10 times</b>. Still huge, but more realistic. Even the PPP figure flatters Norway a little: Norwegians must spend on heating and winter clothing just to stay comfortable. That spending adds to GDP, but it only offsets the cold.',
+        lesson: 'Market exchange rates <b>understate</b> living standards where the cost of living is low, so cross-country comparisons use <b>PPP-adjusted real GDP per capita</b>. PPP has limits too: different needs (heating), different baskets (a chicken "Big Mac") and data quality. Your notes use older figures (about 65× and 17×); the 2023 data tells the same story. Each wrong option was ruled out by a different clue: Switzerland and Denmark by exports, Luxembourg by GDP per person; Nigeria by exports, Indonesia by GDP per person, Pakistan by inflation.',
+        sources: 'World Bank (GDP per capita at market rates and PPP, real GDP growth and inflation, 2023, as published September 2025); The Economist Big Mac Index, January 2024 (via Visual Capitalist); OEC and WITS (India\'s and Switzerland\'s main exports, 2023); Norwegian Petroleum Directorate and Oslo kommune (oil and gas exports); NBIM (Government Pension Fund Global, the largest sovereign wealth fund); STATEC and ADEM (47% of Luxembourg\'s workers commute from abroad); Nigeria NBS (crude oil about 81% of exports, 2023); IMF (US$3 billion Stand-By Arrangement for Pakistan, July 2023) and Pakistan Bureau of Statistics (inflation 38% in May 2023); World Bank India Development Update, September 2024 (fastest-growing major economy); Norwegian Meteorological Institute (Oslo January normal about −2°C). Exact figures vary by source and year.' } },
 
     { id: 'q6', type: 'quick', gut: 'A 20% price jump is a 20% price jump. It should hit everyone the same.', title: 'Trap card 6 · Weights in the CPI',
       q: 'World fuel and food prices jump by 20%. Food and fuel make up a much bigger share of the typical basket in Tonga than in Norway. Whose inflation rate rises more?',

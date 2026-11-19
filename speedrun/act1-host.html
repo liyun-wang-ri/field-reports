@@ -161,7 +161,7 @@ function mapCard(r, title){
 }
 function hostGrif(round, reveal){
   if(round.type==='quick') return reveal ? FX.griffles('skeptical', `I said: "${esc(round.gut)}" Yeah… don't do what I did.`, 'shake') : FX.griffles('guessing', `<i>My gut says:</i> ${esc(round.gut)}`, 'pop');
-  if(round.type==='mystery') return reveal ? FX.griffles('surprised', round.id==='m1'?'Wait, the one that <i>grew</i> faster is the poorer one? My whole worldview is shaking.':'Sixty-five times richer… or seventeen? Same countries, very different story.', 'hop') : FX.griffles('curious', 'Watch which clues the class is buying. Is anyone paying 4 coins for HDI?', 'pop');
+  if(round.type==='mystery') return reveal ? FX.griffles('surprised', round.id==='m1'?'Wait, the one that <i>grew</i> faster is the poorer one? My whole worldview is shaking.':'Thirty-five times richer… or ten? Same countries, very different story. And the cold costs Norway something too.', 'hop') : FX.griffles('curious', 'Watch which clues the class is buying. Is anyone paying 4 coins for HDI?', 'pop');
   return FX.griffles('curious','Is low carbon part of <i>my</i> living standard, or the planet\'s? Asking for a griffin.','pop');
 }
 

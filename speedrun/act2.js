@@ -153,7 +153,8 @@
       intro: 'Both governments spend an extra US$1 billion building hospitals. In which country does that billion grow into more national income? Buy clues about the <b>leakages</b>. Coins you don\'t spend are worth 2 points each.',
       gut: 'The richer, more open one will get the bigger boost. Money attracts money!',
       clues: [
-        { k: 'pop', group: 'Basics', label: 'Population', unit: '', cost: 1, v: ['about 5 million', 'about 211 million'] },
+        { k: 'tax', group: 'Basics', label: 'Tax rate on company profits', unit: '', cost: 1, v: ['12.5%', '34%'] },
+        { k: 'pi', group: 'Basics', label: 'Inflation rate', unit: '', cost: 1, v: ['6.3%', '4.6%'] },
         { k: 'exp', group: 'Basics', label: 'Famous exports', unit: '', cost: 2, v: ['medicines, software services', 'soybeans, iron ore, crude oil'] },
         { k: 'imp', group: 'Leakages', label: 'Imports (% of GDP)', unit: '', cost: 2, v: ['102%', '16%'] },
         { k: 'sav', group: 'Leakages', label: 'Gross savings (% of national income)', unit: '', cost: 2, v: ['34%', '15%'] }
@@ -162,14 +163,14 @@
         { id: 'big', q: 'Which country has the bigger multiplier?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'B' },
         { id: 'leak', q: 'What is Country A\'s biggest leakage?', opts: [['s', 'Savings'], ['t', 'Taxes'], ['m', 'Imports']], correct: 'm' },
         { id: 'whoA', q: 'Country A is…', opts: [['nl', 'Netherlands'], ['dk', 'Denmark'], ['ire', 'Ireland'], ['be', 'Belgium']], correct: 'ire',
-          desc: { nl: 'Home to Rotterdam, Europe\'s busiest port, and about 18 million people.', dk: 'A Nordic country best known for wind turbines and LEGO, with about as many people as Singapore.', ire: 'Hosts the European headquarters of many big US tech and drug companies.', be: 'Home to the EU\'s main institutions in Brussels, and about 12 million people.' } },
+          desc: { nl: 'Rotterdam, Europe\'s busiest port, ships goods in and out for much of Europe, so its imports are worth about three-quarters of its GDP.', dk: 'Taxes profits at 22%, and its biggest exports include medicines and wind turbines.', ire: 'Many big US tech and drug companies base their European headquarters here, attracted by its low tax on company profits.', be: 'Home to the EU\'s headquarters in Brussels. It saves about a quarter of its national income.' } },
         { id: 'whoB', q: 'Country B is…', opts: [['ar', 'Argentina'], ['br', 'Brazil'], ['co', 'Colombia'], ['pe', 'Peru']], correct: 'br',
-          desc: { ar: 'South America\'s second-largest country by area, with about 46 million people.', br: 'Latin America\'s most populous country, and the world\'s biggest soybean exporter.', co: 'About 52 million people; famous for coffee and flowers.', pe: 'About 34 million people; one of the world\'s top copper producers.' } }
+          desc: { ar: 'Prices more than tripled in 2023: inflation passed 200%.', br: 'The world\'s biggest exporter of soybeans, and a major exporter of iron ore.', co: 'Its two biggest exports are crude oil and coal.', pe: 'Copper is its biggest export: it is one of the world\'s top copper producers.' } }
       ],
       reveal: { names: ['Ireland', 'Brazil'], chain: [[ 'Ireland', 0.75 ], [ 'Brazil', 0.45 ]],
         text: 'A is <b>Ireland</b>, B is <b>Brazil</b>. Each round of the multiplier, part of the new income leaks out as savings, taxes and imports. Ireland\'s imports are worth about as much as its whole GDP, so much of every extra euro is spent on foreign goods and leaks abroad straight away. Brazil buys far less from abroad and saves less, so more of each extra real stays at home and is spent again.',
         lesson: 'The <b>smaller the leakages</b> (savings, taxes, imports), the more rounds of spending, and the <b>bigger the multiplier</b>. A small, very open economy has a small multiplier. The chain below is an illustration, not a measured figure.',
-        sources: 'World Bank WITS and World Development Indicators (imports % of GDP and gross savings % of GNI, 2023; population); OECD (Ireland trade); main exports from WITS trade summaries. Country descriptions: World Bank population estimates; USDA (Brazil the largest soybean exporter); USGS (Peru among the top copper producers).' } },
+        sources: 'World Bank WITS and World Development Indicators (imports % of GDP and gross savings % of GNI, 2023; Netherlands imports about 77% of GDP; Belgium gross savings about 25% of GNI); OECD (Ireland trade); main exports from WITS and OEC trade summaries (Colombia: crude oil and coal). Tax on company profits: PwC Worldwide Tax Summaries (Ireland 12.5%, with 15% for very large groups from 2024; Brazil 34%; Denmark 22%). Inflation 2023: Ireland CSO (6.3%), IBGE (Brazil 4.62%), INDEC (Argentina 211.4%). USDA (Brazil the largest soybean exporter); USGS (Peru among the top copper producers).' } },
 
     { id: 'q3', type: 'quick', tab: 'Trap card', title: 'Trap card 3 · The leaky bucket',
       gut: 'The government spends $1 billion, and the multiplier makes it… way more than $1 billion. Like, $5 billion. Multipliers are great.',
