@@ -35,11 +35,25 @@
       options: [
         { k: 'none', t: 'None', s: '', res: 0 },
         { k: 'skills', t: 'Skills', s: 'retraining · −1', res: -1 },
-        { k: 'infra', t: 'Infrastructure', s: 'ports, energy · −1', res: -1 }
+        { k: 'infra', t: 'Infrastructure', s: 'ports, energy · −1', res: -1 },
+        { k: 'green', t: 'Green R&D', s: 'clean energy · −1', res: -1, unlock: 'green' }
+      ]
+    },
+    carbon: {
+      name: 'Carbon tax', lagNote: 'cuts emissions at once',
+      options: [
+        { k: 'off', t: 'Off', s: '', cost: 0, res: 0 },
+        { k: 'on', t: 'On', s: 'costs up · +½ reserve', cost: 0.3, res: 0.5 }
       ]
     }
   };
-  const DEFAULT_POLICY = { fiscal: 'neutral', er: 'steady', supply: 'none' };
+  const DEFAULT_POLICY = { fiscal: 'neutral', er: 'steady', supply: 'none', carbon: 'off' };
+
+  // Six dimensions of living standard (same order as the Act 3 formula code).
+  const DIMS = [
+    { k: 'income', t: 'Income', s: 'Income', e: '💰' }, { k: 'health', t: 'Health', s: 'Health', e: '❤️' }, { k: 'edu', t: 'Education', s: 'Edu', e: '🎓' },
+    { k: 'air', t: 'Clean air', s: 'Air', e: '🌫️' }, { k: 'carbon', t: 'Low carbon', s: 'Carbon', e: '🌱' }, { k: 'jobs', t: 'Jobs & prices', s: 'Jobs', e: '💼' }
+  ];
 
   // What unlocks when (quarter index, 0-based). Each unlock pauses the class for a short lesson.
   const UNLOCKS = [
@@ -62,7 +76,12 @@
     { q: 11, k: 'supply', title: 'Supply-side policy', levers: ['supply'],
       lesson: ['Supply-side policies raise productive capacity, so AS shifts right. They work slowly: about 4 quarters here.',
                'Skills cut structural unemployment. Infrastructure raises capacity and eases costs.',
-               'Each one costs 1 reserve point. Think long term.'] }
+               'Each one costs 1 reserve point. Think long term.'] },
+    { q: 13, k: 'green', title: 'Sustainable growth: carbon tax + green R&D', levers: ['carbon', 'green'],
+      lesson: ['More output usually means more carbon emissions and dirtier air. Sustainable growth is growth that does not run down the future.',
+               'Carbon tax: firms pay for every tonne of carbon they emit. Costs rise (cost-push), but emissions fall at once and the revenue tops up your reserves. Singapore has taxed carbon since 2019: S$5 a tonne, S$25 from 2024 and S$45 from 2026.',
+               'Green R&D: public money for clean-energy research and green infrastructure. It costs 1 reserve and pays off after 4 quarters: cleaner production for good, and a little more capacity.',
+               'Your formula decides how much this matters. Check your weights for Clean air and Low carbon.'] }
   ];
 
   const AIM_ORDER = ['growth', 'inflation', 'unemployment'];
@@ -92,6 +111,8 @@
       reserves: 6, index: 100,
       g: 3, pi: 2, u: 2.8,
       hist: [{ q: -1, g: 3, pi: 2, u: 2.8, index: 100, reserves: 6 }],
+      inc: 100, emis: 100, poll: 100, skillsDone: 0, greenDone: 0, jobsSum: 0, jobsN: 0,
+      dims: { income: 100, health: 100, edu: 100, air: 100, carbon: 100, jobs: 100 },
       newsDone: {}, // id -> choice
       flags: {},
       ach: {}, streak: { pi: 0, all: 0 },
@@ -109,6 +130,8 @@
     if (!unl.levers.has('fiscal')) policy.fiscal = 'neutral';
     if (!unl.levers.has('er')) policy.er = 'steady';
     if (!unl.levers.has('supply')) policy.supply = 'none';
+    if (!unl.levers.has('carbon')) policy.carbon = 'off';
+    if (policy.supply === 'green' && !unl.levers.has('green')) policy.supply = 'none';
     if (policy.fiscal === 'big' && !unl.levers.has('big')) policy.fiscal = 'expand';
     const notes = [];
 
@@ -129,15 +152,17 @@
     });
 
     // 3. policy, with lags: fiscal acts 50% now, 50% next quarter; ER builds over two quarters.
-    const f = optionOf('fiscal', policy.fiscal), e = optionOf('er', policy.er), sp = optionOf('supply', policy.supply);
+    const f = optionOf('fiscal', policy.fiscal), e = optionOf('er', policy.er), sp = optionOf('supply', policy.supply), ct = optionOf('carbon', policy.carbon);
     const fisNow = 0.5 * f.ad + run.fisPipe; run.fisPipe = 0.5 * f.ad;
     run.erPipe.ad = 0.5 * run.erPipe.ad + 0.5 * e.ad; run.erPipe.cost = 0.5 * run.erPipe.cost + 0.5 * e.cost;
-    run.reserves += f.res + sp.res;
-    if (sp.k === 'skills') run.supplyQueue.push({ due: q + 4, struct: -0.35, cap: 0.15, note: 'A skills programme from a year ago pays off: structural unemployment falls.' });
+    run.reserves += f.res + sp.res + ct.res;
+    if (sp.k === 'skills') run.supplyQueue.push({ due: q + 4, struct: -0.35, cap: 0.15, skills: 1, note: 'A skills programme from a year ago pays off: structural unemployment falls and the workforce is better educated.' });
+    if (sp.k === 'green') run.supplyQueue.push({ due: q + 4, cap: 0.2, cost: -0.05, green: 1, note: 'Green R&D from a year ago pays off: cleaner energy cuts emissions and pollution for good.' });
     if (sp.k === 'infra') run.supplyQueue.push({ due: q + 4, cap: 0.35, cost: -0.15, note: 'Infrastructure from a year ago is ready: capacity rises and costs ease.' });
     run.supplyQueue = run.supplyQueue.filter(x => {
       if (x.due !== q) return true;
       run.cap += x.cap || 0; run.struct = Math.max(0, run.struct + (x.struct || 0)); run.c += x.cost || 0; run.d += x.ad || 0; run.reserves += x.res || 0;
+      run.skillsDone += x.skills || 0; run.greenDone += x.green || 0;
       if (x.note) notes.push(x.note);
       return false;
     });
@@ -146,7 +171,7 @@
     const R = rng(run.seed * 1009 + q * 7919);
     const noise = () => (R() - 0.5) * 0.4;
     const AD = run.d + fisNow + run.erPipe.ad;
-    const cost = run.c + run.erPipe.cost;
+    const cost = run.c + run.erPipe.cost + ct.cost;
     const overdrawn = run.reserves < 0 ? Math.min(2, -run.reserves * 0.3) : 0; // borrowing scares investors
     const g = 3 + 1.0 * AD - 0.5 * cost + run.cap - overdrawn + noise();
     const piTarget = 2 + 0.55 * AD + 0.9 * cost - 0.3 * run.cap;
@@ -165,6 +190,19 @@
     if (run.reserves < 0) pain += 0.5;
     const w = run.g - pain;
     run.index = +(run.index * (1 + w / 400)).toFixed(2);
+    run.reserves = Math.round(run.reserves * 10) / 10;
+
+    // 5b. six dimensions (all start at 100). Simplified teaching model.
+    const taxOn = ct.k === 'on';
+    run.inc *= 1 + run.g / 400;
+    run.emis *= 1 + (0.3 * run.g - (taxOn ? 0.9 : 0) - 0.35 * run.greenDone) / 100;
+    run.poll *= 1 + (0.2 * run.g - (taxOn ? 0.5 : 0) - 0.3 * run.greenDone) / 100;
+    run.jobsSum += 100 - 6 * Math.max(0, run.u - 3.5) - 5 * Math.max(0, run.pi - 3) - 6 * Math.max(0, -run.pi); run.jobsN++;
+    const air = 200 - run.poll;
+    run.dims = {
+      income: +run.inc.toFixed(2), health: +(0.6 * run.inc + 0.4 * air).toFixed(2), edu: 100 + 2.5 * run.skillsDone,
+      air: +air.toFixed(2), carbon: +(200 - run.emis).toFixed(2), jobs: +(run.jobsSum / run.jobsN).toFixed(2)
+    };
 
     // 6. achievements
     const met = aimMet(run, aimsNow);
@@ -178,7 +216,7 @@
     if (ev.some(x => (x.ad || 0) <= -2) && run.u <= 3.5 && aimsNow.has('unemployment')) award('cushion');
     if (run.supplyQueue.length >= 3) award('builder');
 
-    run.hist.push({ q, g: run.g, pi: run.pi, u: run.u, index: run.index, reserves: run.reserves, policy: Object.assign({}, policy), AD: +AD.toFixed(2), cost: +cost.toFixed(2) });
+    run.hist.push({ q, g: run.g, pi: run.pi, u: run.u, index: run.index, reserves: run.reserves, dims: Object.assign({}, run.dims), policy: Object.assign({}, policy), AD: +AD.toFixed(2), cost: +cost.toFixed(2) });
     run.q = q + 1;
     return { q, g: run.g, pi: run.pi, u: run.u, index: run.index, reserves: run.reserves, met, notes, events: ev, achievements: got, AD, cost };
   }
@@ -210,6 +248,20 @@
     builder: { t: 'Nation Builder', d: 'Three supply-side projects in the pipeline at once' }
   };
 
-  const api = { TARGETS, LEVERS, DEFAULT_POLICY, UNLOCKS, AIM_ORDER, ACHIEVEMENTS, unlockedAt, unlocksFor, newRun, step, autopilotRun, aimMet, rng };
+  // Formula score: weighted average of the six dimensions, weights 0-5 (missing = 0).
+  function formulaScore(dims, w) {
+    let sw = 0, s = 0;
+    DIMS.forEach(d => { const v = +((w || {})[d.k]) || 0; sw += v; s += v * ((dims || {})[d.k] || 100); });
+    return sw ? s / sw : 100;
+  }
+  // Revision penalty: 0.25 points for every point a weight moves beyond ±1 of the saved formula.
+  function revisionPenalty(orig, w) {
+    if (!orig) return 0;
+    let p = 0;
+    DIMS.forEach(d => { if (orig[d.k] === undefined) return; p += 0.25 * Math.max(0, Math.abs((+w[d.k] || 0) - (+orig[d.k] || 0)) - 1); });
+    return p;
+  }
+
+  const api = { DIMS, formulaScore, revisionPenalty, TARGETS, LEVERS, DEFAULT_POLICY, UNLOCKS, AIM_ORDER, ACHIEVEMENTS, unlockedAt, unlocksFor, newRun, step, autopilotRun, aimMet, rng };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof self !== 'undefined' ? self : this);

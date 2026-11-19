@@ -75,9 +75,9 @@ async function boot(){
 }
 
 function setup(){
-  app.innerHTML=`<div class="hdr"><h1>Econ Speedrun · Macro <span class="pill">Host</span></h1><span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo mode: this browser only</span>':''}</div>
+  app.innerHTML=`<div class="hdr"><h1>Econ Speedrun · Act 4 The Minister <span class="pill">Host</span></h1><span class="spacer"></span>${H.sync.kind==='local'?'<span class="pill hot">Demo mode: this browser only</span>':''}</div>
    <div class="card" style="max-width:760px"><h2>Start a class game</h2>
-    <p class="mute">Each team steers its own Harbour Republic through the same shocks. You control the clock, the lessons and the prediction polls. Students join on their phones with a code, and no accounts are needed.</p>
+    <p class="mute">Each team steers its own Harbour Republic through the same shocks, scored by its own Living Standard formula from Acts 1 and 3. Teams confirm or revise the formula in a short briefing when they join. You control the clock, the lessons and the prediction polls. Students join on their phones with a code, and no accounts are needed.</p>
     <b>Which hidden era?</b> <span class="small mute">Students only find out at the end.</span>
     <div class="scen">${Sc.SCENARIOS.map((s,i)=>`<label><input type="radio" name="sc" value="${s.id}" ${i===0?'checked':''}><span><b>${UI.esc(s.reveal.title)}</b><br><span class="small mute">${UI.esc(s.reveal.story)}</span></span></label>`).join('')}
      <label><input type="radio" name="sc" value="random"><span><b>Surprise me</b><br><span class="small mute">You won't know either.</span></span></label></div>
@@ -123,7 +123,7 @@ function render(){
 
 function hdr(extra){
   const s=st();
-  return `<div class="hdr"><h1>Econ Speedrun</h1><span class="pill">Code <span class="code">${H.code}</span></span>
+  return `<div class="hdr"><h1>Econ Speedrun</h1><span class="pill">Code <span class="code">${H.code}</span></span><span class="pill">🛰 War room</span>
    ${s.phase==='play'?`<span class="pill hot">${s.q<H.sc.quarters?UI.qLabel(s.q):'Final results'}</span>`:''}<span class="spacer"></span>${extra||''}
    ${H.sync.kind==='local'?'<span class="pill hot">Demo</span>':''}<button class="btn ghost" id="menu" style="padding:7px 12px">⋯</button></div>`;
 }
@@ -140,23 +140,35 @@ function menu(){
 
 function lobby(){
   const T=teams(), url=playURL(H.code);
+  const fset=T.filter(t=>t.fok).length;
   app.innerHTML=hdr()+`<div class="card lobby"><div class="mute">Go to <b style="color:var(--ink)">${UI.esc(url.replace(/\?.*/,'').replace(/^https?:\/\//,''))}</b> and enter</div>
     <div class="code">${H.code}</div><div id="qr"></div>
-    <div class="teams">${T.length?T.map(t=>`<span class="team">${UI.esc(t.name)}</span>`).join(''):'<span class="mute">Waiting for teams to join…</span>'}</div>
+    <div class="teams">${T.length?T.map(t=>`<span class="team">${t.fok?'✓ ':'📝 '}${UI.esc(t.name)}</span>`).join(''):'<span class="mute">Waiting for teams to join…</span>'}</div>
+    ${T.length?`<p class="mute">${fset} of ${T.length} teams have confirmed their Living Standard formula. 📝 = still in the minister's briefing.</p>`:''}
     <div class="ctrl" style="justify-content:center;margin-top:22px"><button class="btn" id="start" ${T.length?'':'disabled'}>Start the game (${T.length} team${T.length===1?'':'s'})</button></div></div>`;
   try{ new QRCode($('#qr'),{text:url,width:180,height:180}); }catch(e){ $('#qr').remove(); }
   bindMenu();
   $('#start').onclick=()=>setState(Object.assign({phase:'play'}, quarterState(0)));
 }
 
+// Each team is scored by its OWN formula, against the Autopilot scored by that same formula.
+const margin=t=>t.margin!==undefined?+t.margin:((t.index||100)-H.ap.index);
 function leaderboard(){
   const T=teams().filter(t=>t.q!==undefined);
-  const rows=T.map(t=>({nm:t.name,idx:t.index||100,meta:`G ${t.g}% · π ${t.pi}% · U ${t.u}% · R ${t.reserves}`,ready:t.readyQ===st().q,auto:false}))
-    .concat([{nm:'🤖 Autopilot',idx:H.ap.index,meta:'never changes policy',auto:true}]).sort((a,b)=>b.idx-a.idx);
-  const mn=Math.min(...rows.map(r=>r.idx))-1, mx=Math.max(...rows.map(r=>r.idx))+0.5;
-  return `<div class="card"><div class="row"><h3>Living standard</h3><span class="spacer"></span><span class="small mute">start = 100</span></div><div class="lb" style="margin-top:10px">${rows.map((r,i)=>`
-    <div class="lbr ${r.auto?'auto':''}"><span class="rk">${i+1}</span><div><div class="nm">${UI.esc(r.nm)} ${r.ready?'<span class="pill ok" style="font-size:10px">locked in</span>':''}</div><div class="barw"><i style="width:${((r.idx-mn)/(mx-mn)*100).toFixed(1)}%"></i></div><div class="meta">${r.meta}</div></div><span class="sc">${r.idx.toFixed(1)}</span></div>`).join('')}</div></div>`;
+  const rows=T.map(t=>({nm:t.name,idx:margin(t),meta:`${t.fcode?'Formula '+UI.esc(t.fcode)+(t.fok?'':' (briefing)')+(t.pen?' · −'+(+t.pen).toFixed(2)+' revision':'')+' · ':''}G ${t.g}% · π ${t.pi}% · U ${t.u}% · R ${+(+t.reserves).toFixed(1)}${t.carbonTax?' · 🌱 tax':''}`,ready:t.readyQ===st().q,auto:false}))
+    .concat([{nm:'🤖 Autopilot',idx:0,meta:'never changes policy · the line to beat',auto:true}]).sort((a,b)=>b.idx-a.idx);
+  const mn=Math.min(...rows.map(r=>r.idx))-0.5, mx=Math.max(...rows.map(r=>r.idx))+0.5;
+  return `<div class="card"><div class="row"><h3>Lead over the Autopilot</h3><span class="spacer"></span><span class="small mute">each team scored by its own formula</span></div><div class="lb" style="margin-top:10px">${rows.map((r,i)=>`
+    <div class="lbr ${r.auto?'auto':''}"><span class="rk">${i+1}</span><div><div class="nm">${UI.esc(r.nm)} ${r.ready?'<span class="pill ok" style="font-size:10px">locked in</span>':''}</div><div class="barw"><i style="width:${((r.idx-mn)/(mx-mn)*100).toFixed(1)}%"></i></div><div class="meta">${r.meta}</div></div><span class="sc">${r.auto?'0':(r.idx>0?'+':'')+r.idx.toFixed(1)}</span></div>`).join('')}</div></div>`;
 }
+function formulaList(){
+  const T=teams().filter(t=>t.fcode); if(!T.length) return '';
+  const txt=T.map(t=>t.name+': '+t.fcode).join('\n');
+  return `<div class="card"><div class="row"><h3>Formula codes (backup)</h3><span class="spacer"></span><button class="btn ghost" id="fcopy" style="padding:6px 10px">Copy</button></div>
+    <p class="small mute" style="margin:4px 0 6px">If a phone loses its profile, the team can type its code in the next act.</p>
+    <div class="small">${T.map(t=>`<div>${UI.esc(t.name)}: <b class="code">${UI.esc(t.fcode)}</b></div>`).join('')}</div><textarea id="ftxt" hidden>${UI.esc(txt)}</textarea></div>`;
+}
+function bindCopy(){ const b=$('#fcopy'); if(b) b.onclick=()=>{ const t=$('#ftxt').value; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>b.textContent='Copied ✓').catch(()=>{ const a=$('#ftxt'); a.hidden=false; a.select(); }); }; }
 
 function planView(info){
   const s=st(), T=teams(), ready=T.filter(t=>t.readyQ===s.q).length;
@@ -231,15 +243,15 @@ function finalQuarterView(){
 }
 
 function endView(){
-  const rv=H.sc.reveal, M=window.WORLD_MAP, T=teams().sort((a,b)=>(b.index||0)-(a.index||0));
-  const beat=T.filter(t=>(t.index||0)>H.ap.index).length;
+  const rv=H.sc.reveal, M=window.WORLD_MAP, T=teams().sort((a,b)=>margin(b)-margin(a));
+  const beat=T.filter(t=>margin(t)>0).length;
   const dots=rv.pins.map(p=>{const [x,y]=M.project(p.lon,p.lat); return `<circle class="pin" cx="${x}" cy="${y}" r="9"/><text x="${x+13}" y="${y+5}">${UI.esc(p.name)}</text>`;}).join('');
   app.innerHTML=hdr()+`<div class="grid"><div><div class="card"><div class="pill hot">Reveal</div><h2 class="big" style="margin-top:6px">You just played: ${UI.esc(rv.title)}</h2><p style="font-size:18px">${UI.esc(rv.story)}</p>
      <div class="endmap"><svg viewBox="0 0 ${M.w} ${M.h}"><path class="land" d="${M.d}"/>${dots}</svg></div>
      <ul style="font-size:16px">${rv.facts.map(f=>`<li>${UI.esc(f)}</li>`).join('')}</ul></div></div>
-    <div><div class="card"><h2>${beat} of ${T.length} teams beat the Autopilot</h2><p class="mute">Debrief: which team reacted to shocks best? Who over-reacted? Where did policy lags bite?</p></div>${leaderboard()}
+    <div><div class="card"><h2>${beat} of ${T.length} teams beat the Autopilot</h2><p class="mute">Debrief: which team reacted to shocks best? Who over-reacted? Where did policy lags bite? Did teams with green weights use the carbon tax or green R&D, and what did it cost them in growth and inflation?</p></div>${leaderboard()}${formulaList()}
      <div class="card"><div class="ctrl"><button class="btn alt" id="del">End and delete all game data</button></div><p class="small mute">Deletes the team names, scores and poll answers for this game from the database.</p></div></div></div>`;
-  bindMenu();
+  bindMenu(); bindCopy();
   $('#del').onclick=async()=>{ $('#del').textContent='Deleting…'; await H.sync.deleteGame(H.code); localStorage.removeItem('speedrun-host'); location.reload(); };
 }
 

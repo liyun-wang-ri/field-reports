@@ -70,7 +70,7 @@ const ACTS=[
   {n:1, t:'The Analyst', s:'Standard of living & key economic indicators', st:done1?'done':'open', host:'act1-host.html', play:'act1-play.html', note:done1?`Completed · ${p.act1.score} points`:'Mystery economies, trap cards and your own Living Standard formula.'},
   {n:2, t:'The Economist', s:'AD/AS and the multiplier', st:done2?'done':'open', host:'act2-host.html', play:'act2-play.html', note:done2?`Completed · ${p.act2.score} points`:'Real shocks from 12 economies, animated AD/AS diagrams and the multiplier race.'},
   {n:3, t:'The Crisis Doctor', s:'Macroeconomic aims & issues', st:done3?'done':'open', host:'act3-host.html', play:'act3-play.html', note:done3?`Completed · ${p.act3.score} points`:'Diagnose six real patient economies, then add jobs & prices to your formula.'},
-  {n:4, t:'The Minister', s:'Macroeconomic policies', st:'open', host:'host.html', play:'play.html', note:'Steer the Harbour Republic through a hidden real era and beat the Autopilot.'}
+  {n:4, t:'The Minister', s:'Macroeconomic policies', st:(p.act4&&p.act4.done)?'done':'open', host:'host.html', play:'play.html', note:(p.act4&&p.act4.done)?`Completed · ${p.act4.score>0?'+':''}${p.act4.score} over the Autopilot`:'Steer the Harbour Republic through a hidden real era, with green levers, and beat the Autopilot by your own formula.'}
 ];
 document.getElementById('acts').innerHTML=ACTS.map(a=>`<div class="act ${a.st}"><div class="n">${a.st==='done'?'✓':a.st==='locked'?'🔒':a.n}</div>
   <div><div class="tiny mute" style="text-transform:uppercase;letter-spacing:.08em;font-weight:800">Act ${a.n} · ${esc(a.s)}</div><h3>${esc(a.t)}</h3><div class="small mute">${esc(a.note)}</div></div>
