@@ -37,13 +37,15 @@
         { id: 'grow', q: 'Which economy grew faster in 2023?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'B' },
         { id: 'mat', q: 'Which has the higher material standard of living?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'A' },
         { id: 'air', q: 'Which has cleaner air?', opts: [['A', 'Country A'], ['B', 'Country B']], correct: 'A' },
-        { id: 'whoA', q: 'Country A is…', opts: [['nz', 'New Zealand'], ['ire', 'Ireland'], ['est', 'Estonia'], ['sg', 'Singapore']], correct: 'est' },
-        { id: 'whoB', q: 'Country B is…', opts: [['vn', 'Vietnam'], ['uz', 'Uzbekistan'], ['eth', 'Ethiopia'], ['bd', 'Bangladesh']], correct: 'uz' }
+        { id: 'whoA', q: 'Country A is…', opts: [['nz', 'New Zealand'], ['ire', 'Ireland'], ['est', 'Estonia'], ['sg', 'Singapore']], correct: 'est',
+          desc: { nz: 'South Pacific islands famous for dairy and farming. Its population is a little smaller than Singapore\'s.', ire: 'EU member where many US tech and drug firms have their European offices. Its population is a little smaller than Singapore\'s.', est: 'Baltic EU member famous for its digital government. It has about a quarter of Singapore\'s population.', sg: 'A city-state with one of the highest incomes per person in the world.' } },
+        { id: 'whoB', q: 'Country B is…', opts: [['vn', 'Vietnam'], ['uz', 'Uzbekistan'], ['eth', 'Ethiopia'], ['bd', 'Bangladesh']], correct: 'uz',
+          desc: { vn: 'A big electronics exporter with about 100 million people.', uz: 'A Central Asian country with no coastline, and about six times Singapore\'s population.', eth: 'Africa\'s second most populous country, with over 120 million people.', bd: 'About 170 million people live in an area smaller than Malaysia\'s.' } }
       ],
       reveal: { names: ['Estonia', 'Uzbekistan'],
         text: 'A is <b>Estonia</b>, a small EU economy of 1.4 million people. B is <b>Uzbekistan</b>, a fast-growing Central Asian economy of 36 million. In 2023 Uzbekistan grew 6% while Estonia <b>shrank</b>, yet Estonia\'s income per person is more than four times higher, people live about 7 years longer and the air is far cleaner. Estonia does emit more CO₂ per person, though. Clean air and low CO₂ are different indicators.',
         lesson: 'Growth, inflation and unemployment measure <b>economic performance this year</b>. Living standards depend on the <b>level</b> of income and well-being. A fast-growing economy can still be much poorer. Did population help you? None of the other options has just 1.4 million or 36 million people.',
-        sources: 'UNDP Human Development Report 2025 (HDI, life expectancy, schooling, GNI per capita, 2023); World Bank (growth, inflation, unemployment, population; PM2.5 for 2017); EDGAR/JRC (CO₂, 2023).' } },
+        sources: 'UNDP Human Development Report 2025 (HDI, life expectancy, schooling, GNI per capita, 2023); World Bank (growth, inflation, unemployment, population; PM2.5 for 2017); EDGAR/JRC (CO₂, 2023). Country descriptions: UN and World Bank population estimates.' } },
 
     { id: 'q1', type: 'quick', gut: 'Easy. GDP went up 10%, so the economy grew 10%. Right? …Right?', title: 'Trap card 1 · Nominal vs real',
       q: 'The Harbour Republic\'s nominal GDP rose by 10% this year. Prices rose by 12%. Did the economy produce more?',
@@ -80,14 +82,17 @@
         { k: 'ppp', group: 'Material SOL', label: 'Gap after adjusting for cost of living (PPP)', unit: '', cost: 4, v: ['about 17 times B', '—'] }
       ],
       questions: [
-        { id: 'whoA', q: 'Country A is…', opts: [['swi', 'Switzerland'], ['lux', 'Luxembourg'], ['nor', 'Norway'], ['ire', 'Ireland']], correct: 'nor' },
-        { id: 'whoB', q: 'Country B is…', opts: [['idn', 'Indonesia'], ['pak', 'Pakistan'], ['ind', 'India'], ['nga', 'Nigeria']], correct: 'ind' },
+        { id: 'whoA', q: 'Country A is…', opts: [['swi', 'Switzerland'], ['lux', 'Luxembourg'], ['nor', 'Norway'], ['den', 'Denmark']], correct: 'nor',
+          desc: { swi: 'Alpine banking hub with about one and a half times Singapore\'s population.', lux: 'A tiny EU state with about a tenth of Singapore\'s population.', nor: 'A Nordic oil and gas exporter with a population a little smaller than Singapore\'s.', den: 'A Nordic country famous for wind turbines and LEGO, with about as many people as Singapore.' } },
+        { id: 'whoB', q: 'Country B is…', opts: [['idn', 'Indonesia'], ['pak', 'Pakistan'], ['ind', 'India'], ['nga', 'Nigeria']], correct: 'ind',
+          desc: { idn: 'The world\'s biggest archipelago, with the fourth-largest population.', pak: 'The world\'s fifth most populous country.', ind: 'Became the world\'s most populous country in 2023.', nga: 'Africa\'s most populous country.' } },
         { id: 'mkt', q: 'At market exchange rates, A\'s GDP per person is about how many times B\'s?', opts: [['3', '3×'], ['17', '17×'], ['65', '65×'], ['200', '200×']], correct: '65' },
         { id: 'ppp', q: 'Once you adjust for cost of living (PPP), the gap is about…', opts: [['3', '3×'], ['17', '17×'], ['65', '65×'], ['200', '200×']], correct: '17' }
       ],
       reveal: { names: ['Norway', 'India'],
         text: 'A is <b>Norway</b>, B is <b>India</b>. At market exchange rates Norway looks about <b>65 times</b> richer. But haircuts, meals and rent cost far less in India, so each dollar buys much more there. Adjusting for cost of living (<b>purchasing power parity</b>), the gap shrinks to about <b>17 times</b>. That\'s still huge, but much more realistic.',
-        lesson: 'That\'s why cross-country SOL comparisons use <b>PPP-adjusted real GDP per capita</b>. The Big Mac Index is a quick version of the same idea.' } },
+        lesson: 'That\'s why cross-country SOL comparisons use <b>PPP-adjusted real GDP per capita</b>. The Big Mac Index is a quick version of the same idea.',
+        sources: 'Figures as quoted in the SOL and KEI notes (World Bank). Country descriptions: UN and World Bank population estimates (India became the most populous country in 2023, UN).' } },
 
     { id: 'q6', type: 'quick', gut: 'A 20% price jump is a 20% price jump. It should hit everyone the same.', title: 'Trap card 6 · Weights in the CPI',
       q: 'World fuel and food prices jump by 20%. Food and fuel make up a much bigger share of the typical basket in Tonga than in Norway. Whose inflation rate rises more?',

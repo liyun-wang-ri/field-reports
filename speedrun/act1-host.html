@@ -183,7 +183,7 @@ function mysteryView(round, reveal, theatre){
      <table class="dz paper"><tr><th>Indicator</th><th class="v">Country A${reveal?`<br><span style="color:#1f7a6f">${esc(round.reveal.names[0])}</span>`:''}</th><th class="v">Country B${reveal?`<br><span style="color:#1f7a6f">${esc(round.reveal.names[1])}</span>`:''}</th><th class="small">teams who bought it</th></tr>${rows}</table>
      ${controls(round, reveal)}</div>
      ${reveal?`<div class="card"><p style="font-size:18px;margin:0">${round.reveal.text}</p><p style="color:var(--yellow);margin:10px 0 0">💡 ${round.reveal.lesson}</p>${round.reveal.sources?`<p class="small mute" style="margin:10px 0 0">Sources: ${round.reveal.sources}</p>`:''}</div>`:''}</div>
-    <div>${hostGrif(round, reveal)}<div class="card"><h3>${reveal?'How the class answered':'Answers so far (hidden until the reveal)'}</h3>${reveal?qs:`<p class="mute">The bars in the table show which clues are selling, live.</p>`}</div>
+    <div>${hostGrif(round, reveal)}<div class="card"><h3>${reveal?'How the class answered':'Questions coming up'}</h3>${reveal?qs:`<p class="mute" style="font-size:16px;margin:4px 0 8px">The questions teams will answer. Point out the country descriptions: which clues would tell the options apart?</p>${round.questions.map(q=>`<div style="margin:6px 0"><b>${esc(q.q)}</b>${q.desc?`<ul style="margin:4px 0;padding-left:18px">${q.opts.map(([k,t])=>`<li><b>${esc(t)}</b>: <span class="mute">${esc(q.desc[k]||'')}</span></li>`).join('')}</ul>`:`<div class="mute small">${q.opts.map(o=>esc(o[1])).join(' · ')}</div>`}</div>`).join('')}`}</div>
      ${reveal?mapCard(st().r):''}${leaderboard(6)}</div></div>`;
   bindControls();
 }

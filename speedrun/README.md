@@ -63,3 +63,31 @@ Eleven rounds in the order of the Year 6 AD/AS notes:
 11. Final call · Harbour Republic: export boom plus oil spike, prices rise, output depends on the sizes.
 
 Scoring: call and mystery rounds give (per × right − per/2 × wrong) × bet; mystery also gives 2 per unspent coin; trap cards as in Act 1. Before class, check the real-world figures against the sources listed in each round's `reveal.sources`.
+
+## Act 3: The Crisis Doctor (Macroeconomic Aims and Issues)
+
+Files: `act3.js`, `act3-host.html`, `act3-play.html`. Theme: `body.theme-er` (on top of `theme-lab`) in `style.css`.
+
+Eleven rounds in the order of the Year 6 Macro Aims and Issues notes:
+
+1. Triage 1 · Actual growth, potential growth, or only higher prices (four Harbour Republic stories).
+2. Trap card · A slowdown is not a recession.
+3. Triage 2 · Cyclical, structural or frictional unemployment (the Ruhr's last coal mine, a graduate, recession layoffs, hysteresis).
+4. Trap card · Full employment is not zero unemployment.
+5. Patient 1 · South Africa: structural unemployment and growth that isn't inclusive.
+6. Patients 2 and 3 · Mystery: Sri Lanka 2022 (cost-push, stagflation) and the United States 2022 (demand-pull and cost-push together).
+7. Patient 4 · Argentina 2023: who gains and who loses from inflation.
+8. Trap card · Disinflation is not deflation.
+9. Patient 5 · Hong Kong 1998–2004: AD-led deflation.
+10. Trap card · Benign (AS-led) deflation.
+11. Final chart · Each team adds a sixth part, **jobs & prices**, to its Act 1 Living Standard formula. Teams that lost their formula type in the five-digit Act 1 code. The new code has six digits (Income, Health, Education, Clean air, Low carbon, Jobs & prices). The host's end screen gives a backup list of every team's six-digit code for Act 4.
+
+Jobs & prices score: 1 − (unemployment + |inflation − 2|) / 30, clipped to 0–1. Before class, check the real-world figures against each round's `reveal.sources`.
+
+## Story mode on phones (all acts)
+
+Phones show each round one short screen at a time (`story.js`): a cover with a headline number, one story and question per screen (tapping an answer slides to the next), a confidence screen, then lock in. Mystery rounds get a clue-shop screen; trap cards are a single question screen. The reveal shows the score, a one-line takeaway, and one row per question that opens to explain why. "Why? Read more" holds the full explanation and sources. Every expander starts closed. The projector (host) pages are unchanged and keep the full text.
+
+- Short wording lives in `act1-story.js`, `act2-story.js`, `act3-story.js` (headline, tiles, short card lines, short questions, per-question explanations, takeaways). The full text stays in `act1.js` to `act3.js`.
+- Add `?ui=classic` to a play page address to get the old long-page layout. `compare.html` shows both side by side.
+- The formula rounds (end of Acts 1 and 3) keep the long-page layout.

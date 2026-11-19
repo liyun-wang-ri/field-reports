@@ -49,6 +49,8 @@
 <div id="app"></div>
 <script src="firebase-config.js"></script>
 <script src="act1.js"></script>
+<script src="story.js"></script>
+<script src="act1-story.js"></script>
 <script src="common.js"></script>
 <script src="fx.js"></script>
 <script src="sync.js"></script>
@@ -60,13 +62,15 @@ const A=Act1, R=A.ROUNDS, $=s=>document.querySelector(s), app=$('#app'), esc=UI.
 const params=new URLSearchParams(location.search);
 const G={mode:null, sync:null, code:null, name:'', colour:null, emblem:null, game:null, answers:{}, r:0, soloReveal:false, formula:null,
   shownTotal:0, gline:null, seenReveal:{}, stickers:{}};
-const KEY='speedrun-act1';
+// Phones use story mode (one screen at a time, story.js) unless the address has ?ui=classic.
+const KEY='speedrun-act1'+(Story.on()?'':'-classic');
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify({mode:G.mode, code:G.code, name:G.name, colour:G.colour, emblem:G.emblem, answers:G.answers, r:G.r, soloReveal:G.soloReveal, formula:G.formula, seenReveal:G.seenReveal})); }catch(e){} }
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
 const lastRevealed=()=>{ const s=cur(); if(s.phase==='end') return R.length-1; if(s.phase==='reveal') return s.r; return (s.r||0)-1; };
 const total=()=>A.totalScore(G.answers, lastRevealed());
 const ans=id=>(G.answers[id]=G.answers[id]||{});
 const say=(mood,text,anim)=>{ G.gline={mood,text,anim}; };
+const SX={A, G, esc, FX, ans:id=>ans(id), locked:r=>locked(r), save:()=>save(), push:()=>push(), render:()=>render(), extra:null};
 
 // ---------- join ----------
 function joinScreen(msg){
@@ -132,6 +136,12 @@ function render(){
   if(st.phase==='end') return endScreen();
   const round=R[st.r], reveal=st.phase==='reveal';
   if(reveal && !G.seenReveal[round.id]) onFirstReveal(round);
+  if(Story.on() && Story.handles(round)){
+    app.innerHTML=`<div class="wrap">${header()}${Story.view(round, reveal, SX)}${G.gline&&!reveal?FX.griffles(G.gline.mood,G.gline.text,G.gline.anim):''}</div>`+(reveal?bar(round, reveal):'');
+    Story.bind(round, reveal, SX); bind(round, reveal);
+    const sc=$('#score'), t=total(); if(t!==G.shownTotal){ FX.countUp(sc,G.shownTotal,t); G.shownTotal=t; }
+    return;
+  }
   let body = round.type==='mystery' ? mystery(round, reveal) : round.type==='quick' ? quick(round, reveal) : formula(round, reveal);
   const tab = round.type==='mystery' ? 'Case file' : round.type==='quick' ? 'Trap card' : 'Final mission';
   app.innerHTML=`<div class="wrap">${header()}<div class="card folder reveal-card" data-tab="${tab}"><div class="tag small" style="color:var(--orange);font-weight:800;letter-spacing:.06em;text-transform:uppercase">${esc(round.title)}</div>${body}</div>${G.gline?FX.griffles(G.gline.mood,G.gline.text,G.gline.anim):defaultLine(round,reveal)}</div>`+bar(round, reveal);
@@ -165,10 +175,14 @@ function betRow(round, dis){
   const a=ans(round.id);
   return `<div class="q"><b>How sure are you?</b><div class="choices">${A.BETS.map(b=>`<button data-bet="${b.k}" class="${(a.bet||1)===b.k?'sel':''}" ${dis?'disabled':''}>${b.t}<br><small class="mute">${b.s}</small></button>`).join('')}</div></div>`;
 }
+// Question preview for mystery rounds: shown before the clue table so teams can choose clues that help.
+function qPreview(round){
+  return `<details class="qprev" open><summary><b>Read the questions before you buy clues</b></summary><ul>${round.questions.map(q=>`<li>${esc(q.q)}${q.desc?`<ul>${q.opts.map(([k,t])=>`<li><b>${esc(t)}</b>: ${esc(q.desc[k]||'')}</li>`).join('')}</ul>`:''}</li>`).join('')}</ul></details>`;
+}
 function mystery(round, reveal){
   const a=ans(round.id), bought=a.bought||[], lk=locked(round)||reveal;
   const spent=bought.reduce((s,k)=>s+round.clues.find(c=>c.k===k).cost,0), left=round.budget-spent;
-  let h=`${reveal?`<div class="stampmark">Declassified</div>`:''}<p class="small mute" style="margin:6px 0 10px">${round.intro}</p>
+  let h=`${reveal?`<div class="stampmark">Declassified</div>`:''}<p class="small mute" style="margin:6px 0 10px">${round.intro}</p>${reveal?'':qPreview(round)}
     <div class="row" style="margin-bottom:8px"><span class="lbl">Coins left</span><span class="coins" id="coins">🪙 ${left}</span><span class="spacer"></span><span class="small mute type">${round.year}</span></div>
     <div class="dossier paper"><div class="h">Indicator</div><div class="h">Country A${reveal?`<br><small style="color:#1f7a6f">${esc(round.reveal.names[0])}</small>`:''}</div><div class="h">Country B${reveal?`<br><small style="color:#1f7a6f">${esc(round.reveal.names[1])}</small>`:''}</div>`;
   let grp='';
@@ -184,7 +198,7 @@ function mystery(round, reveal){
     const mine=(a.a||{})[q.id];
     h+=`<div class="q"><b>${esc(q.q)}</b><div class="choices">${q.opts.map(([k,t])=>{
       const cls = reveal ? (k===q.correct?'right':k===mine?'wrong':'') : (k===mine?'sel':'');
-      return `<button data-q="${q.id}" data-k="${k}" class="${cls}" ${lk?'disabled':''}>${esc(t)}${reveal&&k===q.correct?' ✓':''}</button>`; }).join('')}</div></div>`;
+      return `<button data-q="${q.id}" data-k="${k}" class="${cls} ${q.desc?'hasdesc':''}" ${lk?'disabled':''}>${esc(t)}${reveal&&k===q.correct?' ✓':''}${q.desc&&q.desc[k]?`<span class="optdesc">${esc(q.desc[k])}</span>`:''}</button>`; }).join('')}</div></div>`;
   });
   h+=betRow(round, lk)+`</div>`;
   if(reveal) h+=revealBox(round, A.scoreRound(round,a), round.reveal.text, round.reveal.lesson)+(round.reveal.sources?`<p class="tiny mute" style="margin:8px 0 0">Sources: ${round.reveal.sources}</p>`:'');
@@ -292,7 +306,9 @@ function endScreen(){
   const ag=$('#again'); if(ag) ag.onclick=()=>{ localStorage.removeItem(KEY); G.endCelebrated=false; startSolo(null); };
 }
 
-joinScreen();
+// Preview shortcut: ?jump=<round id> starts a fresh solo game at that round.
+if(params.get('jump')){ const i=R.findIndex(r=>r.id===params.get('jump')); try{ localStorage.removeItem(KEY); }catch(e){} G.name='Preview'; G.colour=FX.COLOURS[1]; G.emblem=FX.EMBLEMS[3]; startSolo({r:Math.max(0,i), name:'Preview'}); }
+else joinScreen();
 })();
 </script>
 </body>
