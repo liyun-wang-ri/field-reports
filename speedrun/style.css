@@ -103,7 +103,7 @@ body.theme-dossier .card.folder::before{content:attr(data-tab);position:absolute
 @keyframes stampin{0%{transform:rotate(-12deg) scale(2.2);opacity:0}100%{transform:rotate(-12deg) scale(1);opacity:.85}}
 
 /* --- Act 4: war room --- */
-body.theme-warroom{background:#06140f;background-image:linear-gradient(rgba(46,196,182,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,196,182,.06) 1px,transparent 1px);background-size:28px 28px}
+body.theme-warroom{min-height:100vh;background:#06140f;background-image:linear-gradient(rgba(46,196,182,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(46,196,182,.06) 1px,transparent 1px);background-size:28px 28px}
 body.theme-warroom .card{background:rgba(12,32,30,.92);border-color:#1d4a42}
 
 /* --- Griffles --- */

@@ -15,6 +15,7 @@ A class game for H1 Economics macro. Each team steers the **Harbour Republic**, 
 | `firebase-config.js` | Public web config for the `econ-speedrun` Firebase project |
 | `database.rules.json` | Security rules (already published in the Firebase console) |
 | `worldmap.js` | World map outline (Natural Earth, public domain) |
+| `minister.js` | Act 4: formula briefing, revision penalty, six-part scoring helpers |
 
 ## How a class game runs
 1. The teacher opens `host.html`, picks an era (or "Surprise me") and creates the game. A 5-character code and a QR code appear.
@@ -91,3 +92,21 @@ Phones show each round one short screen at a time (`story.js`): a cover with a h
 - Short wording lives in `act1-story.js`, `act2-story.js`, `act3-story.js` (headline, tiles, short card lines, short questions, per-question explanations, takeaways). The full text stays in `act1.js` to `act3.js`.
 - Add `?ui=classic` to a play page address to get the old long-page layout. `compare.html` shows both side by side.
 - The formula rounds (end of Acts 1 and 3) keep the long-page layout.
+
+## Act 4: The Minister (rework: own formula, green levers)
+`play.html` / `host.html` are Act 4. The game above now scores each team by **its own Living Standard formula**.
+
+- **Minister's briefing** (`minister.js`): before playing, each team sees the formula saved in the phone's profile (from Act 1 or Act 3), or types its 5- or 6-digit code. A 5-digit code (from Act 1) leaves Jobs & prices free to set. Teams may revise: moving a weight by 1 is free; every step beyond that costs 0.25 points. The confirmed formula is saved back to the profile.
+- **Six dimensions** tracked by `engine.js` (all start at 100, teaching model only):
+  - Income: grows with real GDP growth.
+  - Health: 0.6 × income + 0.4 × clean air.
+  - Education: +2.5 for every skills project that finishes.
+  - Clean air and Low carbon: pollution and emissions grow with output; the carbon tax and finished green R&D projects cut them.
+  - Jobs & prices: average of 100 − 6 per point of unemployment above 3.5% − 5 per point of inflation above 3% − 6 per point of deflation.
+- **Score** = weighted average of the six dimensions under the team's formula, minus the Autopilot's score under the same formula, minus any revision penalty. The host leaderboard ranks teams by this lead, so teams with different values compete fairly.
+- **Green levers** (unlock at Year 4 Q2 with a lesson on sustainable growth):
+  - Carbon tax (on/off): costs +0.3 (cost-push) while on, +½ reserve a quarter, cuts emissions and pollution at once. The lesson cites Singapore's carbon tax: S$5/tCO₂e 2019–23, S$25 from 2024, S$45 from 2026 (NCCS, MTI).
+  - Green R&D (a supply-side option): −1 reserve, pays off after 4 quarters with a little more capacity, slightly lower costs and permanently cleaner production.
+- **Balance check** (seed 7, Singapore 2007–11): with an equal-weight formula the Autopilot scores 97.9; adding the carbon tax and green R&D from Year 4 takes a team to about 101.5, skills alone to about 99.9. Income-only formulas barely reward the green levers, so formulas matter.
+- Host extras: lobby shows which teams have confirmed their formula; the end screen lists every team's formula code with a Copy button.
+- Profile: `act4 {score, done}` (best lead over the Autopilot), shown on the campaign map.

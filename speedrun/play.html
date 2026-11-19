@@ -28,6 +28,33 @@ ul.tips{margin:6px 0 0;padding-left:18px} ul.tips li{margin:3px 0}
 .endmap path.land{fill:#1f3a62}
 .endmap circle.pin{fill:var(--orange);stroke:#fff;stroke-width:1.5}
 .endmap text{fill:var(--ink);font-size:13px;font-weight:700;paint-order:stroke;stroke:#0b1626;stroke-width:3px}
+/* Act 4 · Minister */
+.warstrip{display:flex;white-space:nowrap;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7fe0c9;border-bottom:1px solid #1d4a42;padding:4px 0 7px;margin-bottom:8px}
+.warstrip .dot{width:8px;height:8px;border-radius:50%;background:#ff5d5d;box-shadow:0 0 0 0 rgba(255,93,93,.6);animation:wrping 1.6s infinite}
+@keyframes wrping{70%{box-shadow:0 0 0 8px rgba(255,93,93,0)}100%{box-shadow:0 0 0 0 rgba(255,93,93,0)}}
+@media (prefers-reduced-motion:reduce){.warstrip .dot{animation:none}}
+.brief{max-width:560px;margin:0 auto;padding:14px 12px}
+.brief h1{font-size:28px;line-height:1.1}
+.mrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #1d4a42}
+.mrow:first-of-type{border-top:0}
+.mlab{display:flex;flex-direction:column}
+.msteps{display:flex;gap:4px}
+.msteps button{width:32px;height:34px;border-radius:8px;border:1.5px solid #1d4a42;background:#0a1f1c;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.msteps button.was{border-color:#7fe0c9;border-style:dashed}
+.msteps button.sel{background:var(--teal);color:#06140f;border-color:var(--teal)}
+.mrow.far .msteps button.sel{background:var(--orange);border-color:var(--orange)}
+input.fcode{flex:1;min-width:150px;background:#0a1f1c;border:1.5px solid #1d4a42;border-radius:10px;color:var(--ink);padding:10px;font:inherit;font-size:16px;letter-spacing:.1em}
+.dchips{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.dchip{background:rgba(10,31,28,.9);border:1px solid #1d4a42;border-radius:9px;padding:5px 7px;display:flex;flex-direction:column;line-height:1.25}
+.dchip b{font-family:"Space Grotesk",Inter,system-ui,sans-serif;font-size:16px}
+.dchip.off{opacity:.45}
+.dchip>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg button{min-width:88px}
+.dchip .wt{color:#7fe0c9;font-size:10.5px}
+.dchip .up{color:var(--teal);font-weight:700} .dchip .dn{color:var(--red);font-weight:700}
+.dtable{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+.dtable td,.dtable th{padding:5px 4px;border-top:1px solid #1d4a42;text-align:right}
+.dtable td:first-child,.dtable th:first-child{text-align:left}
 </style>
 </head>
 <body class="theme-warroom">
@@ -39,6 +66,8 @@ ul.tips{margin:6px 0 0;padding-left:18px} ul.tips li{margin:3px 0}
 <script src="common.js"></script>
 <script src="sync.js"></script>
 <script src="worldmap.js"></script>
+<script src="fx.js"></script>
+<script src="minister.js"></script>
 <script>
 (function(){
 'use strict';
@@ -48,18 +77,21 @@ const G={ mode:null, sc:null, run:null, ap:null, policy:Object.assign({},E.DEFAU
   // class
   sync:null, code:null, name:'', game:null, voted:{}, readyQ:-1,
   // solo
-  stage:'plan', soloPred:null };
+  stage:'plan', soloPred:null,
+  // Act 4 formula {w, orig, confirmed}
+  F:null };
+const M=Minister;
 
-function store(){ try{ localStorage.setItem('speedrun-play', JSON.stringify({mode:G.mode, code:G.code, name:G.name, sc:G.sc&&G.sc.id, decisions:G.decisions, policy:G.policy, voted:G.voted, stage:G.stage})); }catch(e){} }
+function store(){ try{ localStorage.setItem('speedrun-play', JSON.stringify({mode:G.mode, code:G.code, name:G.name, sc:G.sc&&G.sc.id, decisions:G.decisions, policy:G.policy, voted:G.voted, stage:G.stage, F:G.F})); }catch(e){} }
 function restore(){ try{ return JSON.parse(localStorage.getItem('speedrun-play')||'null'); }catch(e){ return null; } }
 
 // ---------- join screen ----------
 function joinScreen(msg){
   const saved=restore();
   app.innerHTML=`<div class="join">
-   <div class="pill hot">Econ Speedrun · Macro</div>
+   <div class="pill hot">Act 4 · The Minister</div>
    <h1 style="margin-top:10px">Steer the Harbour Republic</h1>
-   <p class="mute">A small, very open, Singapore-like economy. Keep growth up, prices stable and people in work, and beat the Autopilot.</p>
+   <p class="mute">A small, very open, Singapore-like economy. Keep growth up, prices stable and people in work, and beat the Autopilot by your own Living Standard formula.</p>
    <div class="card" style="margin-top:14px">
     <h3>Join your class</h3>
     <label>Game code</label><input id="code" class="code" maxlength="5" autocomplete="off" value="${UI.esc(params.get('code')||(saved&&saved.mode==='class'&&saved.code)||'')}">
@@ -84,8 +116,8 @@ async function joinClass(){
     if(!(await G.sync.exists(code))) return joinScreen('No game with that code. Check with your teacher.');
     const saved=restore();
     G.mode='class'; G.code=code; G.name=name;
-    if(saved&&saved.mode==='class'&&saved.code===code){ G.decisions=saved.decisions||{}; G.policy=saved.policy||G.policy; G.voted=saved.voted||{}; }
-    else { G.decisions={}; G.voted={}; }
+    if(saved&&saved.mode==='class'&&saved.code===code){ G.decisions=saved.decisions||{}; G.policy=Object.assign({},E.DEFAULT_POLICY,saved.policy||{}); G.voted=saved.voted||{}; G.F=M.init(saved.F); }
+    else { G.decisions={}; G.voted={}; G.F=M.init(null); }
     G.sync.watchGame(code, onGame);
   }catch(e){ console.error(e); joinScreen('Could not connect. Is the school Wi-Fi blocking it? ('+(e.code||e.message||e)+')'); }
 }
@@ -104,7 +136,9 @@ function onGame(game){
 
 function pushTeam(){
   if(G.mode!=='class') return;
-  const r=G.run; G.sync.setTeam(G.code,{name:G.name, q:r.q, index:r.index, g:r.g, pi:r.pi, u:r.u, reserves:r.reserves, ach:Object.keys(r.ach).length, readyQ:G.readyQ, at:Date.now()}).catch(console.error);
+  const r=G.run, S=M.score(G.run,G.ap,G.F);
+  G.sync.setTeam(G.code,{name:G.name, q:r.q, index:r.index, g:r.g, pi:r.pi, u:r.u, reserves:r.reserves, ach:Object.keys(r.ach).length, readyQ:G.readyQ, at:Date.now(),
+    fcode:M.code(G.F.w), fok:!!G.F.confirmed, score:+S.me.toFixed(2), auto:+S.auto.toFixed(2), pen:+S.pen.toFixed(2), margin:+S.margin.toFixed(2), green:r.greenDone, carbonTax:G.policy.carbon==='on'}).catch(console.error);
 }
 
 // ---------- solo ----------
@@ -112,7 +146,8 @@ function startSolo(saved){
   G.mode='solo';
   G.sc = saved&&saved.sc ? Sc.byId(saved.sc) : Sc.SCENARIOS[Math.floor(Math.random()*Sc.SCENARIOS.length)];
   G.run=E.newRun(G.sc,{seed:7}); G.ap=E.newRun(G.sc,{seed:7});
-  G.decisions=(saved&&saved.decisions)||{}; G.policy=(saved&&saved.policy)||Object.assign({},E.DEFAULT_POLICY);
+  G.decisions=(saved&&saved.decisions)||{}; G.policy=Object.assign({},E.DEFAULT_POLICY,(saved&&saved.policy)||{});
+  G.F=M.init(saved&&saved.F);
   const done=Object.keys(G.decisions).length;
   for(let i=0;i<done;i++) stepOnce(true);
   G.stage=(saved&&saved.stage)||'start'; if(!done) G.stage='start';
@@ -146,7 +181,7 @@ function tiles(){
     return `<div class="tile ${played?(ok?'ok':'bad'):''}"><div class="lab">${lab}</div>${UI.spark(H.map(h=>h[fmt]))}<div class="val">${v.toFixed(1)}%</div><div class="tgt">Target ${tg.label}</div></div>`;
   };
   return `<div class="tiles">${t('growth','Growth',r.g,'g')}${t('inflation','Inflation',r.pi,'pi')}${t('unemployment','Jobless',r.u,'u')}
-    <div class="tile ${r.reserves<0?'bad':''}"><div class="lab">Reserves</div><div class="val">${r.reserves}</div><div class="tgt">${r.reserves<0?'Overdrawn!':'rainy-day fund'}</div></div></div>`;
+    <div class="tile ${r.reserves<0?'bad':''}"><div class="lab">Reserves</div><div class="val">${+(+r.reserves).toFixed(1)}</div><div class="tgt">${r.reserves<0?'Overdrawn!':'rainy-day fund'}</div></div></div>`;
 }
 
 function levers(locked){
@@ -158,7 +193,7 @@ function levers(locked){
     return `<div class="lever ${open?'':'locked'}"><div class="name"><span>${L.name}</span><span class="mute small">${open?L.lagNote:'🔒 '+(u?UI.qLabel(u.q):'')}</span></div>
       <div class="seg">${opts.map(o=>`<button data-lever="${key}" data-k="${o.k}" class="${G.policy[key]===o.k?'sel':''}" ${open&&!locked?'':'disabled'}>${o.t}${o.s?`<small>${o.s}</small>`:''}</button>`).join('')}</div></div>`;
   };
-  return `<div class="card"><h3 style="font-size:15px">Your levers</h3>${one('fiscal')}${one('er')}${one('supply')}</div>`;
+  return `<div class="card"><h3 style="font-size:15px">Your levers</h3>${one('fiscal')}${one('er')}${one('supply')}${one('carbon')}</div>`;
 }
 
 function lastCard(){
@@ -186,15 +221,22 @@ function quarterCards(locked){
 }
 
 function header(){
-  const r=G.run, ap=G.ap, diff=+(r.index-ap.index).toFixed(1);
-  return `<div class="top"><div><div class="lsl">Living standard</div><div class="ls">${r.index.toFixed(1)}</div>
-     <div class="vs ${diff>0?'win':diff<0?'lose':''}">${r.q?(diff===0?'Level with Autopilot':`${diff>0?'Ahead of':'Behind'} Autopilot by ${Math.abs(diff)}`):'Autopilot starts at 100 too'}</div></div>
-    <div style="text-align:right"><div class="pill">${G.mode==='class'?UI.esc(G.name):'Solo run'}</div><div class="disp" style="font-size:18px;margin-top:4px">${r.q<G.sc.quarters?UI.qLabel(r.q):'Run complete'}</div></div></div>
-    ${UI.skyline(r.index)}`;
+  const r=G.run, ap=G.ap, S=M.score(r,ap,G.F), diff=+S.margin.toFixed(1);
+  return `<div class="warstrip"><span class="dot"></span>War room<span class="spacer"></span>Formula ${M.code(G.F.w)}</div>
+    <div class="top"><div><div class="lsl">Living standard · your formula</div><div class="ls">${S.me.toFixed(1)}</div>
+     <div class="vs ${diff>0?'win':diff<0?'lose':''}">${r.q?(diff===0?'Level with Autopilot':`${diff>0?'Ahead of':'Behind'} Autopilot by ${Math.abs(diff)}`):'Autopilot starts at 100 too'}${S.pen?` <span class="tiny mute">(after −${S.pen.toFixed(2)} revision)</span>`:''}</div></div>
+    <div style="text-align:right"><div class="pill">${G.mode==='class'?UI.esc(G.name):'Solo run'}</div><div class="disp" style="font-size:18px;margin-top:4px">${r.q<G.sc.quarters?UI.qLabel(r.q):'Done'}</div></div></div>
+    ${M.dimChips(r,ap,G.F)}${UI.skyline(r.index)}`;
+}
+function briefScreen(msg){
+  ov.innerHTML='';
+  app.innerHTML=`<div class="wrap"><div class="warstrip"><span class="dot"></span>War room · Cabinet office</div>${M.briefing(G.F,msg)}</div>`;
+  M.bindBriefing(app, G.F, m=>briefScreen(m), ()=>{ store(); pushTeam(); if(G.mode==='solo') enterQuarter(); render(); window.scrollTo({top:0}); });
 }
 
 function render(){
   if(!G.run) return;
+  if(!G.F.confirmed) return briefScreen();
   if(G.run.q>=G.sc.quarters && (G.mode==='solo' || (G.game&&G.game.state&&G.game.state.phase==='ended'))) return endScreen();
   const st=(G.game&&G.game.state)||{};
   const lobby=G.mode==='class'&&st.phase==='lobby';
@@ -263,15 +305,19 @@ function worldMap(pins){
 }
 function endScreen(){
   ov.innerHTML='';
-  const r=G.run, ap=G.ap, diff=+(r.index-ap.index).toFixed(1), rv=G.sc.reveal;
+  const r=G.run, ap=G.ap, S=M.score(r,ap,G.F), diff=+S.margin.toFixed(1), rv=G.sc.reveal;
+  try{ const p=FX.profile(), best=p.act4&&p.act4.done?p.act4.score:-Infinity; FX.updateProfile({act4:{score:Math.max(best,+S.margin.toFixed(1)), done:true}}); }catch(e){}
+  const fs=hh=>E.formulaScore(hh.dims||{},G.F.w);
   const H=r.hist, A=ap.hist, W=320, Hh=110, n=H.length-1;
-  const y=v=>Hh-8-(v-Math.min(...H.map(h=>h.index),...A.map(h=>h.index))+1)/(Math.max(...H.map(h=>h.index),...A.map(h=>h.index))-Math.min(...H.map(h=>h.index),...A.map(h=>h.index))+2)*(Hh-16);
-  const line=(arr,c,dash)=>`<polyline fill="none" stroke="${c}" stroke-width="2.4" ${dash?'stroke-dasharray="5 4"':''} points="${arr.map((h,i)=>`${10+i/n*(W-20)},${y(h.index)}`).join(' ')}"/>`;
+  const all=H.concat(A).map(fs), lo=Math.min(...all), hi=Math.max(...all);
+  const y=v=>Hh-8-(v-lo+1)/(hi-lo+2)*(Hh-16);
+  const line=(arr,c,dash)=>`<polyline fill="none" stroke="${c}" stroke-width="2.4" ${dash?'stroke-dasharray="5 4"':''} points="${arr.map((h,i)=>`${10+i/n*(W-20)},${y(fs(h))}`).join(' ')}"/>`;
   app.innerHTML=`<div class="wrap">${header()}
    <div class="card" style="margin-top:10px"><h2>${diff>0?'You beat the Autopilot!':diff===0?'Exactly level with the Autopilot':'The Autopilot won this time.'}</h2>
-    <p class="mute">Your living standard: <b style="color:var(--ink)">${r.index.toFixed(1)}</b> · Autopilot: <b style="color:var(--ink)">${ap.index.toFixed(1)}</b>. ${diff>0?'Your policies cushioned the shocks better than doing nothing.':diff===0?'Did you leave every lever alone? Doing nothing is exactly what the Autopilot does.':'Remember the lags: policy that arrives late can make things worse. When did you react too much, or too little?'}</p>
+    <p class="mute">By your formula <b style="color:var(--ink)">${M.code(G.F.w)}</b>: you <b style="color:var(--ink)">${S.me.toFixed(1)}</b> · Autopilot <b style="color:var(--ink)">${S.auto.toFixed(1)}</b>${S.pen?` · revision −${S.pen.toFixed(2)}`:''} → <b style="color:var(--ink)">${diff>0?'+':''}${diff}</b>. ${diff>0?'Your policies served what you said matters better than doing nothing.':diff===0?'Did you leave every lever alone? Doing nothing is exactly what the Autopilot does.':'Remember the lags: policy that arrives late can make things worse. And did your levers serve the dimensions you weighted most?'}</p>
+    <table class="dtable"><tr><th>Dimension</th><th>Weight</th><th>You</th><th>Autopilot</th></tr>${E.DIMS.map(d=>`<tr><td>${d.e} ${d.t}</td><td>×${G.F.w[d.k]}</td><td><b>${r.dims[d.k].toFixed(1)}</b></td><td>${ap.dims[d.k].toFixed(1)}</td></tr>`).join('')}</table>
     <svg viewBox="0 0 ${W} ${Hh}" style="width:100%;background:#0c1a30;border-radius:10px">${line(A,'#9db0ca',true)}${line(H,'#2ec4b6')}</svg>
-    <div class="small mute"><span style="color:var(--teal)">━ You</span> &nbsp; ┅ Autopilot</div>
+    <div class="small mute"><span style="color:var(--teal)">━ You</span> &nbsp; ┅ Autopilot · both scored by your formula</div>
     ${Object.keys(r.ach).length?`<div style="margin-top:8px">${Object.keys(r.ach).map(k=>`<span class="ach">🏅 ${E.ACHIEVEMENTS[k].t}</span>`).join('')}</div>`:''}</div>
    <div class="card"><div class="pill hot">Reveal</div><h2 style="margin-top:6px">You just played: ${UI.esc(rv.title)}</h2><p>${UI.esc(rv.story)}</p>${worldMap(rv.pins)}
     <ul class="tips small">${rv.facts.map(f=>`<li>${UI.esc(f)}</li>`).join('')}</ul></div>
